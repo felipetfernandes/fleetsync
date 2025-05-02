@@ -8,52 +8,58 @@ export class VehiclesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createVehicleDto: CreateVehicleDto) {
-    const existingVehicle = await this.prisma.vehicle.findUnique({
-      where: { plate: createVehicleDto.plate },
-    });
+    // // Verificar se a placa já existe
+    // const existingVehicle = await this.prisma.vehicle.findUnique({
+    //   where: { plate: createVehicleDto.plate },
+    // })
 
-    if (existingVehicle) {
-      throw new ConflictException("Placa já está em uso");
-    }
+    // if (existingVehicle) {
+    //   throw new ConflictException("Placa já está em uso")
+    // }
 
-    return this.prisma.vehicle.create({
-      data: createVehicleDto,
-    });
+    // // Criar veículo
+    // return this.prisma.vehicle.create({
+    //   data: createVehicleDto,
+    // })
   }
 
   async findAll() {
-    return this.prisma.vehicle.findMany();
+    // return this.prisma.vehicle.findMany()
   }
 
   async findOne(id: string) {
-    const vehicle = await this.prisma.vehicle.findUnique({
-      where: { id },
-      include: { services: true }, // ajuste conforme suas relações
-    });
+    // const vehicle = await this.prisma.vehicle.findUnique({
+    //   where: { id },
+    //   include: { services: true },
+    // })
 
-    if (!vehicle) {
-      throw new NotFoundException(`Veículo com ID ${id} não encontrado`);
-    }
+    // if (!vehicle) {
+    //   throw new NotFoundException(`Veículo com ID ${id} não encontrado`)
+    // }
 
-    return vehicle;
+    // return vehicle
   }
 
   async update(id: string, updateVehicleDto: UpdateVehicleDto) {
-    await this.findOne(id); // dispara NotFoundException se não existir
+    // Verificar se o veículo existe
+    // await this.findOne(id)
 
-    return this.prisma.vehicle.update({
-      where: { id },
-      data: updateVehicleDto,
-    });
+    // // Atualizar veículo
+    // return this.prisma.vehicle.update({
+    //   where: { id },
+    //   data: updateVehicleDto,
+    // })
   }
 
   async remove(id: string) {
-    await this.findOne(id); // dispara NotFoundException se não existir
+    // Verificar se o veículo existe
+    // await this.findOne(id)
 
-    await this.prisma.vehicle.delete({
-      where: { id },
-    });
+    // // Remover veículo
+    // await this.prisma.vehicle.delete({
+    //   where: { id },
+    // })
 
-    return { message: "Veículo removido com sucesso" };
+    // return { message: "Veículo removido com sucesso" }
   }
 }

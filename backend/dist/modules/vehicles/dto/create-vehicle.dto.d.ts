@@ -4,6 +4,7 @@ export declare class CreateVehicleDto {
     brand: string;
     year: string;
     color: string;
-    chassi?: string;
+    chassi: string;
     status?: string;
+    enterpriseId: string;
 }

@@ -6,32 +6,32 @@ export declare class UsersService {
     constructor(prisma: PrismaService);
     create(createUserDto: CreateUserDto): Promise<void>;
     findAll(): Promise<{
-        id: string;
         name: string;
         email: string;
         role: string;
+        id: string;
         enterpriseId: string;
     }[]>;
     findOne(id: string): Promise<{
-        id: string;
         name: string;
         email: string;
         role: string;
+        id: string;
         enterpriseId: string;
     }>;
     findByEmail(email: string): Promise<{
-        id: string;
         name: string;
         email: string;
         password: string;
         role: string;
+        id: string;
         enterpriseId: string;
     }>;
     update(id: string, updateUserDto: UpdateUserDto): Promise<{
-        id: string;
         name: string;
         email: string;
         role: string;
+        id: string;
         enterpriseId: string;
     }>;
     remove(id: string): Promise<{

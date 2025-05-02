@@ -46,9 +46,9 @@ __decorate([
     __metadata("design:type", String)
 ], CreateVehicleDto.prototype, "color", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: "9BWHE21JX24060960", required: false }),
+    (0, swagger_1.ApiProperty)({ example: "9BWHE21JX24060960" }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateVehicleDto.prototype, "chassi", void 0);
 __decorate([
@@ -57,4 +57,10 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateVehicleDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: "uuid-da-enterprise" }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateVehicleDto.prototype, "enterpriseId", void 0);
 //# sourceMappingURL=create-vehicle.dto.js.map

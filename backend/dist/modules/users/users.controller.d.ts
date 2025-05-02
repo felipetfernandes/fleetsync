@@ -6,24 +6,24 @@ export declare class UsersController {
     constructor(usersService: UsersService);
     create(createUserDto: CreateUserDto): Promise<void>;
     findAll(): Promise<{
-        id: string;
         name: string;
         email: string;
         role: string;
+        id: string;
         enterpriseId: string;
     }[]>;
     findOne(id: string): Promise<{
-        id: string;
         name: string;
         email: string;
         role: string;
+        id: string;
         enterpriseId: string;
     }>;
     update(id: string, updateUserDto: UpdateUserDto): Promise<{
-        id: string;
         name: string;
         email: string;
         role: string;
+        id: string;
         enterpriseId: string;
     }>;
     remove(id: string): Promise<{

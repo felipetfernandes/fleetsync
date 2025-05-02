@@ -1,7 +1,8 @@
+// app/layout.tsx
+
 import type React from "react"
-import "@/app/globals.css"
+import "@/globals.css"
 import { Inter } from "next/font/google"
-import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -17,10 +18,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          {children}
-        </ThemeProvider>
+      <body className={`${inter.className} bg-gray-900`}>
+        {children}
       </body>
     </html>
   )

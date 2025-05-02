@@ -5,35 +5,40 @@ export class CreateVehicleDto {
   @ApiProperty({ example: "ABC1234" })
   @IsString()
   @IsNotEmpty()
-  plate: string
+  plate: string;
 
   @ApiProperty({ example: "Hilux" })
   @IsString()
   @IsNotEmpty()
-  model: string
+  model: string;
 
   @ApiProperty({ example: "Toyota" })
   @IsString()
   @IsNotEmpty()
-  brand: string
+  brand: string;
 
   @ApiProperty({ example: "2022" })
   @IsString()
   @IsNotEmpty()
-  year: string
+  year: string;
 
   @ApiProperty({ example: "Prata" })
   @IsString()
   @IsNotEmpty()
-  color: string
+  color: string;
 
   @ApiProperty({ example: "9BWHE21JX24060960", required: false })
   @IsString()
   @IsOptional()
-  chassi?: string
+  chassi?: string;
 
   @ApiProperty({ example: "Ativo", required: false })
   @IsString()
   @IsOptional()
-  status?: string
+  status?: string;
+
+  @ApiProperty({ example: "1", required: true })
+  @IsString()
+  @IsNotEmpty()
+  enterpriseId: string;  // ID da empresa
 }

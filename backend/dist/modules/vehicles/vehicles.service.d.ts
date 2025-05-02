@@ -4,9 +4,59 @@ import { PrismaService } from "src/prisma/prisma.service";
 export declare class VehiclesService {
     private readonly prisma;
     constructor(prisma: PrismaService);
-    create(createVehicleDto: CreateVehicleDto): Promise<void>;
-    findAll(): Promise<void>;
-    findOne(id: string): Promise<void>;
-    update(id: string, updateVehicleDto: UpdateVehicleDto): Promise<void>;
-    remove(id: string): Promise<void>;
+    findAll(): Promise<{
+        id: string;
+        plate: string;
+        model: string;
+        brand: string;
+        year: string;
+        color: string;
+        chassi: string;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        enterpriseId: string;
+    }[]>;
+    findOne(id: string): Promise<{
+        id: string;
+        plate: string;
+        model: string;
+        brand: string;
+        year: string;
+        color: string;
+        chassi: string;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        enterpriseId: string;
+    }>;
+    create(createVehicleDto: CreateVehicleDto): Promise<{
+        id: string;
+        plate: string;
+        model: string;
+        brand: string;
+        year: string;
+        color: string;
+        chassi: string;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        enterpriseId: string;
+    }>;
+    update(id: string, updateVehicleDto: UpdateVehicleDto): Promise<{
+        id: string;
+        plate: string;
+        model: string;
+        brand: string;
+        year: string;
+        color: string;
+        chassi: string;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        enterpriseId: string;
+    }>;
+    remove(id: string): Promise<{
+        message: string;
+    }>;
 }

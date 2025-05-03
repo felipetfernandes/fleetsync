@@ -4,7 +4,13 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 export declare class UsersController {
     private readonly usersService;
     constructor(usersService: UsersService);
-    create(createUserDto: CreateUserDto): Promise<void>;
+    create(createUserDto: CreateUserDto): Promise<{
+        id: string;
+        name: string;
+        email: string;
+        role: string;
+        enterpriseId: string;
+    }>;
     findAll(): Promise<{
         id: string;
         name: string;

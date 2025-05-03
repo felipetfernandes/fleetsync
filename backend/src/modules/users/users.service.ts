@@ -9,29 +9,36 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
-    // // Verificar se o email já existe
-    // const existingUser = await this.prisma.user.findUnique({
-    //   where: { email: createUserDto.email },
-    // })
+    // Verificar se o email já existe
+     const existingUser = await this.prisma.user.findUnique({
+       where: { email: createUserDto.email },
+     })
 
-    // if (existingUser) {
-    //   throw new ConflictException("Email já está em uso")
-    // }
+     if (existingUser) {
+       throw new ConflictException("Email já está em uso")
+     }
 
-    // // Hash da senha
-    // const hashedPassword = await bcrypt.hash(createUserDto.password, 10)
+     // Hash da senha
+     const hashedPassword = await bcrypt.hash(createUserDto.password, 10)
 
-    // // Criar usuário
-    // const user = await this.prisma.user.create({
-    //   data: {
-    //     ...createUserDto,
-    //     password: hashedPassword,
-    //   },
-    // })
+     // Criar usuário
+     const user = await this.prisma.user.create({
+      data: {
+        name: createUserDto.name,
+        email: createUserDto.email,
+        password: hashedPassword,
+        role: createUserDto.role,
+        Enterprise: {
+          connect: {
+            id: createUserDto.enterpriseId,
+          },
+        },
+      },
+    })
 
-    // // Remover a senha do objeto retornado
-    // const { password, ...result } = user
-    // return result
+     // Remover a senha do objeto retornado
+     const { password, ...result } = user
+     return result
   }
 
   async findAll() {

@@ -18,6 +18,28 @@ let UsersService = class UsersService {
         this.prisma = prisma;
     }
     async create(createUserDto) {
+        const existingUser = await this.prisma.user.findUnique({
+            where: { email: createUserDto.email },
+        });
+        if (existingUser) {
+            throw new common_1.ConflictException("Email já está em uso");
+        }
+        const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+        const user = await this.prisma.user.create({
+            data: {
+                name: createUserDto.name,
+                email: createUserDto.email,
+                password: hashedPassword,
+                role: createUserDto.role,
+                Enterprise: {
+                    connect: {
+                        id: createUserDto.enterpriseId,
+                    },
+                },
+            },
+        });
+        const { password, ...result } = user;
+        return result;
     }
     async findAll() {
         const users = await this.prisma.user.findMany();

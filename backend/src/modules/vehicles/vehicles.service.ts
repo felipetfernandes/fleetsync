@@ -1,65 +1,78 @@
-import { Injectable, ConflictException, NotFoundException } from "@nestjs/common"
-import { CreateVehicleDto } from "./dto/create-vehicle.dto"
-import { UpdateVehicleDto } from "./dto/update-vehicle.dto"
-import { PrismaService } from "src/prisma/prisma.service"
+import { Injectable, ConflictException, NotFoundException } from "@nestjs/common";
+import { CreateVehicleDto } from "./dto/create-vehicle.dto";
+import { UpdateVehicleDto } from "./dto/update-vehicle.dto";
+import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
 export class VehiclesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createVehicleDto: CreateVehicleDto) {
-    // // Verificar se a placa já existe
-    // const existingVehicle = await this.prisma.vehicle.findUnique({
-    //   where: { plate: createVehicleDto.plate },
-    // })
-
-    // if (existingVehicle) {
-    //   throw new ConflictException("Placa já está em uso")
-    // }
-
-    // // Criar veículo
-    // return this.prisma.vehicle.create({
-    //   data: createVehicleDto,
-    // })
-  }
-
+  // Método para encontrar todos os veículos
   async findAll() {
-    // return this.prisma.vehicle.findMany()
+    return this.prisma.vehicle.findMany();
   }
 
+  // Método para encontrar um veículo pelo id
   async findOne(id: string) {
-    // const vehicle = await this.prisma.vehicle.findUnique({
-    //   where: { id },
-    //   include: { services: true },
-    // })
+    const vehicle = await this.prisma.vehicle.findUnique({
+      where: { id },
+    });
 
-    // if (!vehicle) {
-    //   throw new NotFoundException(`Veículo com ID ${id} não encontrado`)
-    // }
+    if (!vehicle) {
+      throw new NotFoundException(`Veículo com ID ${id} não encontrado`);
+    }
 
-    // return vehicle
+    return vehicle;
   }
 
+  // Método para criar um veículo
+  async create(createVehicleDto: CreateVehicleDto) {
+    // Verificar se a placa já existe
+    const existingVehicle = await this.prisma.vehicle.findUnique({
+      where: { plate: createVehicleDto.plate },
+    });
+
+    if (existingVehicle) {
+      throw new ConflictException("Placa já está em uso");
+    }
+
+    // Criar veículo e associar à empresa
+    return this.prisma.vehicle.create({
+      data: {
+        plate: createVehicleDto.plate,
+        model: createVehicleDto.model,
+        brand: createVehicleDto.brand,
+        year: createVehicleDto.year,
+        color: createVehicleDto.color,
+        chassi: createVehicleDto.chassi,
+        status: createVehicleDto.status,
+
+        // Associando o veículo à empresa existente
+        enterprise: {
+          connect: { id: createVehicleDto.enterpriseId }, // Conectando o veículo à empresa usando o enterpriseId
+        },
+      },
+    });
+  }
+
+  // Método para atualizar um veículo
   async update(id: string, updateVehicleDto: UpdateVehicleDto) {
-    // Verificar se o veículo existe
-    // await this.findOne(id)
+    await this.findOne(id);
 
-    // // Atualizar veículo
-    // return this.prisma.vehicle.update({
-    //   where: { id },
-    //   data: updateVehicleDto,
-    // })
+    return this.prisma.vehicle.update({
+      where: { id },
+      data: updateVehicleDto,
+    });
   }
 
+  // Método para remover um veículo
   async remove(id: string) {
-    // Verificar se o veículo existe
-    // await this.findOne(id)
+    await this.findOne(id);
 
-    // // Remover veículo
-    // await this.prisma.vehicle.delete({
-    //   where: { id },
-    // })
+    await this.prisma.vehicle.delete({
+      where: { id },
+    });
 
-    // return { message: "Veículo removido com sucesso" }
+    return { message: "Veículo removido com sucesso" };
   }
 }

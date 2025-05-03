@@ -13,14 +13,14 @@ COPY package.json package-lock.json* ./
 # Instalar dependências
 RUN npm i
 
-# Copiar código fonte
+# Copiar o restante do código, incluindo o start.sh
 COPY . .
 
-# Gerar Prisma Client
-RUN npx prisma generate
+# Dá permissão de execução ao script
+RUN chmod +x ./start.sh
 
-# Expor porta
+# Expor a porta da aplicação
 EXPOSE 3001
 
-# Comando para iniciar em desenvolvimento
-CMD ["npm", "run", "start:dev"]
+# Comando para iniciar
+CMD ["./start.sh"]

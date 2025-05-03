@@ -16,15 +16,53 @@ let VehiclesService = class VehiclesService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async create(createVehicleDto) {
-    }
     async findAll() {
+        return this.prisma.vehicle.findMany();
     }
     async findOne(id) {
+        const vehicle = await this.prisma.vehicle.findUnique({
+            where: { id },
+        });
+        if (!vehicle) {
+            throw new common_1.NotFoundException(`Veículo com ID ${id} não encontrado`);
+        }
+        return vehicle;
+    }
+    async create(createVehicleDto) {
+        const existingVehicle = await this.prisma.vehicle.findUnique({
+            where: { plate: createVehicleDto.plate },
+        });
+        if (existingVehicle) {
+            throw new common_1.ConflictException("Placa já está em uso");
+        }
+        return this.prisma.vehicle.create({
+            data: {
+                plate: createVehicleDto.plate,
+                model: createVehicleDto.model,
+                brand: createVehicleDto.brand,
+                year: createVehicleDto.year,
+                color: createVehicleDto.color,
+                chassi: createVehicleDto.chassi,
+                status: createVehicleDto.status,
+                enterprise: {
+                    connect: { id: createVehicleDto.enterpriseId },
+                },
+            },
+        });
     }
     async update(id, updateVehicleDto) {
+        await this.findOne(id);
+        return this.prisma.vehicle.update({
+            where: { id },
+            data: updateVehicleDto,
+        });
     }
     async remove(id) {
+        await this.findOne(id);
+        await this.prisma.vehicle.delete({
+            where: { id },
+        });
+        return { message: "Veículo removido com sucesso" };
     }
 };
 exports.VehiclesService = VehiclesService;

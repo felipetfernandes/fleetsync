@@ -4,7 +4,13 @@ import { PrismaService } from "src/prisma/prisma.service";
 export declare class UsersService {
     private readonly prisma;
     constructor(prisma: PrismaService);
-    create(createUserDto: CreateUserDto): Promise<void>;
+    create(createUserDto: CreateUserDto): Promise<{
+        id: string;
+        name: string;
+        email: string;
+        role: string;
+        enterpriseId: string;
+    }>;
     findAll(): Promise<{
         id: string;
         name: string;

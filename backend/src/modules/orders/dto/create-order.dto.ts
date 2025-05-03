@@ -3,10 +3,20 @@ import { IsNotEmpty, IsString, IsNumber, IsDateString, IsOptional, IsUUID } from
 import { Type } from "class-transformer"
 
 export class CreateOrderDto {
-  @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000" })
+  @ApiProperty({ example: "uuid-do-veiculo" })
   @IsUUID()
   @IsNotEmpty()
   vehicleId: string
+
+  @ApiProperty({ example: "uuid-da-oficina" })
+  @IsUUID()
+  @IsNotEmpty()
+  workshopId: string
+
+  @ApiProperty({ example: "uuid-da-empresa" })
+  @IsUUID()
+  @IsNotEmpty()
+  enterpriseId: string
 
   @ApiProperty({ example: "Troca de óleo e filtros" })
   @IsString()

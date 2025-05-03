@@ -8,68 +8,110 @@ export class OrderService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createOrderDto: CreateOrderDto) {
-    // // Verificar se o veículo existe
-    // const vehicle = await this.prismaService.vehicle.findUnique({
-    //   where: { id: createOrderDto.vehicleId },
-    // })
+    const { vehicleId, workshopId, enterpriseId, ...orderData } = createOrderDto
 
-    // if (!vehicle) {
-    //   throw new NotFoundException(`Veículo com não encontrado`)
-    // }
+    // Verificar se o veículo existe
+    const vehicle = await this.prismaService.vehicle.findUnique({
+      where: { id: vehicleId },
+    })
+    if (!vehicle) {
+      throw new NotFoundException(`Veículo com ID ${vehicleId} não encontrado`)
+    }
 
-    // // Criar serviço
-    // return this.prismaService.order.create({
-    //   data: createOrderDto,
-    // })
+    // Verificar se a oficina existe
+    const workshop = await this.prismaService.workshop.findUnique({
+      where: { id: workshopId },
+    })
+    if (!workshop) {
+      throw new NotFoundException(`Oficina com ID ${workshopId} não encontrada`)
+    }
+
+    // Verificar se a empresa existe
+    const enterprise = await this.prismaService.enterprise.findUnique({
+      where: { id: enterpriseId },
+    })
+    if (!enterprise) {
+      throw new NotFoundException(`Empresa com ID ${enterpriseId} não encontrada`)
+    }
+
+    // Criar ordem de serviço
+    return this.prismaService.order.create({
+      data: {
+        ...orderData,
+        vehicle: { connect: { id: vehicleId } },
+        workshop: { connect: { id: workshopId } },
+        enterprise: { connect: { id: enterpriseId } },
+      },
+      include: {
+        vehicle: true,
+        workshop: true,
+        enterprise: true,
+      },
+    })
   }
 
   async findAll() {
-    // return this.prismaService.order.findMany()
+    return this.prismaService.order.findMany({
+      include: { vehicle: true, workshop: true, enterprise: true },
+    })
   }
 
   async findOne(id: string) {
-    // const service = await this.prismaService.order.findUnique({
-    //   where: { id },
-    // })
+    const service = await this.prismaService.order.findUnique({
+      where: { id },
+      include: { vehicle: true, workshop: true, enterprise: true },
+    })
 
-    // if (!service) {
-    //   throw new NotFoundException(`Serviço com ID ${id} não encontrado`)
-    // }
+    if (!service) {
+      throw new NotFoundException(`Serviço com ID ${id} não encontrado`)
+    }
 
-    // return service
+    return service
   }
 
-  async update(id: string, updateServiceDto: UpdateOrderDto) {
-    // Verificar se o serviço existe
-    // await this.findOne(id)
+  async update(id: string, updateDto: UpdateOrderDto) {
+    // Verificar se a ordem existe
+    await this.findOne(id)
 
-    // // Se estiver atualizando o veículo, verificar se o veículo existe
-    // if (updateServiceDto.vehicleId) {
-    //   const vehicle = await this.prismaService.vehicle.findUnique({
-    //     where: { id: updateServiceDto.vehicleId },
-    //   })
+    const { vehicleId, workshopId, enterpriseId, ...rest } = updateDto
 
-    //   if (!vehicle) {
-    //     throw new NotFoundException(`Veículo com ID ${updateServiceDto.vehicleId} não encontrado`)
-    //   }
-    // }
+    const data: any = { ...rest }
 
-    // // Atualizar serviço
-    // return this.prismaService.service.update({
-    //   where: { id },
-    //   data: updateServiceDto,
-    //   include: { vehicle: true },
-    // })
+    // Validar e conectar veículo se necessário
+    if (vehicleId) {
+      const vehicle = await this.prismaService.vehicle.findUnique({ where: { id: vehicleId } })
+      if (!vehicle) throw new NotFoundException(`Veículo com ID ${vehicleId} não encontrado`)
+      data.vehicle = { connect: { id: vehicleId } }
+    }
+
+    // Validar e conectar oficina se necessário
+    if (workshopId) {
+      const workshop = await this.prismaService.workshop.findUnique({ where: { id: workshopId } })
+      if (!workshop) throw new NotFoundException(`Oficina com ID ${workshopId} não encontrada`)
+      data.workshop = { connect: { id: workshopId } }
+    }
+
+    // Validar e conectar empresa se necessário
+    if (enterpriseId) {
+      const enterprise = await this.prismaService.enterprise.findUnique({ where: { id: enterpriseId } })
+      if (!enterprise) throw new NotFoundException(`Empresa com ID ${enterpriseId} não encontrada`)
+      data.enterprise = { connect: { id: enterpriseId } }
+    }
+
+    // Atualizar ordem
+    return this.prismaService.order.update({
+      where: { id },
+      data,
+      include: { vehicle: true, workshop: true, enterprise: true },
+    })
   }
 
   async remove(id: string) {
-    // Verificar se o serviço existe
-    // await this.findOne(id)
+    await this.findOne(id)
 
-    // // Remover serviço
-    // await this.prismaService.service.delete({
-    //   where: { id },
-    // })
+    await this.prismaService.order.delete({
+      where: { id },
+    })
 
     return { message: "Serviço removido com sucesso" }
   }

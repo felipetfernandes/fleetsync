@@ -13,40 +13,41 @@ export class OrderController {
   constructor(private readonly servicesService: OrderService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Criar um novo serviço' })
-  @ApiResponse({ status: 201, description: 'Serviço criado com sucesso' })
-  @ApiResponse({ status: 404, description: 'Veículo não encontrado' })
-  create(@Body() createServiceDto: CreateOrderDto) {
-    return null;
-  }
+@ApiOperation({ summary: 'Criar um novo serviço' })
+@ApiResponse({ status: 201, description: 'Serviço criado com sucesso' })
+@ApiResponse({ status: 404, description: 'Veículo não encontrado' })
+create(@Body() createServiceDto: CreateOrderDto) {
+  return this.servicesService.create(createServiceDto);
+}
 
-  @Get()
-  @ApiOperation({ summary: "Listar todos os serviços" })
-  findAll() {
-    return null
-  }
+@Get()
+@ApiOperation({ summary: "Listar todos os serviços" })
+findAll() {
+  return this.servicesService.findAll();
+}
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Buscar um serviço pelo ID' })
-  @ApiResponse({ status: 200, description: 'Serviço encontrado' })
-  @ApiResponse({ status: 404, description: 'Serviço não encontrado' })
-  findOne(@Param('id') id: string) {
-    return null
-  }
+@Get(':id')
+@ApiOperation({ summary: 'Buscar um serviço pelo ID' })
+@ApiResponse({ status: 200, description: 'Serviço encontrado' })
+@ApiResponse({ status: 404, description: 'Serviço não encontrado' })
+findOne(@Param('id') id: string) {
+  return this.servicesService.findOne(id);
+}
 
-  @Patch(":id")
-  @ApiOperation({ summary: "Atualizar um serviço" })
-  @ApiResponse({ status: 200, description: "Serviço atualizado com sucesso" })
-  @ApiResponse({ status: 404, description: "Serviço não encontrado" })
-  update(@Param('id') id: string, @Body() updateServiceDto: UpdateOrderDto) {
-    return null
-  }
+@Patch(":id")
+@ApiOperation({ summary: "Atualizar um serviço" })
+@ApiResponse({ status: 200, description: "Serviço atualizado com sucesso" })
+@ApiResponse({ status: 404, description: "Serviço não encontrado" })
+update(@Param('id') id: string, @Body() updateServiceDto: UpdateOrderDto) {
+  return this.servicesService.update(id, updateServiceDto);
+}
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Remover um serviço' })
-  @ApiResponse({ status: 200, description: 'Serviço removido com sucesso' })
-  @ApiResponse({ status: 404, description: 'Serviço não encontrado' })
-  remove(@Param('id') id: string) {
-    return null
-  }
+@Delete(':id')
+@ApiOperation({ summary: 'Remover um serviço' })
+@ApiResponse({ status: 200, description: 'Serviço removido com sucesso' })
+@ApiResponse({ status: 404, description: 'Serviço não encontrado' })
+remove(@Param('id') id: string) {
+  return this.servicesService.remove(id);
+}
+
 }

@@ -17,11 +17,23 @@ class CreateOrderDto {
 }
 exports.CreateOrderDto = CreateOrderDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: "123e4567-e89b-12d3-a456-426614174000" }),
+    (0, swagger_1.ApiProperty)({ example: "uuid-do-veiculo" }),
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "vehicleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: "uuid-da-oficina" }),
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "workshopId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: "uuid-da-empresa" }),
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "enterpriseId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: "Troca de óleo e filtros" }),
     (0, class_validator_1.IsString)(),

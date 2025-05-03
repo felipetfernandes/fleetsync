@@ -1,22 +1,30 @@
-import * as React from "react"
+import Image from "next/image";
 
-import { cn } from "@/lib/utils"
+type InputProps = {
+  placeholder?: string;
+  type?: "password" | "email" | "text";
+  image?: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+};
+const Input = (props: InputProps) => {
+  return (
+    <input
+      className="px-2 bg-gray-400 placeholder:text-gray-600 text-gray-900 border-2 border-gray-300 rounded-md shadow-sm -mt-2"
+      type={props.type}
+      placeholder={props.placeholder}
+    >
+      {props.image && props.alt && (
+        <Image
+          src={props.image}
+          alt={props.alt}
+          width={props.width || 20}
+          height={props.height || 20}
+        />
+      )}
+    </input>
+  );
+};
 
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
-    return (
-      <input
-        type={type}
-        className={cn(
-          "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-          className
-        )}
-        ref={ref}
-        {...props}
-      />
-    )
-  }
-)
-Input.displayName = "Input"
-
-export { Input }
+export default Input;

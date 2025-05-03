@@ -24,19 +24,19 @@ let OrderController = class OrderController {
         this.servicesService = servicesService;
     }
     create(createServiceDto) {
-        return null;
+        return this.servicesService.create(createServiceDto);
     }
     findAll() {
-        return null;
+        return this.servicesService.findAll();
     }
     findOne(id) {
-        return null;
+        return this.servicesService.findOne(id);
     }
     update(id, updateServiceDto) {
-        return null;
+        return this.servicesService.update(id, updateServiceDto);
     }
     remove(id) {
-        return null;
+        return this.servicesService.remove(id);
     }
 };
 exports.OrderController = OrderController;

@@ -57,4 +57,10 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateVehicleDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: "1", required: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateVehicleDto.prototype, "enterpriseId", void 0);
 //# sourceMappingURL=create-vehicle.dto.js.map

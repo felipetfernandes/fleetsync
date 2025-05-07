@@ -2,6 +2,7 @@
 
 import VehicleCard from "@/components/ui/vehicleCard";
 import VehicleForm from "@/components/vehicleForm";
+import { PlusCircle } from "lucide-react";
 import React, { useState } from "react";
 
 // Dados de exemplo
@@ -161,7 +162,7 @@ export default function FleetPage() {
   );
 
   return (
-    <div className="px-10">
+    <div className="px-10 bg-gray-950">
       {showForm ? (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -178,7 +179,10 @@ export default function FleetPage() {
                   X
                 </button>
               </div>
-              <VehicleForm onSubmit={() => setShowForm(false)} onCancel={() => setShowForm(false)} />
+              <VehicleForm
+                onSubmit={() => setShowForm(false)}
+                onCancel={() => setShowForm(false)}
+              />
             </div>
           </div>
         </div>
@@ -202,8 +206,9 @@ export default function FleetPage() {
             />
             <button
               onClick={() => setShowForm(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded"
+              className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded text-sm"
             >
+              <PlusCircle className="mr-2 h-4 w-4" />
               Novo Veículo
             </button>
           </header>

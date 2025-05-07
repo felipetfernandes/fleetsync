@@ -16,7 +16,7 @@ type InputProps = {
 const Input = (props: InputProps) => {
   return (
     <input
-      className="bg-gray-700 text-white p-2 rounded focus:ring-0 focus:outline-none"
+      className="bg-gray-800 text-white p-2 rounded focus:ring-0 focus:outline-none placeholder:text-gray-400 placeholder:text-sm placeholder:font-light placeholder:font-sans border border-gray-600"
       type={props.type}
       placeholder={props.placeholder}
       id={props.id}

@@ -4,8 +4,20 @@ import Button from "@/components/ui/button";
 import SupportButton from "@/components/ui/supportButton";
 import Image from "next/image";
 import Input from "@/components/ui/input";
+import { redirect } from "next/navigation";
 
 const truckImage = "/images/truck.svg";
+
+async function handleLogin(formData: FormData) {
+  "use server";
+
+  // Aqui você pode validar os dados, autenticar, etc.
+  const email = formData.get("email");
+  const password = formData.get("password");
+
+  // Depois redirecionar
+  redirect("/fleet");
+}
 
 export default function LoginPage() {
   return (
@@ -16,7 +28,7 @@ export default function LoginPage() {
         <h3 className="text-gray-500 text-xs mb-4">
           Sistema de Gerenciamento de Frota
         </h3>
-        <form action="" className="flex flex-col gap-2">
+        <form action={handleLogin} className="flex flex-col gap-2">
           <span className="text-gray-300 text-sm">Email</span>
           <Input type="email" placeholder="seu@email.com" />
           <span className="text-gray-300 text-sm">Senha</span>

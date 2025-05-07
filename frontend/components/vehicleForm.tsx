@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import  Input  from "@/components/ui/input"
+import { useState } from "react";
+import Input from "@/components/ui/input";
 
 interface VehicleFormProps {
-  onSubmit: (data: any) => void
-  onCancel: () => void
+  onSubmit: (data: any) => void;
+  onCancel: () => void;
 }
 
 export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
@@ -22,27 +22,29 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
     renavam: "",
     chassi: "",
     status: "Ativo",
-  })
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSubmit(formData)
-  }
+    e.preventDefault();
+    onSubmit(formData);
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2 flex flex-col ">
-          <label htmlFor="plate" className="text-gray-100">Placa</label>
+          <label htmlFor="plate" className="text-gray-100 -mb-2">
+            Placa
+          </label>
           <Input
             id="plate"
             name="plate"
@@ -54,7 +56,9 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
         </div>
 
         <div className="space-y-2 flex flex-col">
-          <label htmlFor="filial" className="text-gray-100">Filial</label>
+          <label htmlFor="filial" className="text-gray-100 -mb-2">
+            Filial
+          </label>
           <Input
             id="filial"
             name="filial"
@@ -66,7 +70,9 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
         </div>
 
         <div className="space-y-2 flex flex-col">
-          <label htmlFor="brand" className="text-gray-100">Marca</label>
+          <label htmlFor="brand" className="text-gray-100 -mb-2">
+            Marca
+          </label>
           <Input
             id="brand"
             name="brand"
@@ -78,7 +84,9 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
         </div>
 
         <div className="space-y-2 flex flex-col">
-          <label htmlFor="model" className="text-gray-100">Modelo</label>
+          <label htmlFor="model" className="text-gray-100 -mb-2">
+            Modelo
+          </label>
           <Input
             id="model"
             name="model"
@@ -90,7 +98,9 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
         </div>
 
         <div className="space-y-2 flex flex-col">
-          <label htmlFor="yearModelo" className="text-gray-100">Ano Modelo</label>
+          <label htmlFor="yearModelo" className="text-gray-100 -mb-2">
+            Ano Modelo
+          </label>
           <Input
             id="yearModelo"
             name="yearModelo"
@@ -102,7 +112,9 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
         </div>
 
         <div className="space-y-2 flex flex-col">
-          <label htmlFor="yearFabricacao" className="text-gray-100">Ano Fabricação</label>
+          <label htmlFor="yearFabricacao" className="text-gray-100 -mb-2">
+            Ano Fabricação
+          </label>
           <Input
             id="yearFabricacao"
             name="yearFabricacao"
@@ -114,7 +126,9 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
         </div>
 
         <div className="space-y-2 flex flex-col">
-          <label htmlFor="color" className="text-gray-100">Cor</label>
+          <label htmlFor="color" className="text-gray-100 -mb-2">
+            Cor
+          </label>
           <Input
             id="color"
             name="color"
@@ -126,16 +140,23 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
         </div>
 
         <div className="space-y-2 flex flex-col">
-          <label htmlFor="status" className="text-gray-100">Status</label>
-      <select name="status" className="bg-gray-700 text-white p-2 rounded focus:ring-0 focus:outline-none">
-        <option value="Ativo">Ativo</option>
-        <option value="Manutenção">Manutenção</option>
-        <option value="Inativo">Inativo</option>
-      </select>
+          <label htmlFor="status" className="text-gray-100 -mb-2">
+            Status
+          </label>
+          <select
+            name="status"
+            className="bg-gray-800 p-2 rounded focus:ring-0 focus:outline-none text-gray-100 border border-gray-600"
+          >
+            <option value="Ativo">Ativo</option>
+            <option value="Manutenção">Manutenção</option>
+            <option value="Inativo">Inativo</option>
+          </select>
         </div>
 
         <div className="space-y-2 flex flex-col">
-          <label htmlFor="renavam" className="text-gray-100">Renavam</label>
+          <label htmlFor="renavam" className="text-gray-100 -mb-2">
+            Renavam
+          </label>
           <Input
             id="renavam"
             name="renavam"
@@ -147,7 +168,9 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
         </div>
 
         <div className="space-y-2 flex flex-col">
-          <label htmlFor="chassi" className="text-gray-100">Chassi</label>
+          <label htmlFor="chassi" className="text-gray-100 -mb-2">
+            Chassi
+          </label>
           <Input
             id="chassi"
             name="chassi"
@@ -167,10 +190,13 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
         >
           Cancelar
         </button>
-        <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded mt-10">
+        <button
+          type="submit"
+          className="bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded mt-10"
+        >
           Salvar Veículo
         </button>
       </div>
     </form>
-  )
+  );
 }

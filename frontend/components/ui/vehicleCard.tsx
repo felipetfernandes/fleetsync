@@ -1,19 +1,6 @@
+import { Car } from "lucide-react";
 import React from "react";
 
-type Vehicles = {
-  id: string;
-  plate: string;
-  brand: string;
-  model: string;
-  modelYear: string;
-  manufactureYear: string;
-  color: string;
-  renavam: string;
-  chassi: string;
-  branch: string;
-  driver: string;
-  status: string;
-};
 
 const infos = [
   "Marca",
@@ -27,7 +14,7 @@ const infos = [
   "Motorista",
 ];
 
-export default function VehicleCard({ vehicle }: { vehicle: Vehicles }) {
+export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
   let statusColorClass = "";
 
   switch (vehicle.status) {
@@ -41,9 +28,12 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicles }) {
       statusColorClass = "bg-green-700";
   }
   return (
-    <div className="text-gray-100 bg-gray-950 border-gray-600 border-2 p-4 rounded-2xl">
+    <div className="text-gray-100 bg-gray-900 border border-gray-800 p-8 rounded-2xl">
       <div className="flex justify-between items-start mb-6">
+        <span className="flex items-center">
+        <Car className="mr-2 h-5 w-5 text-indigo-400" />
         <h1 className="text-xl font-bold flex items-center">{vehicle.plate}</h1>
+        </span>
         <p className={`px-2 py-0.5 rounded-2xl ${statusColorClass}`}>
           {vehicle.status}
         </p>
@@ -55,7 +45,7 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicles }) {
             return (
               <span key={id}>
                 <p className="text-gray-400">{infos[id]}</p>
-                <p className="font-medium">{vehicle[value as keyof Vehicles]}</p>
+                <p className="font-medium">{vehicle[value as keyof Vehicle]}</p>
               </span>
             );
           })}

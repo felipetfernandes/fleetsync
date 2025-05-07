@@ -2,11 +2,13 @@ import { NestFactory } from "@nestjs/core"
 import { ValidationPipe } from "@nestjs/common"
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger"
 import { AppModule } from "./app.module"
+import * as cookieParser from "cookie-parser"
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
-  // Configuração global de pipes
+  app.use(cookieParser()) // Habilita leitura de cookies
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -15,10 +17,11 @@ async function bootstrap() {
     }),
   )
 
-  // Configuração de CORS
-  app.enableCors()
+  app.enableCors({
+    origin: "http://localhost:3000", // Trocar depos pela URL do front-end
+    credentials: true, // Permite envio de cookies
+  })
 
-  // Configuração do Swagger
   const config = new DocumentBuilder()
     .setTitle("Gestor de Frota API")
     .setDescription("API para o sistema de gerenciamento de frota")
@@ -28,7 +31,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup("api", app, document)
 
-  // Iniciar servidor
   const port = process.env.PORT || 3001
   await app.listen(port)
   console.log(`Aplicação rodando na porta ${port}`)

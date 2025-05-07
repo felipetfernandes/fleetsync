@@ -1,5 +1,6 @@
 "use client";
 
+import NewCarForm from "@/components/newCarForm";
 import VehicleCard from "@/components/ui/vehicleCard";
 import React, { useState } from "react";
 
@@ -8,8 +9,8 @@ const vehicles = [
   {
     id: "1",
     plate: "ABC1234",
-    model: "Corolla",
     brand: "Toyota",
+    model: "Corolla",
     modelYear: "2022",
     manufactureYear: "2021",
     color: "Preto",
@@ -22,8 +23,8 @@ const vehicles = [
   {
     id: "2",
     plate: "DEF5678",
-    model: "Civic",
     brand: "Honda",
+    model: "Civic",
     modelYear: "2021",
     manufactureYear: "2020",
     color: "Branco",
@@ -36,8 +37,8 @@ const vehicles = [
   {
     id: "3",
     plate: "GHI9012",
-    model: "Compass",
     brand: "Jeep",
+    model: "Compass",
     modelYear: "2023",
     manufactureYear: "2022",
     color: "Cinza",
@@ -50,8 +51,8 @@ const vehicles = [
   {
     id: "4",
     plate: "JKL3456",
-    model: "Onix",
     brand: "Chevrolet",
+    model: "Onix",
     modelYear: "2020",
     manufactureYear: "2019",
     color: "Vermelho",
@@ -64,8 +65,8 @@ const vehicles = [
   {
     id: "5",
     plate: "MNO7890",
-    model: "HB20",
     brand: "Hyundai",
+    model: "HB20",
     modelYear: "2022",
     manufactureYear: "2021",
     color: "Azul",
@@ -78,8 +79,8 @@ const vehicles = [
   {
     id: "6",
     plate: "PQR1234",
-    model: "EcoSport",
     brand: "Ford",
+    model: "EcoSport",
     modelYear: "2019",
     manufactureYear: "2018",
     color: "Prata",
@@ -92,8 +93,8 @@ const vehicles = [
   {
     id: "7",
     plate: "STU5678",
-    model: "Gol",
     brand: "Volkswagen",
+    model: "Gol",
     modelYear: "2021",
     manufactureYear: "2020",
     color: "Preto",
@@ -106,8 +107,8 @@ const vehicles = [
   {
     id: "8",
     plate: "VWX9012",
-    model: "Ka",
     brand: "Ford",
+    model: "Ka",
     modelYear: "2020",
     manufactureYear: "2019",
     color: "Branco",
@@ -120,8 +121,8 @@ const vehicles = [
   {
     id: "9",
     plate: "YZA3456",
-    model: "Renegade",
     brand: "Jeep",
+    model: "Renegade",
     modelYear: "2023",
     manufactureYear: "2022",
     color: "Verde",
@@ -134,8 +135,8 @@ const vehicles = [
   {
     id: "10",
     plate: "BCD7890",
-    model: "Corolla Cross",
     brand: "Toyota",
+    model: "Corolla Cross",
     modelYear: "2024",
     manufactureYear: "2023",
     color: "Grafite",
@@ -149,38 +150,76 @@ const vehicles = [
 
 export default function FleetPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [showForm, setShowForm] = useState(false);
 
   const filteredVehicles = vehicles.filter(
     (vehicle) =>
       vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vehicle.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vehicle.branch.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vehicle.driver.toLowerCase().includes(searchTerm.toLowerCase()),
+      vehicle.driver.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="px-10">
-      <header className="flex flex-wrap justify-between items-center my-8 mx-40">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Gestão de Veículos</h1>
-          <p className="text-gray-400 mt-1">Visualize e gerencie sua frota</p>
+      {showForm ? (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-white">
+                  Adicionar Novo Veículo
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  x
+                </button>
+              </div>
+              <NewCarForm />
+              <button               
+                onClick={() => setShowForm(false)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded mt-10"
+              >
+                Salvar Veículo
+              </button>
+            </div>
+          </div>
         </div>
-        <input
-          type="text"
-          placeholder="Busque por placa, modelo, filial ou motorista"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-2/3 bg-gray-700 text-white p-2 rounded focus:ring-0 focus:outline-none"
-        />
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded">
-          Novo Veículo
-        </button>
-      </header>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredVehicles.map((vehicle) => (
-          <VehicleCard key={vehicle.id} vehicle={vehicle} />
-        ))}
-      </div>
+      ) : (
+        <div>
+          <header className="flex flex-wrap justify-between items-center my-8 mx-40">
+            <div>
+              <h1 className="text-3xl font-bold text-white">
+                Gestão de Veículos
+              </h1>
+              <p className="text-gray-400 mt-1">
+                Visualize e gerencie sua frota
+              </p>
+            </div>
+            <input
+              type="text"
+              placeholder="Busque por placa, modelo, filial ou motorista"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-2/3 bg-gray-700 text-white p-2 rounded focus:ring-0 focus:outline-none"
+            />
+            <button
+              onClick={() => setShowForm(true)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded"
+            >
+              Novo Veículo
+            </button>
+          </header>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredVehicles.map((vehicle) => (
+              <VehicleCard key={vehicle.id} vehicle={vehicle} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

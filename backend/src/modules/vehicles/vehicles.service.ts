@@ -46,11 +46,7 @@ export class VehiclesService {
         color: createVehicleDto.color,
         chassi: createVehicleDto.chassi,
         status: createVehicleDto.status,
-
-        // Associando o veículo à empresa existente
-        enterprise: {
-          connect: { id: createVehicleDto.enterpriseId }, // Conectando o veículo à empresa usando o enterpriseId
-        },
+        enterpriseId: createVehicleDto.enterpriseId,
       },
     });
   }

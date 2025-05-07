@@ -34,6 +34,8 @@ model User {
   enterpriseId String
 }
 
+
+// cidade, ano modelo, motorista
 model Vehicle {
   id           String     @id @default(uuid())
   plate        String     @unique

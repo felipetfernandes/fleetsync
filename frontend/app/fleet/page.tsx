@@ -1,181 +1,219 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Plus, Search, MoreHorizontal, FileEdit, Trash2, FileText } from "lucide-react"
+import VehicleCard from "@/components/ui/vehicleCard";
+import VehicleForm from "@/components/vehicleForm";
+import React, { useState } from "react";
 
 // Dados de exemplo
 const vehicles = [
   {
     id: "1",
     plate: "ABC1234",
-    model: "Hilux",
     brand: "Toyota",
-    year: "2022",
-    color: "Prata",
+    model: "Corolla",
+    modelYear: "2022",
+    manufactureYear: "2021",
+    color: "Preto",
+    renavam: "12345678901",
+    chassi: "9BRBL9BF1K0123456",
+    branch: "São Paulo",
+    driver: "João Silva",
     status: "Ativo",
   },
   {
     id: "2",
     plate: "DEF5678",
-    model: "Ranger",
-    brand: "Ford",
-    year: "2021",
+    brand: "Honda",
+    model: "Civic",
+    modelYear: "2021",
+    manufactureYear: "2020",
     color: "Branco",
-    status: "Em manutenção",
+    renavam: "98765432101",
+    chassi: "93HGK5830MZ123456",
+    branch: "Rio de Janeiro",
+    driver: "Maria Oliveira",
+    status: "Manutenção",
   },
   {
     id: "3",
     plate: "GHI9012",
-    model: "S10",
-    brand: "Chevrolet",
-    year: "2023",
-    color: "Preto",
+    brand: "Jeep",
+    model: "Compass",
+    modelYear: "2023",
+    manufactureYear: "2022",
+    color: "Cinza",
+    renavam: "45678901234",
+    chassi: "8AJYZ59G6K0123456",
+    branch: "Belo Horizonte",
+    driver: "Carlos Souza",
     status: "Ativo",
   },
   {
     id: "4",
     plate: "JKL3456",
-    model: "Toro",
-    brand: "Fiat",
-    year: "2022",
+    brand: "Chevrolet",
+    model: "Onix",
+    modelYear: "2020",
+    manufactureYear: "2019",
     color: "Vermelho",
+    renavam: "10293847561",
+    chassi: "9BGKS19X0GB123456",
+    branch: "Curitiba",
+    driver: "Ana Lima",
     status: "Inativo",
   },
   {
     id: "5",
     plate: "MNO7890",
-    model: "L200",
-    brand: "Mitsubishi",
-    year: "2021",
+    brand: "Hyundai",
+    model: "HB20",
+    modelYear: "2022",
+    manufactureYear: "2021",
     color: "Azul",
+    renavam: "19283746509",
+    chassi: "93HBE55G0LZ654321",
+    branch: "Fortaleza",
+    driver: "Pedro Martins",
     status: "Ativo",
   },
-]
+  {
+    id: "6",
+    plate: "PQR1234",
+    brand: "Ford",
+    model: "EcoSport",
+    modelYear: "2019",
+    manufactureYear: "2018",
+    color: "Prata",
+    renavam: "56473829102",
+    chassi: "8AFDP85GXKL789012",
+    branch: "Porto Alegre",
+    driver: "Juliana Rocha",
+    status: "Manutenção",
+  },
+  {
+    id: "7",
+    plate: "STU5678",
+    brand: "Volkswagen",
+    model: "Gol",
+    modelYear: "2021",
+    manufactureYear: "2020",
+    color: "Preto",
+    renavam: "84736291028",
+    chassi: "9BWZZZ377VT004321",
+    branch: "Salvador",
+    driver: "Roberto Dias",
+    status: "Ativo",
+  },
+  {
+    id: "8",
+    plate: "VWX9012",
+    brand: "Ford",
+    model: "Ka",
+    modelYear: "2020",
+    manufactureYear: "2019",
+    color: "Branco",
+    renavam: "65748392018",
+    chassi: "8AFDP85G0KL654321",
+    branch: "Recife",
+    driver: "Fernanda Alves",
+    status: "Ativo",
+  },
+  {
+    id: "9",
+    plate: "YZA3456",
+    brand: "Jeep",
+    model: "Renegade",
+    modelYear: "2023",
+    manufactureYear: "2022",
+    color: "Verde",
+    renavam: "90817263548",
+    chassi: "8AJYZ59G9K0123487",
+    branch: "Campinas",
+    driver: "Bruno Teixeira",
+    status: "Ativo",
+  },
+  {
+    id: "10",
+    plate: "BCD7890",
+    brand: "Toyota",
+    model: "Corolla Cross",
+    modelYear: "2024",
+    manufactureYear: "2023",
+    color: "Grafite",
+    renavam: "73829104657",
+    chassi: "9BRBL9BF2K0567890",
+    branch: "Brasília",
+    driver: "Larissa Mendes",
+    status: "Ativo",
+  },
+];
 
 export default function FleetPage() {
-  const [searchTerm, setSearchTerm] = useState("")
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showForm, setShowForm] = useState(false);
 
   const filteredVehicles = vehicles.filter(
     (vehicle) =>
       vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vehicle.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vehicle.brand.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Ativo":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-      case "Em manutenção":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-      case "Inativo":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-    }
-  }
+      vehicle.branch.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vehicle.driver.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Frota de Veículos</h1>
-        <Button asChild>
-          <Link href="/fleet/add">
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Veículo
-          </Link>
-        </Button>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Gerenciamento de Frota</CardTitle>
-          <CardDescription>Gerencie todos os veículos da sua frota em um só lugar.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center mb-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Buscar por placa, modelo ou marca..."
-                className="pl-8"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+    <div className="px-10">
+      {showForm ? (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-white">
+                  Adicionar Novo Veículo
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  X
+                </button>
+              </div>
+              <VehicleForm onSubmit={() => setShowForm(false)} onCancel={() => setShowForm(false)} />
             </div>
           </div>
-
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Placa</TableHead>
-                  <TableHead>Modelo</TableHead>
-                  <TableHead>Marca</TableHead>
-                  <TableHead>Ano</TableHead>
-                  <TableHead>Cor</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[80px]">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredVehicles.length > 0 ? (
-                  filteredVehicles.map((vehicle) => (
-                    <TableRow key={vehicle.id}>
-                      <TableCell className="font-medium">{vehicle.plate}</TableCell>
-                      <TableCell>{vehicle.model}</TableCell>
-                      <TableCell>{vehicle.brand}</TableCell>
-                      <TableCell>{vehicle.year}</TableCell>
-                      <TableCell>{vehicle.color}</TableCell>
-                      <TableCell>
-                        <Badge className={getStatusColor(vehicle.status)}>{vehicle.status}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Abrir menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <FileText className="mr-2 h-4 w-4" />
-                              Detalhes
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <FileEdit className="mr-2 h-4 w-4" />
-                              Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Excluir
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center">
-                      Nenhum veículo encontrado.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+        </div>
+      ) : (
+        <div>
+          <header className="flex flex-wrap justify-between items-center my-8 mx-40">
+            <div>
+              <h1 className="text-3xl font-bold text-white">
+                Gestão de Veículos
+              </h1>
+              <p className="text-gray-400 mt-1">
+                Visualize e gerencie sua frota
+              </p>
+            </div>
+            <input
+              type="text"
+              placeholder="Busque por placa, modelo, filial ou motorista"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-2/3 bg-gray-700 text-white p-2 rounded focus:ring-0 focus:outline-none"
+            />
+            <button
+              onClick={() => setShowForm(true)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded"
+            >
+              Novo Veículo
+            </button>
+          </header>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredVehicles.map((vehicle) => (
+              <VehicleCard key={vehicle.id} vehicle={vehicle} />
+            ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      )}
     </div>
-  )
+  );
 }

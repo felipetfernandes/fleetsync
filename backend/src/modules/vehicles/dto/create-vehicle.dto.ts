@@ -2,43 +2,43 @@ import { ApiProperty } from "@nestjs/swagger"
 import { IsNotEmpty, IsString, IsOptional } from "class-validator"
 
 export class CreateVehicleDto {
-  @ApiProperty({ example: "ABC1234" })
+  @ApiProperty({ example: "MNO5P12" })
   @IsString()
   @IsNotEmpty()
   plate: string;
 
-  @ApiProperty({ example: "Hilux" })
+  @ApiProperty({ example: "Fazer" })
   @IsString()
   @IsNotEmpty()
   model: string;
 
-  @ApiProperty({ example: "Toyota" })
+  @ApiProperty({ example: "Yamaha" })
   @IsString()
   @IsNotEmpty()
   brand: string;
 
-  @ApiProperty({ example: "2022" })
+  @ApiProperty({ example: "2021" })
   @IsString()
   @IsNotEmpty()
   year: string;
 
-  @ApiProperty({ example: "Prata" })
+  @ApiProperty({ example: "Azul" })
   @IsString()
   @IsNotEmpty()
   color: string;
 
-  @ApiProperty({ example: "9BWHE21JX24060960", required: false })
+  @ApiProperty({ example: "9C6RG1710M0001234" })
   @IsString()
   @IsOptional()
-  chassi?: string;
+  chassi: string;
 
-  @ApiProperty({ example: "Ativo", required: false })
+  @ApiProperty({ example: "Ativo", required: false, default: "Ativo" })
   @IsString()
   @IsOptional()
   status?: string;
 
-  @ApiProperty({ example: "1", required: true })
+  @ApiProperty({ example: "<enterprise_id>"})
   @IsString()
   @IsNotEmpty()
-  enterpriseId: string;  // ID da empresa
+  enterpriseId: string;
 }

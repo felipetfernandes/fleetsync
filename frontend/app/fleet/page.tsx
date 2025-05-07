@@ -1,7 +1,7 @@
 "use client";
 
-import NewCarForm from "@/components/newCarForm";
 import VehicleCard from "@/components/ui/vehicleCard";
+import VehicleForm from "@/components/vehicleForm";
 import React, { useState } from "react";
 
 // Dados de exemplo
@@ -175,16 +175,10 @@ export default function FleetPage() {
                   onClick={() => setShowForm(false)}
                   className="text-gray-400 hover:text-white"
                 >
-                  x
+                  X
                 </button>
               </div>
-              <NewCarForm />
-              <button               
-                onClick={() => setShowForm(false)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded mt-10"
-              >
-                Salvar Veículo
-              </button>
+              <VehicleForm onSubmit={() => setShowForm(false)} onCancel={() => setShowForm(false)} />
             </div>
           </div>
         </div>

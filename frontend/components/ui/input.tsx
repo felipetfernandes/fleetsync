@@ -7,6 +7,11 @@ type InputProps = {
   alt?: string;
   width?: number;
   height?: number;
+  id?: string;
+  name?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  required?: boolean;
 };
 const Input = (props: InputProps) => {
   return (
@@ -14,6 +19,11 @@ const Input = (props: InputProps) => {
       className="bg-gray-700 text-white p-2 rounded focus:ring-0 focus:outline-none"
       type={props.type}
       placeholder={props.placeholder}
+      id={props.id}
+      name={props.name}
+      value={props.value}
+      onChange={props.onChange}
+      required={props.required}
     >
       {props.image && props.alt && (
         <Image

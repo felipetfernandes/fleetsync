@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 
 import {
@@ -25,9 +27,11 @@ export default function WorkshopCard({ workshop }: { workshop: Workshop }) {
             <Wrench className="mr-2 h-5 w-5 text-indigo-400" />
             {workshop.name}
           </h1>
-          <div className="bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-3 py-0.5">
-            {workshop.vehiclesInMaintenance.length} veículo(s)
-          </div>
+          {workshop.vehiclesInMaintenance && (
+            <div className="bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-3 py-0.5">
+              {workshop.vehiclesInMaintenance.length} veículo(s)
+            </div>
+          )}
         </div>
       </div>
       <div>
@@ -63,7 +67,7 @@ export default function WorkshopCard({ workshop }: { workshop: Workshop }) {
             </div>
           </div>
 
-          {workshop.vehiclesInMaintenance.length > 0 && (
+          {workshop.vehiclesInMaintenance?.length > 0 && (
             <div className="w-full">
               <div className="border-gray-800">
                 <button

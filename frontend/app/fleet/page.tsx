@@ -4,156 +4,13 @@ import VehicleCard from "@/components/ui/vehicleCard";
 import VehicleForm from "@/components/vehicleForm";
 import { PlusCircle } from "lucide-react";
 import React, { useState } from "react";
-
-// Dados de exemplo
-const vehicles = [
-  {
-    id: "1",
-    plate: "ABC1234",
-    brand: "Toyota",
-    model: "Corolla",
-    modelYear: "2022",
-    manufactureYear: "2021",
-    color: "Preto",
-    renavam: "12345678901",
-    chassi: "9BRBL9BF1K0123456",
-    branch: "São Paulo",
-    driver: "João Silva",
-    status: "Ativo",
-  },
-  {
-    id: "2",
-    plate: "DEF5678",
-    brand: "Honda",
-    model: "Civic",
-    modelYear: "2021",
-    manufactureYear: "2020",
-    color: "Branco",
-    renavam: "98765432101",
-    chassi: "93HGK5830MZ123456",
-    branch: "Rio de Janeiro",
-    driver: "Maria Oliveira",
-    status: "Manutenção",
-  },
-  {
-    id: "3",
-    plate: "GHI9012",
-    brand: "Jeep",
-    model: "Compass",
-    modelYear: "2023",
-    manufactureYear: "2022",
-    color: "Cinza",
-    renavam: "45678901234",
-    chassi: "8AJYZ59G6K0123456",
-    branch: "Belo Horizonte",
-    driver: "Carlos Souza",
-    status: "Ativo",
-  },
-  {
-    id: "4",
-    plate: "JKL3456",
-    brand: "Chevrolet",
-    model: "Onix",
-    modelYear: "2020",
-    manufactureYear: "2019",
-    color: "Vermelho",
-    renavam: "10293847561",
-    chassi: "9BGKS19X0GB123456",
-    branch: "Curitiba",
-    driver: "Ana Lima",
-    status: "Inativo",
-  },
-  {
-    id: "5",
-    plate: "MNO7890",
-    brand: "Hyundai",
-    model: "HB20",
-    modelYear: "2022",
-    manufactureYear: "2021",
-    color: "Azul",
-    renavam: "19283746509",
-    chassi: "93HBE55G0LZ654321",
-    branch: "Fortaleza",
-    driver: "Pedro Martins",
-    status: "Ativo",
-  },
-  {
-    id: "6",
-    plate: "PQR1234",
-    brand: "Ford",
-    model: "EcoSport",
-    modelYear: "2019",
-    manufactureYear: "2018",
-    color: "Prata",
-    renavam: "56473829102",
-    chassi: "8AFDP85GXKL789012",
-    branch: "Porto Alegre",
-    driver: "Juliana Rocha",
-    status: "Manutenção",
-  },
-  {
-    id: "7",
-    plate: "STU5678",
-    brand: "Volkswagen",
-    model: "Gol",
-    modelYear: "2021",
-    manufactureYear: "2020",
-    color: "Preto",
-    renavam: "84736291028",
-    chassi: "9BWZZZ377VT004321",
-    branch: "Salvador",
-    driver: "Roberto Dias",
-    status: "Ativo",
-  },
-  {
-    id: "8",
-    plate: "VWX9012",
-    brand: "Ford",
-    model: "Ka",
-    modelYear: "2020",
-    manufactureYear: "2019",
-    color: "Branco",
-    renavam: "65748392018",
-    chassi: "8AFDP85G0KL654321",
-    branch: "Recife",
-    driver: "Fernanda Alves",
-    status: "Ativo",
-  },
-  {
-    id: "9",
-    plate: "YZA3456",
-    brand: "Jeep",
-    model: "Renegade",
-    modelYear: "2023",
-    manufactureYear: "2022",
-    color: "Verde",
-    renavam: "90817263548",
-    chassi: "8AJYZ59G9K0123487",
-    branch: "Campinas",
-    driver: "Bruno Teixeira",
-    status: "Ativo",
-  },
-  {
-    id: "10",
-    plate: "BCD7890",
-    brand: "Toyota",
-    model: "Corolla Cross",
-    modelYear: "2024",
-    manufactureYear: "2023",
-    color: "Grafite",
-    renavam: "73829104657",
-    chassi: "9BRBL9BF2K0567890",
-    branch: "Brasília",
-    driver: "Larissa Mendes",
-    status: "Ativo",
-  },
-];
+import { mockVehicles } from "@/lib/mockData";
 
 export default function FleetPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
 
-  const filteredVehicles = vehicles.filter(
+  const filteredVehicles = mockVehicles.filter(
     (vehicle) =>
       vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vehicle.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -188,7 +45,7 @@ export default function FleetPage() {
         </div>
       ) : (
         <div>
-          <header className="flex flex-wrap justify-between items-center my-8 mx-40">
+          <header className="flex flex-wrap justify-between items-center py-8 px-40">
             <div>
               <h1 className="text-3xl font-bold text-white">
                 Gestão de Veículos

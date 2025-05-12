@@ -5,9 +5,8 @@ import SupportButton from "@/components/ui/supportButton";
 import Image from "next/image";
 import Input from "@/components/ui/input";
 import { redirect } from "next/navigation";
-import { Truck } from "lucide-react";
 
-const truckImage = "/images/truck.svg";
+const LogoImage = "/images/logo2.png";
 
 async function handleLogin(formData: FormData) {
   "use server";
@@ -24,7 +23,7 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center h-screen bg-gray-950">
       <div className="flex flex-col items-center justify-center text-gray-100 bg-gray-900 border border-gray-800 p-8 rounded-2xl">
-        <Truck className="h-24 w-24"/>
+        <Image src={LogoImage} width={150} height={150} alt="Logo" className="mb-6"/>
         <h1 className="text-gray-300 text-2xl">Fleet Manager</h1>
         <h3 className="text-gray-500 text-xs mb-4">
           Sistema de Gerenciamento de Frota

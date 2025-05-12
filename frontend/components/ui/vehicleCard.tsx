@@ -1,4 +1,5 @@
 import { Car } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 
@@ -28,6 +29,7 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
       statusColorClass = "bg-green-700";
   }
   return (
+    <Link href={`/fleet/${vehicle.plate}`}>
     <div className="text-gray-100 bg-gray-900 border border-gray-800 p-8 rounded-2xl">
       <div className="flex justify-between items-start mb-6">
         <span className="flex items-center">
@@ -50,6 +52,7 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
             );
           })}
       </div>
-    </div>
+      </div>
+      </Link>
   );
 }

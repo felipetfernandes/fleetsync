@@ -196,7 +196,7 @@ export default function WorkshopsPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-6">
             {workshops.map((workshop) => (
               <WorkshopCard key={workshop.id} workshop={workshop} />
             ))}

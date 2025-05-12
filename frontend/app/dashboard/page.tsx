@@ -253,7 +253,7 @@ export default function DashboardPage() {
                 {dashboardData.recentOrders.map((order: any) => {
                   const statusInfo = getStatusInfo(order.status)
                   return (
-                    <Link href={`/ordens/${order.id}`} key={order.id}>
+                    <Link href={`/orders/${order.id}`} key={order.id}>
                       <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition-colors">
                         <div className="flex items-start space-x-4">
                           <div className={`p-2 rounded-md ${statusInfo.color}`}>{statusInfo.icon}</div>
@@ -343,7 +343,7 @@ export default function DashboardPage() {
             </div>
           </Link>
 
-          <Link href="/oficinas">
+          <Link href="/workshops">
             <div className="bg-gray-900 border border-gray-800 rounded-xl hover:bg-gray-800 transition-colors cursor-pointer h-full">
               <div className="p-6 flex flex-col items-center justify-center text-center h-full">
                 <Wrench className="h-10 w-10 text-indigo-400 mb-4" />
@@ -353,7 +353,7 @@ export default function DashboardPage() {
             </div>
           </Link>
 
-          <Link href="/ordens">
+          <Link href="/orders">
             <div className="bg-gray-900 border border-gray-800 rounded-xl hover:bg-gray-800 transition-colors cursor-pointer h-full">
               <div className="p-6 flex flex-col items-center justify-center text-center h-full">
                 <ClipboardList className="h-10 w-10 text-indigo-400 mb-4" />

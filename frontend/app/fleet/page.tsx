@@ -14,8 +14,7 @@ export default function FleetPage() {
     (vehicle) =>
       vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vehicle.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vehicle.branch.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vehicle.driver.toLowerCase().includes(searchTerm.toLowerCase())
+      vehicle.branch.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -57,7 +56,7 @@ export default function FleetPage() {
               </div>
               <input
                 type="text"
-                placeholder="Busque por placa, modelo, filial ou motorista"
+                placeholder="Busque por placa, modelo ou filial"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-2/3 bg-gray-700 text-white p-2 rounded focus:ring-0 focus:outline-none"

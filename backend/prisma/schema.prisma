@@ -7,83 +7,215 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Enterprise {
-  id        String     @id @default(uuid())
-  name      String
-  cnpj      String     @unique
-  email     String     @unique
-  password  String
-  flat      String
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt @map("updated_at")
+enum OrderType {
+  PREVENTIVE
+  CORRECTIVE
+  PERIODIC
+}
+
+enum UserRole {
+  ADMIN
+  DRIVER
+  WORKSHOP_MANAGER
+}
+
+// Prisma Schema for Company
+model Company {
+  id         String @id @default(uuid())
+  name       String
+  cnpj       String @unique
+  assetCount Int    @default(0) @map("asset_count")
+
+  // Relationships
+  branches Branch[]
+  vehicles Vehicle[]
+  users    User[]
+  order    Order[]
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("company")
+}
+
+model Branch {
+  id   Int    @id @default(autoincrement())
+  name String
+  city String
+
+  // Relationships
+  company   Company    @relation(fields: [companyId], references: [id])
+  companyId String
   vehicles  Vehicle[]
   workshops Workshop[]
-  orders    Order[]
   users     User[]
 
-  @@map("enterprises")
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  Order     Order[]
+
+  @@map("branch")
 }
 
-model User {
-  id           String     @id @default(uuid())
-  name         String
-  email        String     @unique
-  password     String
-  role         String
-  Enterprise   Enterprise @relation(fields: [enterpriseId], references: [id])
-  enterpriseId String
-}
-
-
-// cidade, ano modelo, motorista
+// Prisma Schema, Interface e DTO para Vehicle
 model Vehicle {
-  id           String     @id @default(uuid())
-  plate        String     @unique
-  model        String
-  brand        String
-  year         String
-  color        String
-  chassi       String     @unique
-  status       String     @default("Ativo")
-  createdAt    DateTime   @default(now()) @map("created_at")
-  updatedAt    DateTime   @updatedAt @map("updated_at")
-  orders       Order[]
-  enterpriseId String     @map("enterprise_id")
-  enterprise   Enterprise @relation(fields: [enterpriseId], references: [id])
+  id              String    @id @default(uuid())
+  plate           String    @unique
+  brand           String
+  model           String
+  modelYear       Int       @map("model_year")
+  manufactureYear Int       @map("manufacture_year")
+  color           String
+  renavam         String    @unique
+  chassis         String
+  status          String
+  purchaseDate    DateTime? @map("purchase_date")
+  purchaseType    String?   @map("purchase_type")
+  purchaseValue   Float?    @map("purchase_value")
+  seller          String?
+  mileageStart    Int       @map("mileage_start")
+  mileageCurrent  Int       @map("mileage_current")
 
-  @@map("vehicles")
+  // Insurance
+  insuranceProvider String?   @map("insurance_provider")
+  insurancePolicy   String?   @map("insurance_policy")
+  insuranceExpires  DateTime? @map("insurance_expires")
+  insuranceValue    Float?    @map("insurance_value")
+
+  // IPVA
+  ipvaStatus  String?   @map("ipva_status")
+  ipvaValue   Float?    @map("ipva_value")
+  ipvaDueDate DateTime? @map("ipva_due_date")
+
+  // Licensing
+  licenseStatus  String?   @map("license_status")
+  licenseValue   Float?    @map("license_value")
+  licenseDueDate DateTime? @map("license_due_date")
+
+  // Relationships
+  company   Company @relation(fields: [companyId], references: [id])
+  companyId String
+  branch    Branch  @relation(fields: [branchId], references: [id])
+  branchId  Int
+  driver    User?   @relation(fields: [driverId], references: [id])
+  driverId  String?
+  order     Order[]
+
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+  MileageHistory MileageHistory[]
+
+  @@map("vehicle")
+}
+
+model MileageHistory {
+  id        String  @id @default(uuid())
+  mileage   Int
+  month     Int
+  year      Int
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("mileage_history")
 }
 
 model Workshop {
-  id           String     @id @default(uuid())
-  name         String
-  cnpj         String     @unique
-  email        String     @unique
-  password     String
-  telephone    String     @unique
-  adress       String     @unique
-  enterpriseId String     @map("enterprise_id")
-  enterprise   Enterprise @relation(fields: [enterpriseId], references: [id])
-  orders       Order[]
+  id       String @id @default(uuid())
+  name     String
+  cnpj     String @unique
+  address  String
+  phone    String
+  email    String
+  password String
 
-  @@map("workshops")
+  // Relationships
+  branch    Branch  @relation(fields: [branchId], references: [id])
+  branchId  Int
+  manager   User?   @relation(fields: [managerId], references: [id])
+  managerId String?
+  order     Order[]
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("workshop")
 }
 
 model Order {
-  id           String     @id @default(uuid())
-  vehicleId    String     @map("vehicle_id")
-  vehicle      Vehicle    @relation(fields: [vehicleId], references: [id])
-  workshopId   String
-  workshop     Workshop   @relation(fields: [workshopId], references: [id])
-  enterpriseId String     @map("enterprise_id")
-  enterprise   Enterprise @relation(fields: [enterpriseId], references: [id])
-  description  String
-  type         String
-  cost         Decimal    @db.Decimal(10, 2)
-  serviceDate  DateTime   @map("service_date")
-  status       String     @default("Agendado")
-  createdAt    DateTime   @default(now()) @map("created_at")
-  updatedAt    DateTime   @updatedAt @map("updated_at")
+  id          String    @id @default(uuid())
+  type        OrderType
+  description String
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime? @map("end_date")
+  totalCost   Float     @map("total_cost")
 
-  @@map("orders")
+  // Relationships
+  company    Company  @relation(fields: [companyId], references: [id])
+  companyId  String
+  branch     Branch   @relation(fields: [branchId], references: [id])
+  branchId   Int
+  vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
+  vehicleId  String
+  workshop   Workshop @relation(fields: [workshopId], references: [id])
+  workshopId String
+
+  // Timestamps
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  OrderItem OrderItem[]
+
+  @@map("order")
+}
+
+model OrderItem {
+  id          String @id @default(uuid())
+  description String
+  cost        Float
+  laborCost   Float  @map("labor_cost")
+  totalCost   Float  @map("total_cost")
+  orderId     String
+  order       Order  @relation(fields: [orderId], references: [id])
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("order_item")
+}
+
+model User {
+  id                   String    @id @default(uuid())
+  name                 String
+  email                String    @unique
+  phone                String    @unique
+  password             String
+  role                 UserRole
+  emailVerified        Boolean   @default(false) @map("email_verified")
+  resetPasswordToken   String?   @map("reset_password_token")
+  resetPasswordExpires DateTime? @map("reset_password_expires")
+
+  // Driver-specific fields
+  licenseNumber     String?   @map("license_number")
+  licenseCategory   String?   @map("license_category")
+  licenseExpiration DateTime? @map("license_expiration")
+
+  // Relationships
+  branchId Int
+  branch   Branch @relation(fields: [branchId], references: [id])
+
+  // Timestamps
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  Company   Company?   @relation(fields: [companyId], references: [id])
+  companyId String?
+  Vehicle   Vehicle[]
+  Workshop  Workshop[]
+
+  @@map("user")
 }

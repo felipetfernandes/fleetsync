@@ -1,7 +1,11 @@
-import { Injectable, ConflictException, NotFoundException } from "@nestjs/common";
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from "@nestjs/common";
 import { CreateVehicleDto } from "./dto/create-vehicle.dto";
 import { UpdateVehicleDto } from "./dto/update-vehicle.dto";
-import { PrismaService } from "src/prisma/prisma.service";
+import { PrismaService } from "src/modules/prisma/prisma.service";
 
 @Injectable()
 export class VehiclesService {
@@ -33,20 +37,13 @@ export class VehiclesService {
     });
 
     if (existingVehicle) {
-      throw new ConflictException("Placa já está em uso");
+      throw new ConflictException("Placa já está cadastrada");
     }
 
     // Criar veículo e associar à empresa
     return this.prisma.vehicle.create({
       data: {
-        plate: createVehicleDto.plate,
-        model: createVehicleDto.model,
-        brand: createVehicleDto.brand,
-        year: createVehicleDto.year,
-        color: createVehicleDto.color,
-        chassi: createVehicleDto.chassi,
-        status: createVehicleDto.status,
-        enterpriseId: createVehicleDto.enterpriseId,
+        ...createVehicleDto,
       },
     });
   }

@@ -1,45 +1,63 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, MinLength } from 'class-validator';
-import { UserRole } from '../interfaces/user.interface';
+import { ApiProperty } from "@nestjs/swagger";
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+  MinLength,
+  IsUUID,
+  IsDateString,
+  IsNumber,
+} from "class-validator";
+import { UserRole } from "../interfaces/user.interface";
 
 export class CreateUserDto {
-  @ApiProperty({ example: 'João da Silva' })
+  @ApiProperty({ example: "João da Silva" })
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ example: 'joao@email.com' })
+  @ApiProperty({ example: "joao@email.com" })
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: '+5511987654321' })
-  @IsPhoneNumber('BR')
+  @ApiProperty({ example: "+5511987654321" })
+  @IsPhoneNumber("BR")
   phone: string;
 
-  @ApiProperty({ example: 'senhaSegura123' })
+  @ApiProperty({ example: "senhaSegura123" })
   @IsString()
   @MinLength(6)
   password: string;
 
-  @ApiProperty({ example: 'DRIVER', enum: UserRole })
+  @ApiProperty({ example: "DRIVER", enum: UserRole })
   @IsEnum(UserRole)
   role: keyof typeof UserRole;
 
-  @ApiProperty({ example: 1 })
-  @IsNotEmpty()
-  branchId: number;
+  @ApiProperty({ example: 1, required: false })
+  @IsOptional()
+  @IsNumber()
+  branchId?: number;
 
-  @ApiProperty({ example: '12345678900', required: false })
+  @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000", required: false })
+  @IsOptional()
+  @IsUUID()
+  companyId?: string;
+
+  @ApiProperty({ example: "12345678900", required: false })
   @IsOptional()
   @IsString()
   licenseNumber?: string;
 
-  @ApiProperty({ example: 'B', required: false })
+  @ApiProperty({ example: "B", required: false })
   @IsOptional()
   @IsString()
   licenseCategory?: string;
 
-  @ApiProperty({ example: '2026-12-31T00:00:00.000Z', required: false })
+  @ApiProperty({ example: "2026-12-31T00:00:00.000Z", required: false })
   @IsOptional()
+  @IsDateString()
   licenseExpiration?: Date;
 }

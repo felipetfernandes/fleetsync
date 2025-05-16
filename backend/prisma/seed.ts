@@ -1,8 +1,9 @@
-import { PrismaClient, OrderType, UserRole } from '@prisma/client';
+import { PrismaClient, OrderType, UserRole } from "@prisma/client";
+import * as bcrypt from "bcrypt";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Iniciando seed...');
+  console.log("🌱 Iniciando seed...");
   for (let i = 1; i <= 2; i++) {
     const company = await prisma.company.create({
       data: {
@@ -28,7 +29,7 @@ async function main() {
         name: `Admin Empresa ${i}`,
         email: `admin${i}@empresa.com`,
         phone: `1190000000${i}`,
-        password: 'admin123',
+        password: bcrypt.hashSync("admin123", 10),
         role: UserRole.ADMIN,
         companyId: company.id,
         branchId: branches[0].id,
@@ -42,13 +43,13 @@ async function main() {
             name: `Motorista ${d + 1} - Empresa ${i}`,
             email: `motorista${d + 1}@empresa${i}.com`,
             phone: `1190000010${i}${d}`,
-            password: 'driver123',
+            password: bcrypt.hashSync("motorista123", 10),
             role: UserRole.DRIVER,
             companyId: company.id,
             branchId: branches[d % 5].id,
             licenseNumber: `LIC${i}${d}`,
-            licenseCategory: 'B',
-            licenseExpiration: new Date('2026-12-31'),
+            licenseCategory: "B",
+            licenseExpiration: new Date("2026-12-31"),
           },
         })
       )
@@ -63,7 +64,7 @@ async function main() {
             address: `Rua Oficina ${w + 1}`,
             phone: `1199999999${i}${w}`,
             email: `oficina${w + 1}@empresa${i}.com`,
-            password: 'oficina123',
+            password: bcrypt.hashSync("oficina123", 10),
             branchId: branches[w % 5].id,
           },
         })
@@ -74,34 +75,34 @@ async function main() {
       Array.from({ length: 25 }).map((_, v) =>
         prisma.vehicle.create({
           data: {
-            plate: `ABC${i}${v.toString().padStart(3, '0')}`,
-            brand: 'MarcaX',
+            plate: `ABC${i}${v.toString().padStart(3, "0")}`,
+            brand: "MarcaX",
             model: `Modelo${v}`,
             modelYear: 2020,
             manufactureYear: 2019,
-            color: 'Branco',
+            color: "Branco",
             renavam: `RENAVAM${i}${v}`,
             chassis: `CHASSIS${i}${v}`,
-            status: 'ATIVO',
-            purchaseDate: new Date('2022-01-01'),
-            purchaseType: 'FINANCIADO',
+            status: "ATIVO",
+            purchaseDate: new Date("2022-01-01"),
+            purchaseType: "FINANCIADO",
             purchaseValue: 50000 + v * 1000,
-            seller: 'Revenda Y',
+            seller: "Revenda Y",
             mileageStart: 10000,
             mileageCurrent: 15000 + v * 100,
 
-            insuranceProvider: 'Seguradora Z',
+            insuranceProvider: "Seguradora Z",
             insurancePolicy: `POL${i}${v}`,
-            insuranceExpires: new Date('2025-12-31'),
+            insuranceExpires: new Date("2025-12-31"),
             insuranceValue: 1200 + v * 10,
 
-            ipvaStatus: 'PAGO',
+            ipvaStatus: "PAGO",
             ipvaValue: 1500,
-            ipvaDueDate: new Date('2025-04-01'),
+            ipvaDueDate: new Date("2025-04-01"),
 
-            licenseStatus: 'EM DIA',
+            licenseStatus: "EM DIA",
             licenseValue: 500,
-            licenseDueDate: new Date('2025-06-01'),
+            licenseDueDate: new Date("2025-06-01"),
 
             companyId: company.id,
             branchId: branches[v % 5].id,
@@ -132,7 +133,11 @@ async function main() {
 
         const order = await prisma.order.create({
           data: {
-            type: [OrderType.CORRECTIVE, OrderType.PREVENTIVE, OrderType.PERIODIC][o % 3],
+            type: [
+              OrderType.CORRECTIVE,
+              OrderType.PREVENTIVE,
+              OrderType.PERIODIC,
+            ][o % 3],
             description: `Manutenção ${o + 1} da Empresa ${i}`,
             startDate: new Date(new Date().getTime() - (60 - o) * 86400000),
             endDate: new Date(),
@@ -157,12 +162,12 @@ async function main() {
     );
   }
 
-  console.log('✅ Seed concluído com sucesso!');
+  console.log("✅ Seed concluído com sucesso!");
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Seed falhou:', e);
+    console.error("❌ Seed falhou:", e);
     process.exit(1);
   })
   .finally(async () => {

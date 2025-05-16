@@ -100,7 +100,7 @@ model Vehicle {
   branch    Branch  @relation(fields: [branchId], references: [id])
   branchId  Int
   driver    User?   @relation(fields: [driverId], references: [id])
-  driverId  String?
+  driverId  String? @unique
   order     Order[]
 
   createdAt      DateTime         @default(now()) @map("created_at")
@@ -137,7 +137,7 @@ model Workshop {
   branch    Branch  @relation(fields: [branchId], references: [id])
   branchId  Int
   manager   User?   @relation(fields: [managerId], references: [id])
-  managerId String?
+  managerId String? @unique
   order     Order[]
 
   // Timestamps
@@ -206,16 +206,18 @@ model User {
   licenseExpiration DateTime? @map("license_expiration")
 
   // Relationships
-  branchId Int
-  branch   Branch @relation(fields: [branchId], references: [id])
+  branchId  Int?
+  branch    Branch?   @relation(fields: [branchId], references: [id])
+  
+  Company   Company?  @relation(fields: [companyId], references: [id])
+  companyId String?
+  
+  Vehicle   Vehicle?
+  Workshop  Workshop?
 
   // Timestamps
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt @map("updated_at")
-  Company   Company?   @relation(fields: [companyId], references: [id])
-  companyId String?
-  Vehicle   Vehicle[]
-  Workshop  Workshop[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("user")
 }

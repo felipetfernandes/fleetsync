@@ -32,8 +32,8 @@ export class AuthController {
     // Enviando o token como cookie
     res.cookie("access_token", loginResult.access_token, {
       httpOnly: false,
-      secure: process.env.NODE_ENV === "production", // HTTPS em produção
-      sameSite: "strict",
+      secure: true, // HTTPS em produção
+      sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24, // 1 dia
     });
 

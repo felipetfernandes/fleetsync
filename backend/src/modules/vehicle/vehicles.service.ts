@@ -16,14 +16,46 @@ export class VehiclesService {
     return this.prisma.vehicle.findMany();
   }
 
+  async findManyByCompany(companyId: string) {
+    return this.prisma.vehicle.findMany({
+      where: { companyId },
+      include: {
+        driver: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            licenseNumber: true,
+            licenseCategory: true,
+            licenseExpiration: true,
+          },
+        },
+      },
+    });
+  }
+
   // Método para encontrar um veículo pelo id
-  async findOne(id: string) {
+  async findOne(plate: string) {
     const vehicle = await this.prisma.vehicle.findUnique({
-      where: { id },
+      where: { plate },
+      include: {
+        driver: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            licenseNumber: true,
+            licenseCategory: true,
+            licenseExpiration: true,
+          },
+        },
+      }
     });
 
     if (!vehicle) {
-      throw new NotFoundException(`Veículo com ID ${id} não encontrado`);
+      throw new NotFoundException(`Veículo com ID ${plate} não encontrado`);
     }
 
     return vehicle;

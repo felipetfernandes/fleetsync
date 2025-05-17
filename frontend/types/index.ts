@@ -1,109 +1,103 @@
 // Tipos de dados
+enum UserRole {
+  ADMIN = 'ADMIN',
+  DRIVER = 'DRIVER',
+  WORKSHOP_MANAGER = 'WORKSHOP_MANAGER',
+}
+
+enum OrderType {
+  PREVENTIVE,
+  CORRECTIVE,
+  PERIODIC,
+}
+
 type User = {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "driver";
-  avatar?: string;
   phone: string;
-  department?: string;
+  password: string;
+  role: UserRole;
+  emailVerified: boolean;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
   licenseNumber?: string;
   licenseCategory?: string;
-};
+  licenseExpiration?: Date;
+  branchId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 type Vehicle = {
   id: string;
   plate: string;
-  branch: string;
-  model: string;
   brand: string;
-  yearModelo: string;
-  yearFabricacao: string;
+  model: string;
+  modelYear: number;
+  manufactureYear: number;
   color: string;
   renavam: string;
-  chassi: string;
-  status: "Ativo" | "Manutenção" | "Inativo";
-  driverId: string;
-  acquisition: {
-    date: Date;
-    type: string;
-    value: number;
-    supplier: string;
+  chassis: string;
+  status: string;
+  purchaseDate: Date;
+  purchaseType?: string;
+  purchaseValue?: number;
+  seller?: string;
+  mileageStart: number;
+  mileageCurrent: number;
+  insuranceProvider?: string;
+  insurancePolicy?: string;
+  insuranceExpires?: Date;
+  insuranceValue?: number;
+  ipvaStatus?: string;
+  ipvaValue?: number;
+  ipvaDueDate?: Date;
+  licenseStatus?: string;
+  licenseValue?: number;
+  licenseDueDate?: Date;
+  companyId: string;
+  branchId: number;
+  driverId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  driver: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    licenseNumber?: string;
+    licenseCategory?: string;
+    licenseExpiration?: Date;
   };
-  documents: {
-    insurance: {
-      company: string;
-      policy: string;
-      validUntil: Date;
-      value: number;
-    };
-    ipva: {
-      paid: boolean;
-      value: number;
-      dueDate: Date;
-    };
-    licensing: {
-      paid: boolean;
-      value: number;
-      dueDate: Date;
-    };
-  };
-  stats: {
-    totalMaintenanceCost: number;
-    maintenanceCount: number;
-    daysInMaintenance: number;
-    lastMaintenance: Date;
-    fuelConsumption: number;
-    mileage: number;
-    availability: number;
-  };
-};
+}
 
 type Workshop = {
   id: string;
   name: string;
   cnpj: string;
+  address: string;
+  phone: string;
   email: string;
-  telephone: string;
-  adress: string;
-  rating: number;
-  ordersCount: number;
-  vehiclesInMaintenance: {
-    id: string;
-    plate: string;
-    model: string;
-    brand: string;
-    color: string;
-    status: string;
-    serviceDescription: string;
-  }[];
+  manager: string | null;
 };
 
-type ServiceOrder = {
+
+type Order = {
   id: string;
+  type: OrderType
   description: string;
-  type: string;
-  cost: number;
-  serviceDate: Date;
-  status:
-    | "Agendado"
-    | "Veículo Entregue"
-    | "Em Andamento"
-    | "Concluído"
-    | "Cancelado";
-  createdAt: Date;
-  updatedAt: Date;
+  startDate: string;
+  endDate: string;
+  totalCost: number;
+  companyId: string;
+  branchId: number;
   vehicleId: string;
-  driverId: string;
   workshopId: string;
-  filialId: string;
-  notes?: string;
-  statusHistory: {
-    id: string;
-    status: string;
-    date: Date;
-    description: string;
-  }[];
+  createdAt: string;
+  updatedAt: string;
+  workshop: Workshop;
+  company: Company;
 };
 
 type Branch = {
@@ -117,13 +111,11 @@ type Branch = {
   manager: string;
 };
 
-type Enterprise = {
+type Company = {
   id: string;
   name: string;
   cnpj: string;
-  address: string;
-  phone: string;
-  email: string;
-  website: string;
-  logo?: string;
+  assetCount: number;
+  createdAt: string; // ou Date, se estiver parseando
+  updatedAt: string;
 };

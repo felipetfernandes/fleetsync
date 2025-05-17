@@ -2,20 +2,48 @@
 
 import VehicleCard from "@/components/ui/vehicleCard";
 import VehicleForm from "@/components/vehicleForm";
+import { Vehicle } from "@/types";
 import { PlusCircle } from "lucide-react";
-import React, { useState } from "react";
-import { mockVehicles } from "@/lib/mockData";
+import React, { useEffect, useState } from "react";
 
 export default function FleetPage() {
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchBranch, setSearchBranch] = useState("");
   const [showForm, setShowForm] = useState(false);
 
-  const filteredVehicles = mockVehicles.filter(
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const res = await fetch("http://localhost:3001/vehicles", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Erro ao buscar veículos");
+
+        const data = await res.json();
+        setVehicles(data);
+      } catch (error) {
+        console.error("Erro ao buscar veículos:", error);
+        // redirecionar para login se necessário
+      }
+    };
+
+    fetchVehicles();
+  }, []);
+
+  const filteredVehicles = vehicles.filter(
     (vehicle) =>
       vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vehicle.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vehicle.branch.toLowerCase().includes(searchTerm.toLowerCase())
+      vehicle.driver.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const filteredVehiclesByBranch = filteredVehicles.filter((vehicle) => {
+    if (!searchBranch || +searchBranch === 0) return true;
+    return vehicle.branchId === +searchBranch;
+  });
 
   return (
     <div className="px-10 bg-gray-950">
@@ -56,10 +84,18 @@ export default function FleetPage() {
               </div>
               <input
                 type="text"
-                placeholder="Busque por placa, modelo ou filial"
+                placeholder="Busque por placa, modelo ou motorista"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-2/3 bg-gray-700 text-white p-2 rounded focus:ring-0 focus:outline-none"
+                className="w-1/3 bg-gray-700 text-white p-2 rounded focus:ring-0 focus:outline-none"
+              />
+              <input
+                type="number"
+                placeholder="Filtre por filial"
+                value={searchBranch}
+                min={0}
+                onChange={(e) => setSearchBranch(e.target.value)}
+                className="bg-gray-700 text-white p-2 rounded focus:ring-0 focus:outline-none"
               />
               <button
                 onClick={() => setShowForm(true)}
@@ -70,7 +106,7 @@ export default function FleetPage() {
               </button>
             </header>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredVehicles.map((vehicle) => (
+              {filteredVehiclesByBranch.map((vehicle) => (
                 <VehicleCard key={vehicle.id} vehicle={vehicle} />
               ))}
             </div>

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from "@nestjs/common"
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger"
 import { VehiclesService } from "./vehicles.service"
 import { CreateVehicleDto } from "./dto/create-vehicle.dto"
@@ -22,16 +22,17 @@ export class VehiclesController {
 
   @Get()
   @ApiOperation({ summary: "Listar todos os veículos" })
-  findAll() {
-    return this.vehiclesService.findAll()
+  findAll(@Req() req) {
+    const companyId = req.user.companyId
+    return this.vehiclesService.findManyByCompany(companyId)
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Buscar um veículo pelo ID' })
+  @Get(':plate')
+  @ApiOperation({ summary: 'Buscar um veículo pelo Placa' })
   @ApiResponse({ status: 200, description: 'Veículo encontrado' })
   @ApiResponse({ status: 404, description: 'Veículo não encontrado' })
-  findOne(@Param('id') id: string) {
-    return this.vehiclesService.findOne(id);
+  findOne(@Param('plate') plate: string) {
+    return this.vehiclesService.findOne(plate);
   }
 
   @Patch(":id")

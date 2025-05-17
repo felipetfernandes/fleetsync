@@ -1,19 +1,19 @@
+import { Vehicle } from "@/types";
 import { Car } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
 
-const infos = [
-  "Marca",
-  "Modelo",
-  "Ano Modelo",
-  "Ano Fabricação",
-  "Cor",
-  "Renavam",
-  "Chassi",
-  "Filial",
-  "Motorista",
-];
+const infos = {
+  brand: "Marca",
+  model: "Modelo",
+  modelYear: "Ano Modelo",
+  manufactureYear: "Ano Fabricação",
+  color: "Cor",
+  renavam:"Renavam",
+  chassis: "Chassis",
+  branchId: "Filial",
+};
 
 export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
   let statusColorClass = "";
@@ -41,16 +41,19 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
         </p>
       </div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-        {Object.keys(vehicle)
-          .slice(2, -1)
-          .map((value, id) => {
+        {Object.keys(infos)
+          .map((value) => {
             return (
-              <span key={id}>
-                <p className="text-gray-400">{infos[id]}</p>
-                <p className="font-medium">{vehicle[value as keyof Vehicle]}</p>
+              <span key={value}>
+                <p className="text-gray-400">{infos[value as keyof typeof infos]}</p>
+                <p className="font-medium">{vehicle[value as keyof typeof infos]}</p>
               </span>
             );
           })}
+          <span>
+            <p className="text-gray-400">Motorista</p>
+            <p className="font-medium">{vehicle.driver.name}</p>
+          </span>
       </div>
       </div>
       </Link>

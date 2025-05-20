@@ -55,6 +55,7 @@ remove(@Param('id') id: string) {
   @ApiResponse({ status: 200, description: 'Serviços encontrados' })
 @ApiResponse({ status: 404, description: 'Serviços não encontrados' })
 findAllbyPlate(@Param('plate') plate: string) {
+  console.log(plate)
   return this.ordersService.findAllByPlate(plate);
 }
 }

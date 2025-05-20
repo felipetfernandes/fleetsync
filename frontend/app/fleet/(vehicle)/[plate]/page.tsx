@@ -6,17 +6,14 @@ import {
   Car,
   Calendar,
   ClipboardList,
-  Clock,
   CheckCircle2,
-  AlertCircle,
   RotateCcw,
   FileText,
-  Truck,
   Edit,
   Trash2,
   PlusCircle,
 } from "lucide-react";
-import { format, set } from "date-fns";
+import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import VehicleCard from "@/components/Vehicle/vehicleCard";
 import OrderCard from "@/components/Order/orderCard";
@@ -98,7 +95,7 @@ export default function VehicleDetailPage({
         if (!res.ok) throw new Error("Erro ao buscar veículos");
 
         const data = await res.json();
-        setOrders(data);
+        if (data.length > 0) setOrders(data);
       } catch (error) {
         console.error("Erro ao buscar veículos:", error);
         // redirecionar para login se necesario
@@ -109,8 +106,39 @@ export default function VehicleDetailPage({
     fetchOrders();
   }, []);
 
+  const handleDeleteVehicle = async () => {
+  const confirmDelete = window.confirm(
+    "Tem certeza que deseja excluir este veículo?\nEsta ação é irreversível."
+  );
+
+  if (confirmDelete) {
+    try {
+      const res = await fetch(`http://localhost:3001/vehicles/${plate}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Erro ao deletar veículo:", errorData);
+        // Aqui você pode adicionar uma lógica para exibir uma mensagem de erro mais amigável ao usuário
+        throw new Error(`Erro ao deletar veículo: ${res.status}`);
+      }
+
+      router.push("/fleet");
+    } catch (error: any) {
+      console.error("Erro ao deletar veículo:", error);
+      // Aqui você pode adicionar uma lógica para exibir uma mensagem de erro ao usuário
+    }
+  } else {
+    // O usuário cancelou a exclusão, nada acontece
+    console.log("Exclusão do veículo cancelada pelo usuário.");
+  }
+};
+
   // Formatar valores monetários
-  const formatCurrency = (value: number) => {
+  const formatCurrency = (value: number | undefined) => {
+    if (!value) return "não informado";
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
@@ -118,12 +146,14 @@ export default function VehicleDetailPage({
   };
 
   // Formatar datas
-  const formatDate = (date: Date | string) => {
+  const formatDate = (date: Date | string | undefined) => {
+    if (!date) return "não informado";
     const parsedDate = typeof date === "string" ? new Date(date) : date;
     return format(parsedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
   };
 
-  const formatShortDate = (date: Date | string) => {
+  const formatShortDate = (date: Date | string | undefined) => {
+    if (!date) return "não informado";
     const parsedDate = typeof date === "string" ? new Date(date) : date;
     return format(parsedDate, "dd/MM/yyyy", { locale: ptBR });
   };
@@ -146,7 +176,7 @@ export default function VehicleDetailPage({
     const today = new Date();
     const totalCost = orders.reduce((acc, order) => acc + order.totalCost, 0);
     const totalOrders = orders.length;
-    const avarageCoast = totalCost / totalOrders;
+    const avarageCoast = totalOrders > 0 ? totalCost / totalOrders : 0;
     const totalDays = orders.reduce((acc, order) => {
       const startDate = new Date(order.startDate);
       const endDate = new Date(order.endDate);
@@ -155,16 +185,21 @@ export default function VehicleDetailPage({
       return acc + diffInDays;
     }, 0);
 
-    const mostRecent = orders.reduce((latest, current) => {
-      return new Date(current.endDate) > new Date(latest.endDate)
-        ? current
-        : latest;
-    });
+    const mostRecent =
+      orders.length > 0
+        ? orders.reduce((latest, current) => {
+            return new Date(current.endDate) > new Date(latest.endDate)
+              ? current
+              : latest;
+          })
+        : { endDate: undefined };
 
-    const diffTime = Math.abs(
-      today.getTime() - new Date(mostRecent.endDate).getTime()
-    );
-    const daysSinceLast = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffTime = mostRecent.endDate
+      ? Math.abs(today.getTime() - new Date(mostRecent.endDate).getTime())
+      : 0;
+    const daysSinceLast = mostRecent.endDate
+      ? Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      : 0;
 
     return {
       totalCost,
@@ -176,7 +211,7 @@ export default function VehicleDetailPage({
     };
   };
 
-  if (!vehicle || orders.length === 0) {
+  if (!vehicle && orders.length === 0) {
     return <div>Carregando...</div>;
   }
 
@@ -214,7 +249,10 @@ export default function VehicleDetailPage({
               <Edit className="mr-2 h-4 w-4" />
               Editar
             </button>
-            <button className="bg-rose-900 hover:bg-rose-800 text-white py-2 px-5 rounded flex flex-row items-center justify-center">
+            <button
+              className="bg-rose-900 hover:bg-rose-800 text-white py-2 px-5 rounded flex flex-row items-center justify-center"
+              onClick={handleDeleteVehicle}
+            >
               <Trash2 className="mr-2 h-4 w-4" />
               Excluir
             </button>
@@ -312,7 +350,7 @@ export default function VehicleDetailPage({
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Nome
                         </h3>
-                        <p className="font-medium">{vehicle.driver.name}</p>
+                        <p className="font-medium">{vehicle.driver?.name}</p>
                       </div>
 
                       <div>
@@ -320,7 +358,7 @@ export default function VehicleDetailPage({
                           CNH
                         </h3>
                         <p className="font-medium">
-                          {vehicle.driver.licenseNumber}
+                          {vehicle.driver?.licenseNumber}
                         </p>
                       </div>
 
@@ -329,7 +367,7 @@ export default function VehicleDetailPage({
                           Categoria
                         </h3>
                         <p className="font-medium">
-                          {vehicle.driver.licenseCategory}
+                          {vehicle.driver?.licenseCategory}
                         </p>
                       </div>
 
@@ -337,7 +375,7 @@ export default function VehicleDetailPage({
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Telefone
                         </h3>
-                        <p className="font-medium">{vehicle.driver.phone}</p>
+                        <p className="font-medium">{vehicle.driver?.phone}</p>
                       </div>
                     </div>
                   </div>
@@ -701,14 +739,16 @@ export default function VehicleDetailPage({
                         </h3>
                         <p
                           className={`${
+                            vehicle.ipvaDueDate &&
                             new Date() < new Date(vehicle.ipvaDueDate)
                               ? "bg-emerald-600"
-                              : "bg-rose-600"
+                              : "bg-gray-400" // Cor diferente para indicar "não disponível" ou "pendente" por padrão
                           } w-fit py-0.5 px-3 rounded-2xl`}
                         >
-                          {new Date() < new Date(vehicle.ipvaDueDate)
+                          {vehicle.ipvaDueDate &&
+                          new Date() < new Date(vehicle.ipvaDueDate)
                             ? "Pago"
-                            : "Pendente"}
+                            : "Não disponível"}
                         </p>
                       </div>
 
@@ -753,14 +793,16 @@ export default function VehicleDetailPage({
                         </h3>
                         <p
                           className={`${
+                            vehicle.licenseDueDate &&
                             new Date() < new Date(vehicle.licenseDueDate)
                               ? "bg-emerald-600"
-                              : "bg-rose-600"
+                              : "bg-gray-400" // Cor diferente para indicar "não disponível" ou "pendente" por padrão
                           } w-fit py-0.5 px-3 rounded-2xl`}
                         >
-                          {new Date() < new Date(vehicle.licenseDueDate)
+                          {vehicle.licenseDueDate &&
+                          new Date() < new Date(vehicle.licenseDueDate)
                             ? "Pago"
-                            : "Pendente"}
+                            : "Não disponível"}
                         </p>
                       </div>
 

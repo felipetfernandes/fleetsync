@@ -63,11 +63,14 @@ export class VehiclesController {
     return this.vehiclesService.update(id, updateVehicleDto);
   }
 
-  @Delete(":id")
+  @Delete(":plate")
   @ApiOperation({ summary: "Remover um veículo" })
   @ApiResponse({ status: 200, description: "Veículo removido com sucesso" })
   @ApiResponse({ status: 404, description: "Veículo não encontrado" })
-  remove(@Param("id") id: string) {
-    return this.vehiclesService.remove(id);
+  remove(@Param("plate") plate: string, @Req() req) {
+    if (req.user.role !== "ADMIN") {
+      throw new Error("Apenas administradores podem remover veículos");
+    }
+    return this.vehiclesService.remove(plate);
   }
 }

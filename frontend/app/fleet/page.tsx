@@ -36,7 +36,7 @@ export default function FleetPage() {
     (vehicle) =>
       vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vehicle.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vehicle.driver.name.toLowerCase().includes(searchTerm.toLowerCase())
+      vehicle.driver?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredVehiclesByBranch = filteredVehicles.filter((vehicle) => {

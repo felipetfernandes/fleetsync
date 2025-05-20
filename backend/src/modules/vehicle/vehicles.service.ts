@@ -125,11 +125,11 @@ export class VehiclesService {
   }
 
   // Método para remover um veículo
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(plate: string) {
+    await this.findOne(plate);
 
     await this.prisma.vehicle.delete({
-      where: { id },
+      where: { plate },
     });
 
     return { message: "Veículo removido com sucesso" };

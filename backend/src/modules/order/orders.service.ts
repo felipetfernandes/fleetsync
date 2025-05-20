@@ -62,8 +62,12 @@ export class OrderService {
   }
 
   async findAllByPlate(plate: string) {
+    const vehicleData = await this.prismaService.vehicle.findUnique({
+      where: { plate },
+    });
+
     return this.prismaService.order.findMany({
-      where: { vehicle: { plate } },
+      where: { vehicle: { id: vehicleData.id } },
       include: {
         workshop: {
           select: {
@@ -74,7 +78,7 @@ export class OrderService {
             phone: true,
             email: true,
             manager: true,
-          }
+          },
         },
         company: true,
       },

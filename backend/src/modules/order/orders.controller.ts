@@ -5,25 +5,25 @@ import { CreateOrderDto } from "./dto/create-order.dto"
 import { UpdateOrderDto } from "./dto/update-order.dto"
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard"
 
-@ApiTags("services")
-@Controller("services")
+@ApiTags("orders")
+@Controller("orders")
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class OrderController {
-  constructor(private readonly servicesService: OrderService) {}
+  constructor(private readonly ordersService: OrderService) {}
 
   @Post()
 @ApiOperation({ summary: 'Criar um novo serviço' })
 @ApiResponse({ status: 201, description: 'Serviço criado com sucesso' })
 @ApiResponse({ status: 404, description: 'Veículo não encontrado' })
 create(@Body() createServiceDto: CreateOrderDto) {
-  return this.servicesService.create(createServiceDto);
+  return this.ordersService.create(createServiceDto);
 }
 
 @Get()
 @ApiOperation({ summary: "Listar todos os serviços" })
 findAll() {
-  return this.servicesService.findAll();
+  return this.ordersService.findAll();
 }
 
 @Get(':id')
@@ -31,7 +31,7 @@ findAll() {
 @ApiResponse({ status: 200, description: 'Serviço encontrado' })
 @ApiResponse({ status: 404, description: 'Serviço não encontrado' })
 findOne(@Param('id') id: string) {
-  return this.servicesService.findOne(id);
+  return this.ordersService.findOne(id);
 }
 
 @Patch(":id")
@@ -39,7 +39,7 @@ findOne(@Param('id') id: string) {
 @ApiResponse({ status: 200, description: "Serviço atualizado com sucesso" })
 @ApiResponse({ status: 404, description: "Serviço não encontrado" })
 update(@Param('id') id: string, @Body() updateServiceDto: UpdateOrderDto) {
-  return this.servicesService.update(id, updateServiceDto);
+  return this.ordersService.update(id, updateServiceDto);
 }
 
 @Delete(':id')
@@ -47,7 +47,15 @@ update(@Param('id') id: string, @Body() updateServiceDto: UpdateOrderDto) {
 @ApiResponse({ status: 200, description: 'Serviço removido com sucesso' })
 @ApiResponse({ status: 404, description: 'Serviço não encontrado' })
 remove(@Param('id') id: string) {
-  return this.servicesService.remove(id);
+  return this.ordersService.remove(id);
 }
-
+  
+@Get('plate/:plate')
+  @ApiOperation({ summary: "Listar todos os serviços de um veículo" })
+  @ApiResponse({ status: 200, description: 'Serviços encontrados' })
+@ApiResponse({ status: 404, description: 'Serviços não encontrados' })
+findAllbyPlate(@Param('plate') plate: string) {
+  console.log(plate)
+  return this.ordersService.findAllByPlate(plate);
+}
 }

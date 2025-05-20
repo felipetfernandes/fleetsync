@@ -2,14 +2,14 @@
 
 import { Search, PlusCircle } from "lucide-react";
 import Input from "@/components/ui/input";
-import OrderCard from "@/components/ui/orderCard";
+import OrderCard from "@/components/Order/orderCard";
 import { mockOrders } from "@/lib/mockData";
-import OrderForm from "@/components/orderForm";
+import OrderForm from "@/components/Order/orderForm";
 import { useState } from "react";
 
 export default function OrdersPage() {
-  const [showForm, setShowForm] = useState(false)
-  
+  const [showForm, setShowForm] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
@@ -26,12 +26,20 @@ export default function OrdersPage() {
               <Input className="pl-10" placeholder="Buscar ordens..." />
             </div>
           </div>
-          <button className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded text-sm" onClick={() => setShowForm(true)}>
+          <button
+            className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded text-sm"
+            onClick={() => setShowForm(true)}
+          >
             <PlusCircle className="mr-2 h-4 w-4" />
             Nova Orden
           </button>
         </header>
-        {showForm && <OrderForm onCancel={() => setShowForm(false)} onSubmit={() => setShowForm(false)}/>}
+        {showForm && (
+          <OrderForm
+            onCancel={() => setShowForm(false)}
+            onSubmit={() => setShowForm(false)}
+          />
+        )}
         <div className="space-y-4">
           {mockOrders.length === 0 ? (
             <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { PlusCircle, X } from "lucide-react"
-import WorkshopForm from "@/components/workshopForm"
+import WorkshopForm from "@/components/Workshops/workshopForm"
 import WorkshopCard from "@/components/ui/workshopCard"
 
 // Dados de exemplo para oficinas

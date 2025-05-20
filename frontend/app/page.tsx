@@ -1,8 +1,13 @@
-// app/page.tsx
-
-import { redirect } from "next/navigation"
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  redirect("/login")
-  return null
+  const cookieStore = cookies();
+  const token = cookieStore.get("access_token")?.value;
+
+  if (token) {
+    redirect("/dashboard");
+  }
+
+  redirect("/login");
 }

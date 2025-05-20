@@ -6,163 +6,38 @@ import {
   Car,
   Calendar,
   ClipboardList,
-  Clock,
   CheckCircle2,
-  AlertCircle,
   RotateCcw,
   FileText,
-  Truck,
   Edit,
   Trash2,
   PlusCircle,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import VehicleCard from "@/components/ui/vehicleCard";
-import OrderCard from "@/components/ui/orderCard";
-import { useState } from "react";
-import OrderForm from "@/components/orderForm";
-
-// Dados de exemplo para um veículo específico
-const getVehicleData = (plate: string) => {
-  // Normalmente, você buscaria esses dados de uma API com base na placa
-  return {
-    id: "v123",
-    plate: plate,
-    model: "Corolla",
-    brand: "Toyota",
-    yearModelo: "2022",
-    yearFabricacao: "2021",
-    color: "Preto",
-    renavam: "12345678901",
-    chassi: "9BRBL9BF1K0123456",
-    filial: "São Paulo",
-    status: "Ativo",
-    driver: "Carlos Silva",
-    stats: {
-      totalMaintenanceCost: 5850.25,
-      maintenanceCount: 8,
-      daysInMaintenance: 14,
-      lastMaintenance: new Date("2025-03-10"),
-      fuelConsumption: 11.5, // km/l
-      mileage: 28500,
-      availability: 96, // porcentagem
-    },
-  };
-};
-
-// Dados de exemplo para ordens de serviço do veículo
-const getVehicleOrders = (plate: string) => {
-  // Normalmente, você buscaria esses dados de uma API com base na placa
-  return [
-    {
-      id: "ord123456",
-      description:
-        "Revisão completa do motor e substituição de componentes desgastados",
-      type: "Manutenção Preventiva",
-      cost: 1250.75,
-      serviceDate: new Date("2025-03-10T10:00:00"),
-      status: "Concluído",
-      createdAt: new Date("2025-02-25T14:30:00"),
-      updatedAt: new Date("2025-03-10T16:45:00"),
-      workshop: {
-        id: "w123",
-        name: "Auto Center Express",
-      },
-    },
-    {
-      id: "ord123457",
-      description: "Troca de óleo e filtros",
-      type: "Manutenção Preventiva",
-      cost: 350.0,
-      serviceDate: new Date("2024-12-05T09:00:00"),
-      status: "Concluído",
-      createdAt: new Date("2024-11-28T10:20:00"),
-      updatedAt: new Date("2024-12-05T11:30:00"),
-      workshop: {
-        id: "w124",
-        name: "Mecânica Precisão",
-      },
-    },
-    {
-      id: "ord123458",
-      description: "Substituição da embreagem",
-      type: "Manutenção Corretiva",
-      cost: 980.0,
-      serviceDate: new Date("2024-09-18T14:00:00"),
-      status: "Concluído",
-      createdAt: new Date("2024-09-15T09:30:00"),
-      updatedAt: new Date("2024-09-18T17:45:00"),
-      workshop: {
-        id: "w123",
-        name: "Auto Center Express",
-      },
-    },
-    {
-      id: "ord123459",
-      description: "Alinhamento e balanceamento",
-      type: "Manutenção Preventiva",
-      cost: 280.0,
-      serviceDate: new Date("2024-07-22T11:30:00"),
-      status: "Concluído",
-      createdAt: new Date("2024-07-20T16:15:00"),
-      updatedAt: new Date("2024-07-22T13:20:00"),
-      workshop: {
-        id: "w125",
-        name: "Oficina Central",
-      },
-    },
-    {
-      id: "ord123460",
-      description: "Revisão do sistema de freios",
-      type: "Manutenção Preventiva",
-      cost: 450.0,
-      serviceDate: new Date("2025-05-25T10:00:00"),
-      status: "Agendado",
-      createdAt: new Date("2025-05-10T11:30:00"),
-      updatedAt: new Date("2025-05-10T11:30:00"),
-      workshop: {
-        id: "w123",
-        name: "Auto Center Express",
-      },
-    },
-  ];
-};
+import VehicleCard from "@/components/Vehicle/vehicleCard";
+import OrderCard from "@/components/Order/orderCard";
+import { useEffect, useState } from "react";
+import OrderForm from "@/components/Order/orderForm";
 
 // Função para obter o ícone do status
-function getStatusIcon(status: string) {
-  switch (status) {
-    case "Agendado":
-      return <Calendar className="h-4 w-4" />;
-    case "Veículo Entregue":
-      return <Truck className="h-4 w-4" />;
-    case "Em Andamento":
-      return <RotateCcw className="h-4 w-4" />;
-    case "Concluído":
-      return <CheckCircle2 className="h-4 w-4" />;
-    case "Cancelado":
-      return <AlertCircle className="h-4 w-4" />;
-    default:
-      return <Clock className="h-4 w-4" />;
-  }
-}
+function getStatusInfo(startDate: string, endDate: string) {
+  if (!startDate)
+    return {
+      icon: <Calendar className="h-4 w-4" />,
+      color: "bg-blue-600 hover:bg-blue-700",
+    };
 
-// Função para obter a cor do badge de status
-function getStatusColor(status: string) {
-  switch (status) {
-    case "Agendado":
-      return "bg-blue-600 hover:bg-blue-700";
-    case "Veículo Entregue":
-      return "bg-purple-600 hover:bg-purple-700";
-    case "Em Andamento":
-      return "bg-amber-600 hover:bg-amber-700";
-    case "Concluído":
-      return "bg-emerald-600 hover:bg-emerald-700";
-    case "Cancelado":
-      return "bg-rose-600 hover:bg-rose-700";
-    default:
-      return "bg-gray-600 hover:bg-gray-700";
-  }
+  if (!endDate)
+    return {
+      icon: <RotateCcw className="h-4 w-4" />,
+      color: "bg-amber-600 hover:bg-amber-700",
+    };
+
+  return {
+    icon: <CheckCircle2 className="h-4 w-4" />,
+    color: "bg-emerald-600 hover:bg-emerald-700",
+  };
 }
 
 // Função para obter a cor do badge de status do veículo
@@ -186,14 +61,84 @@ export default function VehicleDetailPage({
 }) {
   const router = useRouter();
   const plate = decodeURIComponent(params.plate);
-  const vehicle = getVehicleData(plate);
-  const orders = getVehicleOrders(plate);
-
   const [tab, setTab] = useState("info");
   const [showForm, setShowForm] = useState(false);
 
+  const [vehicle, setvehicle] = useState<Vehicle | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  useEffect(() => {
+    const fetchVehicle = async () => {
+      try {
+        const res = await fetch(`http://localhost:3001/vehicles/${plate}`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Erro ao buscar veículos");
+
+        const data = await res.json();
+        setvehicle(data);
+      } catch (error) {
+        console.error("Erro ao buscar veículos:", error);
+        // redirecionar para login se necessário
+      }
+    };
+
+    const fetchOrders = async () => {
+      try {
+        const res = await fetch(`http://localhost:3001/orders/plate/${plate}`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Erro ao buscar veículos");
+
+        const data = await res.json();
+        if (data.length > 0) setOrders(data);
+      } catch (error) {
+        console.error("Erro ao buscar veículos:", error);
+        // redirecionar para login se necesario
+      }
+    };
+
+    fetchVehicle();
+    fetchOrders();
+  }, []);
+
+  const handleDeleteVehicle = async () => {
+  const confirmDelete = window.confirm(
+    "Tem certeza que deseja excluir este veículo?\nEsta ação é irreversível."
+  );
+
+  if (confirmDelete) {
+    try {
+      const res = await fetch(`http://localhost:3001/vehicles/${plate}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Erro ao deletar veículo:", errorData);
+        // Aqui você pode adicionar uma lógica para exibir uma mensagem de erro mais amigável ao usuário
+        throw new Error(`Erro ao deletar veículo: ${res.status}`);
+      }
+
+      router.push("/fleet");
+    } catch (error: any) {
+      console.error("Erro ao deletar veículo:", error);
+      // Aqui você pode adicionar uma lógica para exibir uma mensagem de erro ao usuário
+    }
+  } else {
+    // O usuário cancelou a exclusão, nada acontece
+    console.log("Exclusão do veículo cancelada pelo usuário.");
+  }
+};
+
   // Formatar valores monetários
-  const formatCurrency = (value: number) => {
+  const formatCurrency = (value: number | undefined) => {
+    if (!value) return "não informado";
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
@@ -201,21 +146,16 @@ export default function VehicleDetailPage({
   };
 
   // Formatar datas
-  const formatDate = (date: Date) => {
-    return format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+  const formatDate = (date: Date | string | undefined) => {
+    if (!date) return "não informado";
+    const parsedDate = typeof date === "string" ? new Date(date) : date;
+    return format(parsedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
   };
 
-  const formatShortDate = (date: Date) => {
-    return format(date, "dd/MM/yyyy", { locale: ptBR });
-  };
-
-  // Calcular o tempo desde a última manutenção
-  const daysSinceLastMaintenance = () => {
-    const today = new Date();
-    const lastMaintenance = new Date(vehicle.stats.lastMaintenance);
-    const diffTime = Math.abs(today.getTime() - lastMaintenance.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+  const formatShortDate = (date: Date | string | undefined) => {
+    if (!date) return "não informado";
+    const parsedDate = typeof date === "string" ? new Date(date) : date;
+    return format(parsedDate, "dd/MM/yyyy", { locale: ptBR });
   };
 
   // Calcular a distribuição de tipos de manutenção
@@ -232,6 +172,49 @@ export default function VehicleDetailPage({
     }));
   };
 
+  const maintenancesResume = (orders: Order[]) => {
+    const today = new Date();
+    const totalCost = orders.reduce((acc, order) => acc + order.totalCost, 0);
+    const totalOrders = orders.length;
+    const avarageCoast = totalOrders > 0 ? totalCost / totalOrders : 0;
+    const totalDays = orders.reduce((acc, order) => {
+      const startDate = new Date(order.startDate);
+      const endDate = new Date(order.endDate);
+      const diffInMs = endDate.getTime() - startDate.getTime();
+      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+      return acc + diffInDays;
+    }, 0);
+
+    const mostRecent =
+      orders.length > 0
+        ? orders.reduce((latest, current) => {
+            return new Date(current.endDate) > new Date(latest.endDate)
+              ? current
+              : latest;
+          })
+        : { endDate: undefined };
+
+    const diffTime = mostRecent.endDate
+      ? Math.abs(today.getTime() - new Date(mostRecent.endDate).getTime())
+      : 0;
+    const daysSinceLast = mostRecent.endDate
+      ? Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      : 0;
+
+    return {
+      totalCost,
+      avarageCoast,
+      totalDays,
+      totalOrders,
+      mostRecent,
+      daysSinceLast,
+    };
+  };
+
+  if (!vehicle && orders.length === 0) {
+    return <div>Carregando...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
@@ -245,7 +228,7 @@ export default function VehicleDetailPage({
           <div className="flex-1">
             <div className="flex items-center gap-4">
               <h1 className="text-3xl font-bold text-white flex items-center">
-                <Car className="mr-3 h-7 w-7 text-indigo-400" />
+                <Car className="mr-3 h-10 w-10 text-indigo-400" />
                 Veículo {vehicle.plate}
               </h1>
               <p
@@ -257,8 +240,8 @@ export default function VehicleDetailPage({
               </p>
             </div>
             <p className="text-gray-400 mt-1">
-              {vehicle.brand} {vehicle.model} • {vehicle.yearModelo}/
-              {vehicle.yearFabricacao}
+              {vehicle.brand} {vehicle.model} • {vehicle.modelYear}/
+              {vehicle.manufactureYear}
             </p>
           </div>
           <div className="flex gap-2 ml-4">
@@ -266,7 +249,10 @@ export default function VehicleDetailPage({
               <Edit className="mr-2 h-4 w-4" />
               Editar
             </button>
-            <button className="bg-rose-900 hover:bg-rose-800 text-white py-2 px-5 rounded flex flex-row items-center justify-center">
+            <button
+              className="bg-rose-900 hover:bg-rose-800 text-white py-2 px-5 rounded flex flex-row items-center justify-center"
+              onClick={handleDeleteVehicle}
+            >
               <Trash2 className="mr-2 h-4 w-4" />
               Excluir
             </button>
@@ -325,28 +311,30 @@ export default function VehicleDetailPage({
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Data de Aquisição
                         </h3>
-                        <p className="font-medium">data</p>
+                        <p className="font-medium">
+                          {formatDate(vehicle.purchaseDate)}
+                        </p>
                       </div>
 
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Tipo de Aquisição
                         </h3>
-                        <p className="font-medium">tipo</p>
+                        <p className="font-medium">{vehicle.purchaseType}</p>
                       </div>
 
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Valor
                         </h3>
-                        <p className="font-medium">preço</p>
+                        <p className="font-medium">{vehicle.purchaseValue}</p>
                       </div>
 
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Fornecedor
                         </h3>
-                        <p className="font-medium">vendedor</p>
+                        <p className="font-medium">{vehicle.seller}</p>
                       </div>
                     </div>
                   </div>
@@ -362,28 +350,32 @@ export default function VehicleDetailPage({
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Nome
                         </h3>
-                        <p className="font-medium">{vehicle.driver}</p>
+                        <p className="font-medium">{vehicle.driver?.name}</p>
                       </div>
 
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           CNH
                         </h3>
-                        <p className="font-medium">teste</p>
+                        <p className="font-medium">
+                          {vehicle.driver?.licenseNumber}
+                        </p>
                       </div>
 
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Categoria
                         </h3>
-                        <p className="font-medium">teste</p>
+                        <p className="font-medium">
+                          {vehicle.driver?.licenseCategory}
+                        </p>
                       </div>
 
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Telefone
                         </h3>
-                        <p className="font-medium">teste</p>
+                        <p className="font-medium">{vehicle.driver?.phone}</p>
                       </div>
                     </div>
                   </div>
@@ -400,7 +392,7 @@ export default function VehicleDetailPage({
                           Total Gasto em Manutenções
                         </h3>
                         <p className="font-medium text-lg text-emerald-400">
-                          {formatCurrency(vehicle.stats.totalMaintenanceCost)}
+                          {formatCurrency(maintenancesResume(orders).totalCost)}
                         </p>
                       </div>
 
@@ -409,7 +401,7 @@ export default function VehicleDetailPage({
                           Quantidade de Manutenções
                         </h3>
                         <p className="font-medium">
-                          {vehicle.stats.maintenanceCount}
+                          {maintenancesResume(orders).totalOrders}
                         </p>
                       </div>
 
@@ -418,7 +410,7 @@ export default function VehicleDetailPage({
                           Dias em Manutenção
                         </h3>
                         <p className="font-medium">
-                          {vehicle.stats.daysInMaintenance}
+                          {maintenancesResume(orders).totalDays}
                         </p>
                       </div>
 
@@ -428,14 +420,17 @@ export default function VehicleDetailPage({
                         </h3>
                         <div className="flex items-center">
                           <p className="font-medium mr-2">
-                            {formatShortDate(vehicle.stats.lastMaintenance)}
+                            {formatShortDate(
+                              maintenancesResume(orders).mostRecent.endDate
+                            )}
                           </p>
                           <p className="text-xs">
-                            {daysSinceLastMaintenance()} dias atrás
+                            {maintenancesResume(orders).daysSinceLast} dias
+                            atrás
                           </p>
                         </div>
                       </div>
-
+                      {/*
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Disponibilidade
@@ -451,6 +446,7 @@ export default function VehicleDetailPage({
                           </div>
                         </div>
                       </div>
+                      */}
                     </div>
                   </div>
                 </div>
@@ -500,17 +496,18 @@ export default function VehicleDetailPage({
                     </div>
                   </div>
                 ) : (
-                  orders.map((order) => {
-                    const statusInfo = {
-                      icon: getStatusIcon(order.status),
-                      color: getStatusColor(order.status),
-                    };
+                  orders.map((order: Order) => {
+                    const statusInfo = getStatusInfo(
+                      order.startDate,
+                      order.endDate
+                    );
 
                     return (
                       <OrderCard
                         key={order.id}
                         statusInfo={statusInfo}
-                        order={{ ...order, vehicle }}
+                        order={order}
+                        vehicle={vehicle}
                       />
                     );
                   })
@@ -533,7 +530,9 @@ export default function VehicleDetailPage({
                         <div>
                           <p className="text-sm text-gray-400">Total Gasto</p>
                           <p className="text-2xl font-bold text-emerald-400">
-                            {formatCurrency(vehicle.stats.totalMaintenanceCost)}
+                            {formatCurrency(
+                              maintenancesResume(orders).totalCost
+                            )}
                           </p>
                         </div>
                         <div>
@@ -542,8 +541,7 @@ export default function VehicleDetailPage({
                           </p>
                           <p className="text-xl font-bold">
                             {formatCurrency(
-                              vehicle.stats.totalMaintenanceCost /
-                                vehicle.stats.maintenanceCount
+                              maintenancesResume(orders).avarageCoast
                             )}
                           </p>
                         </div>
@@ -600,7 +598,7 @@ export default function VehicleDetailPage({
                   <div>
                     <div className="space-y-6">
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-gray-800 rounded-lg p-4">
+                        {/*<div className="bg-gray-800 rounded-lg p-4">
                           <p className="text-sm text-gray-400">
                             Disponibilidade
                           </p>
@@ -610,14 +608,14 @@ export default function VehicleDetailPage({
                           <div className="h-1 mt-2 bg-gray-700">
                             <div className="h-full bg-emerald-600 rounded-full"></div>
                           </div>
-                        </div>
+                        </div>*/}
 
                         <div className="bg-gray-800 rounded-lg p-4">
                           <p className="text-sm text-gray-400">
                             Dias em Manutenção
                           </p>
                           <p className="text-2xl font-bold">
-                            {vehicle.stats.daysInMaintenance}
+                            {maintenancesResume(orders).totalDays}
                           </p>
                           <p className="text-xs text-gray-500 mt-1">
                             Total acumulado
@@ -627,12 +625,12 @@ export default function VehicleDetailPage({
                         <div className="bg-gray-800 rounded-lg p-4">
                           <p className="text-sm text-gray-400">Quilometragem</p>
                           <p className="text-2xl font-bold">
-                            {vehicle.stats.mileage.toLocaleString("pt-BR")} km
+                            {vehicle.mileageCurrent.toLocaleString("pt-BR")} km
                           </p>
                           <p className="text-xs text-gray-500 mt-1">Atual</p>
                         </div>
 
-                        <div className="bg-gray-800 rounded-lg p-4">
+                        {/*<div className="bg-gray-800 rounded-lg p-4">
                           <p className="text-sm text-gray-400">Consumo Médio</p>
                           <p className="text-2xl font-bold">
                             {vehicle.stats.fuelConsumption} km/l
@@ -640,7 +638,7 @@ export default function VehicleDetailPage({
                           <p className="text-xs text-gray-500 mt-1">
                             Média dos últimos 3 meses
                           </p>
-                        </div>
+                        </div>*/}
                       </div>
 
                       <div>
@@ -651,10 +649,13 @@ export default function VehicleDetailPage({
                           <div className="flex justify-between items-start">
                             <div>
                               <p className="font-medium">
-                                {formatDate(vehicle.stats.lastMaintenance)}
+                                {formatDate(
+                                  maintenancesResume(orders).mostRecent.endDate
+                                )}
                               </p>
                               <p className="text-sm text-gray-400 mt-1">
-                                {daysSinceLastMaintenance()} dias atrás
+                                {maintenancesResume(orders).daysSinceLast} dias
+                                atrás
                               </p>
                             </div>
                             <p className="bg-emerald-600 px-2 py-0.5 rounded-2xl">
@@ -687,28 +688,32 @@ export default function VehicleDetailPage({
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Seguradora
                         </h3>
-                        <p className="font-medium">Seguradora</p>
+                        <p className="font-medium">
+                          {vehicle.insuranceProvider}
+                        </p>
                       </div>
 
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Apólice
                         </h3>
-                        <p className="font-medium">apolice</p>
+                        <p className="font-medium">{vehicle.insurancePolicy}</p>
                       </div>
 
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Validade
                         </h3>
-                        <p className="font-medium">data</p>
+                        <p className="font-medium">
+                          {formatDate(vehicle.insuranceExpires)}
+                        </p>
                       </div>
 
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Valor
                         </h3>
-                        <p className="font-medium">valor</p>
+                        <p className="font-medium">{vehicle.insuranceValue}</p>
                       </div>
 
                       <button className="flex flex-row items-center justify-center p-2 rounded text-sm w-full bg-indigo-600 hover:bg-indigo-700">
@@ -734,10 +739,16 @@ export default function VehicleDetailPage({
                         </h3>
                         <p
                           className={`${
-                            false ? "bg-emerald-600" : "bg-rose-600"
+                            vehicle.ipvaDueDate &&
+                            new Date() < new Date(vehicle.ipvaDueDate)
+                              ? "bg-emerald-600"
+                              : "bg-gray-400" // Cor diferente para indicar "não disponível" ou "pendente" por padrão
                           } w-fit py-0.5 px-3 rounded-2xl`}
                         >
-                          {false ? "Pago" : "Pendente"}
+                          {vehicle.ipvaDueDate &&
+                          new Date() < new Date(vehicle.ipvaDueDate)
+                            ? "Pago"
+                            : "Não disponível"}
                         </p>
                       </div>
 
@@ -745,14 +756,18 @@ export default function VehicleDetailPage({
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Valor
                         </h3>
-                        <p className="font-medium">{formatCurrency(1232)}</p>
+                        <p className="font-medium">
+                          {formatCurrency(vehicle.ipvaValue)}
+                        </p>
                       </div>
 
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Vencimento
                         </h3>
-                        <p className="font-medium">data</p>
+                        <p className="font-medium">
+                          {formatDate(vehicle.ipvaDueDate)}
+                        </p>
                       </div>
 
                       <button className="flex flex-row items-center justify-center p-2 rounded text-sm w-full bg-indigo-600 hover:bg-indigo-700">
@@ -778,10 +793,16 @@ export default function VehicleDetailPage({
                         </h3>
                         <p
                           className={`${
-                            true ? "bg-emerald-600" : "bg-rose-600"
+                            vehicle.licenseDueDate &&
+                            new Date() < new Date(vehicle.licenseDueDate)
+                              ? "bg-emerald-600"
+                              : "bg-gray-400" // Cor diferente para indicar "não disponível" ou "pendente" por padrão
                           } w-fit py-0.5 px-3 rounded-2xl`}
                         >
-                          {true ? "Pago" : "Pendente"}
+                          {vehicle.licenseDueDate &&
+                          new Date() < new Date(vehicle.licenseDueDate)
+                            ? "Pago"
+                            : "Não disponível"}
                         </p>
                       </div>
 
@@ -789,14 +810,18 @@ export default function VehicleDetailPage({
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Valor
                         </h3>
-                        <p className="font-medium">{formatCurrency(45645)}</p>
+                        <p className="font-medium">
+                          {formatCurrency(vehicle.licenseValue)}
+                        </p>
                       </div>
 
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Vencimento
                         </h3>
-                        <p className="font-medium">data</p>
+                        <p className="font-medium">
+                          {formatDate(vehicle.licenseDueDate)}
+                        </p>
                       </div>
 
                       <button className="flex flex-row items-center justify-center p-2 rounded text-sm w-full bg-indigo-600 hover:bg-indigo-700">

@@ -48,14 +48,14 @@ export default function WorkshopCard({ workshop }: { workshop: Workshop }) {
               <MapPin className="h-4 w-4 mr-2 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-gray-400 text-sm">Endereço</p>
-                <p className="font-medium">{workshop.adress}</p>
+                <p className="font-medium">{workshop.address}</p>
               </div>
             </div>
             <div className="flex items-start">
               <Phone className="h-4 w-4 mr-2 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-gray-400 text-sm">Telefone</p>
-                <p className="font-medium">{workshop.telephone}</p>
+                <p className="font-medium">{workshop.phone}</p>
               </div>
             </div>
             <div className="flex items-start">

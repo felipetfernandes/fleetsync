@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsInt, Min } from 'class-validator';
 
 export class CreateCompanyDto {
   @ApiProperty({ example: 'ACME Corp' })
@@ -11,4 +11,10 @@ export class CreateCompanyDto {
   @IsString()
   @IsNotEmpty()
   cnpj: string;
+
+  @ApiProperty({ example: 0, required: false })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  assetCount?: number;
 }

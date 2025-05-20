@@ -1,0 +1,51 @@
+@Cookie1 = access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhhYTJmYzk1LWRiYjYtNDNhMC04MTgwLTM1OTI4YjdlZmFlMiIsIm5hbWUiOiJBZG1pbiAxIEVtcHJlc2EgMSIsImVtYWlsIjoiYWRtaW4xX2NvbXBhbnkxQGV4YW1wbGUuY29tIiwicGhvbmUiOiIxMTkxMDAwMDAxIiwicm9sZSI6IkFETUlOIiwiZW1haWxWZXJpZmllZCI6dHJ1ZSwicmVzZXRQYXNzd29yZFRva2VuIjpudWxsLCJyZXNldFBhc3N3b3JkRXhwaXJlcyI6bnVsbCwibGljZW5zZU51bWJlciI6bnVsbCwibGljZW5zZUNhdGVnb3J5IjpudWxsLCJsaWNlbnNlRXhwaXJhdGlvbiI6bnVsbCwiYnJhbmNoSWQiOm51bGwsImNvbXBhbnlJZCI6ImE2MjIxZTA3LTliOWItNGZlNi1hZmZiLWJkMmI5NjVmMzNhNSIsImNyZWF0ZWRBdCI6IjIwMjUtMDUtMThUMjI6Mjk6MTUuMTU5WiIsInVwZGF0ZWRBdCI6IjIwMjUtMDUtMThUMjI6Mjk6MTUuMTU5WiIsImlhdCI6MTc0NzYwNzQ0MiwiZXhwIjoxNzQ3NjkzODQyfQ.vPGAqs-QQeywMQMVf-Ieph7itwEWBmB5jszHWzBtgc8
+@Cookie2 = access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhhYTJmYzk1LWRiYjYtNDNhMC04MTgwLTM1OTI4YjdlZmFlMiIsIm5hbWUiOiJBZG1pbiAxIEVtcHJlc2EgMSIsImVtYWlsIjoiYWRtaW4xX2NvbXBhbnkxQGV4YW1wbGUuY29tIiwicGhvbmUiOiIxMTkxMDAwMDAxIiwicm9sZSI6IkFETUlOIiwiZW1haWxWZXJpZmllZCI6dHJ1ZSwicmVzZXRQYXNzd29yZFRva2VuIjpudWxsLCJyZXNldFBhc3N3b3JkRXhwaXJlcyI6bnVsbCwibGljZW5zZU51bWJlciI6bnVsbCwibGljZW5zZUNhdGVnb3J5IjpudWxsLCJsaWNlbnNlRXhwaXJhdGlvbiI6bnVsbCwiYnJhbmNoSWQiOm51bGwsImNvbXBhbnlJZCI6ImE2MjIxZTA3LTliOWItNGZlNi1hZmZiLWJkMmI5NjVmMzNhNSIsImNyZWF0ZWRBdCI6IjIwMjUtMDUtMThUMjI6Mjk6MTUuMTU5WiIsInVwZGF0ZWRBdCI6IjIwMjUtMDUtMThUMjI6Mjk6MTUuMTU5WiIsImlhdCI6MTc0NzY5Njg0OCwiZXhwIjoxNzQ3NzgzMjQ4fQ.7lHs36L2Xv-freK-v6lt74Ws8qXOfnYSAvv2rlPHm3o
+### Fazer login
+POST http://localhost:3001/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin1_company1@example.com",
+  "password": "senha123"
+}
+
+### Dados do usuário
+GET http://localhost:3001/auth/me
+Content-Type: application/json
+Cookie: {{Cookie2}}
+
+### Buscar veículos
+GET http://localhost:3001/vehicles
+Cookie: {{Cookie2}}
+
+
+### Buscar ordens de um veículo
+GET http://localhost:3001/orders/plate/UCD331XZ
+Cookie: {{Cookie2}}
+
+### Buscar veículo pela placa
+GET http://localhost:3001/vehicles/QQX4012XZ
+Cookie: {{Cookie2}}
+
+### Buscar todas as branchs
+GET http://localhost:3001/branchs/
+Cookie: {{Cookie2}}
+
+### Criar novo veículo
+POST http://localhost:3001/vehicles
+Cookie: {{Cookie2}}
+Content-Type: application/json
+
+{
+  "plate": "ABC-1234",
+  "branchId": 31,
+  "model": "Civic",
+  "brand": "Honda",
+  "modelYear": 2023,
+  "manufactureYear": 2022,
+  "color": "Preto",
+  "renavam": "12345678901",
+  "chassis": "9BWZZZ377VT004251",
+  "status": "AVAILABLE",
+  "mileageStart": 0
+}

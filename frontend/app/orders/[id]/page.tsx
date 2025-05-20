@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Calendar,
@@ -15,9 +15,9 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import VehicleCard from "@/components/ui/vehicleCard";
+import VehicleCard from "@/components/Vehicle/vehicleCard";
 import WorkshopCard from "@/components/ui/workshopCard";
-import OrderFullCard from "@/components/ui/orderFullCard";
+import OrderFullCard from "@/components/Order/orderFullCard";
 
 // Dados de exemplo para uma ordem específica
 const mockOrder = {
@@ -104,7 +104,7 @@ function getStatusIcon(status: string) {
 }
 
 export default function OrderDetailPage() {
-  const router = useRouter()
+  const router = useRouter();
   const formatDateTime = (date: Date) => {
     return format(date, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
   };

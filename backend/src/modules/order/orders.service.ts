@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { PrismaService } from "src/modules/prisma/prisma.service";
+import { identity } from "rxjs";
 
 @Injectable()
 export class OrderService {
@@ -57,6 +58,30 @@ export class OrderService {
   async findAll() {
     return this.prismaService.order.findMany({
       include: { vehicle: true, workshop: true, company: true },
+    });
+  }
+
+  async findAllByPlate(plate: string) {
+    const vehicleData = await this.prismaService.vehicle.findUnique({
+      where: { plate },
+    });
+
+    return this.prismaService.order.findMany({
+      where: { vehicle: { id: vehicleData.id } },
+      include: {
+        workshop: {
+          select: {
+            id: true,
+            name: true,
+            cnpj: true,
+            address: true,
+            phone: true,
+            email: true,
+            manager: true,
+          },
+        },
+        company: true,
+      },
     });
   }
 

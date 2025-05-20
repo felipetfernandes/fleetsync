@@ -16,14 +16,46 @@ export class VehiclesService {
     return this.prisma.vehicle.findMany();
   }
 
+  async findManyByCompany(companyId: string) {
+    return this.prisma.vehicle.findMany({
+      where: { companyId },
+      include: {
+        driver: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            licenseNumber: true,
+            licenseCategory: true,
+            licenseExpiration: true,
+          },
+        },
+      },
+    });
+  }
+
   // Método para encontrar um veículo pelo id
-  async findOne(id: string) {
+  async findOne(plate: string) {
     const vehicle = await this.prisma.vehicle.findUnique({
-      where: { id },
+      where: { plate },
+      include: {
+        driver: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            licenseNumber: true,
+            licenseCategory: true,
+            licenseExpiration: true,
+          },
+        },
+      },
     });
 
     if (!vehicle) {
-      throw new NotFoundException(`Veículo com ID ${id} não encontrado`);
+      throw new NotFoundException(`Veículo com ID ${plate} não encontrado`);
     }
 
     return vehicle;
@@ -40,10 +72,22 @@ export class VehiclesService {
       throw new ConflictException("Placa já está cadastrada");
     }
 
-    // Criar veículo e associar à empresa
+    const { companyId, branchId, driverId, ...rest } = createVehicleDto;
+
     return this.prisma.vehicle.create({
       data: {
-        ...createVehicleDto,
+        ...rest,
+        mileageCurrent: rest.mileageStart,
+        company: {
+          connect: {
+            id: createVehicleDto.companyId,
+          },
+        },
+        branch: {
+          connect: {
+            id: createVehicleDto.branchId,
+          },
+        },
       },
     });
   }
@@ -52,18 +96,40 @@ export class VehiclesService {
   async update(id: string, updateVehicleDto: UpdateVehicleDto) {
     await this.findOne(id);
 
+    const { companyId, branchId, driverId, ...rest } = updateVehicleDto;
+
     return this.prisma.vehicle.update({
       where: { id },
-      data: updateVehicleDto,
+      data: {
+        ...rest,
+
+        ...(companyId && {
+          company: {
+            connect: { id: companyId },
+          },
+        }),
+
+        ...(branchId && {
+          branch: {
+            connect: { id: branchId },
+          },
+        }),
+
+        ...(driverId && {
+          driver: {
+            connect: { id: driverId },
+          },
+        }),
+      },
     });
   }
 
   // Método para remover um veículo
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(plate: string) {
+    await this.findOne(plate);
 
     await this.prisma.vehicle.delete({
-      where: { id },
+      where: { plate },
     });
 
     return { message: "Veículo removido com sucesso" };

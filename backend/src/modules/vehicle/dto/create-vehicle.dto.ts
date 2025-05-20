@@ -1,62 +1,75 @@
-import { ApiProperty } from "@nestjs/swagger"
-import { IsNotEmpty, IsString } from "class-validator"
+import { IsString, IsInt, IsEnum, IsOptional, IsDateString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { VehicleStatus } from '@prisma/client';
 
 export class CreateVehicleDto {
-  @ApiProperty({ example: 'MNO5P12' })
+  @ApiProperty()
   @IsString()
-  @IsNotEmpty()
   plate: string;
 
-  @ApiProperty({ example: 'Yamaha' })
-  @IsString()
-  @IsNotEmpty()
-  brand: string;
-
-  @ApiProperty({ example: 'Fazer' })
-  @IsString()
-  @IsNotEmpty()
-  model: string;
-
-  @ApiProperty({ example: 2023 })
-  @IsNotEmpty()
-  modelYear: number;
-
-  @ApiProperty({ example: 2022 })
-  @IsNotEmpty()
-  manufactureYear: number;
-
-  @ApiProperty({ example: 'Preta' })
-  @IsString()
-  @IsNotEmpty()
-  color: string;
-
-  @ApiProperty({ example: '12345678910' })
-  @IsString()
-  @IsNotEmpty()
-  renavam: string;
-
-  @ApiProperty({ example: '9BWZZZ377VT004251' })
-  @IsString()
-  @IsNotEmpty()
-  chassis: string;
-
-  @ApiProperty({ example: 'active' })
-  @IsString()
-  @IsNotEmpty()
-  status: string;
-
-  @ApiProperty({ example: 100 })
-  mileageStart: number;
-
-  @ApiProperty({ example: 1500 })
-  mileageCurrent: number;
-
-  @ApiProperty({ example: 'uuid-da-empresa' })
-  companyId: string;
-
-  @ApiProperty({ example: 1 })
+  @ApiProperty()
+  @IsInt()
   branchId: number;
 
-  @ApiProperty({ required: false, example: 'uuid-do-motorista' })
+  @ApiProperty()
+  @IsString()
+  model: string;
+
+  @ApiProperty()
+  @IsString()
+  brand: string;
+
+  @ApiProperty()
+  @IsInt()
+  modelYear: number;
+
+  @ApiProperty()
+  @IsInt()
+  manufactureYear: number;
+
+  @ApiProperty()
+  @IsString()
+  color: string;
+
+  @ApiProperty()
+  @IsString()
+  renavam: string;
+
+  @ApiProperty()
+  @IsString()
+  chassis: string;
+
+  @ApiProperty({ enum: VehicleStatus })
+  @IsEnum(VehicleStatus)
+  status: VehicleStatus;
+
+  @ApiProperty()
+  @IsInt()
+  mileageStart: number;
+
+  // Campos opcionais
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsDateString()
+  purchaseDate?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  purchaseType?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsInt()
+  mileageCurrent?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  companyId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
   driverId?: string;
 }

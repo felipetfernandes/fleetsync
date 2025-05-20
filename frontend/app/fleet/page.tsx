@@ -1,8 +1,7 @@
 "use client";
 
-import VehicleCard from "@/components/ui/vehicleCard";
-import VehicleForm from "@/components/vehicleForm";
-import { Vehicle } from "@/types";
+import VehicleCard from "@/components/Vehicle/vehicleCard";
+import VehicleForm from "@/components/Vehicle/vehicleForm";
 import { PlusCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
 

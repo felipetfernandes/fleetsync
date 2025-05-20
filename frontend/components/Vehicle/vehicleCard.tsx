@@ -52,7 +52,7 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
           })}
           <span>
             <p className="text-gray-400">Motorista</p>
-            <p className="font-medium">{vehicle.driver.name}</p>
+            <p className="font-medium">{vehicle.driver?.name}</p>
           </span>
       </div>
       </div>

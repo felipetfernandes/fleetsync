@@ -51,7 +51,7 @@ export class VehiclesService {
             licenseExpiration: true,
           },
         },
-      }
+      },
     });
 
     if (!vehicle) {
@@ -72,10 +72,22 @@ export class VehiclesService {
       throw new ConflictException("Placa já está cadastrada");
     }
 
-    // Criar veículo e associar à empresa
+    const { companyId, branchId, driverId, ...rest } = createVehicleDto;
+
     return this.prisma.vehicle.create({
       data: {
-        ...createVehicleDto,
+        ...rest,
+        mileageCurrent: rest.mileageStart,
+        company: {
+          connect: {
+            id: createVehicleDto.companyId,
+          },
+        },
+        branch: {
+          connect: {
+            id: createVehicleDto.branchId,
+          },
+        },
       },
     });
   }
@@ -84,9 +96,31 @@ export class VehiclesService {
   async update(id: string, updateVehicleDto: UpdateVehicleDto) {
     await this.findOne(id);
 
+    const { companyId, branchId, driverId, ...rest } = updateVehicleDto;
+
     return this.prisma.vehicle.update({
       where: { id },
-      data: updateVehicleDto,
+      data: {
+        ...rest,
+
+        ...(companyId && {
+          company: {
+            connect: { id: companyId },
+          },
+        }),
+
+        ...(branchId && {
+          branch: {
+            connect: { id: branchId },
+          },
+        }),
+
+        ...(driverId && {
+          driver: {
+            connect: { id: driverId },
+          },
+        }),
+      },
     });
   }
 

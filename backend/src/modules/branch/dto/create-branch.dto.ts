@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsInt, IsOptional } from 'class-validator';
 
 export class CreateBranchDto {
-  @ApiProperty({ example: 'Filial SP' })
+  @ApiProperty({ example: 'Filial Centro' })
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -12,7 +12,7 @@ export class CreateBranchDto {
   @IsNotEmpty()
   city: string;
 
-  @ApiProperty({ example: 'uuid-da-empresa' })
+  @ApiProperty({ example: 'uuid-company-id' })
   @IsString()
   @IsNotEmpty()
   companyId: string;

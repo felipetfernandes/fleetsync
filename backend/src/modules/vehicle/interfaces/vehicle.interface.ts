@@ -1,3 +1,9 @@
+export enum VehicleStatus {
+  AVAILABLE,
+  UNAVAILABLE,
+  MAINTENANCE,
+}
+
 export interface Vehicle {
   id: string;
   plate: string;
@@ -8,7 +14,7 @@ export interface Vehicle {
   color: string;
   renavam: string;
   chassis: string;
-  status: string;
+  status: VehicleStatus;
   purchaseDate?: Date;
   purchaseType?: string;
   purchaseValue?: number;

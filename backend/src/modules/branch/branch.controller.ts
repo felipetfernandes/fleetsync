@@ -1,9 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common';
 import { BranchService } from './branch.service';
 import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@Controller('branch')
+@UseGuards(JwtAuthGuard)
+@ApiTags("branchs")
+@Controller('branchs')
 export class BranchController {
   constructor(private readonly branchService: BranchService) {}
 
@@ -13,8 +17,10 @@ export class BranchController {
   }
 
   @Get()
-  findAll() {
-    return this.branchService.findAll();
+     @ApiOperation({ summary: "Listar todos as Filiais" })
+  findAll(@Req() req) {
+    const companyId = req.user.companyId
+    return this.branchService.findAll(companyId);
   }
 
   @Get(':id')

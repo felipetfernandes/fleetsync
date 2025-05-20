@@ -18,10 +18,10 @@ import {
 } from "lucide-react";
 import { format, set } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import VehicleCard from "@/components/ui/vehicleCard";
-import OrderCard from "@/components/ui/orderCard";
+import VehicleCard from "@/components/Vehicle/vehicleCard";
+import OrderCard from "@/components/Order/orderCard";
 import { useEffect, useState } from "react";
-import OrderForm from "@/components/orderForm";
+import OrderForm from "@/components/Order/orderForm";
 
 // Função para obter o ícone do status
 function getStatusInfo(startDate: string, endDate: string) {
@@ -650,7 +650,9 @@ export default function VehicleDetailPage({
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Seguradora
                         </h3>
-                        <p className="font-medium">{vehicle.insuranceProvider}</p>
+                        <p className="font-medium">
+                          {vehicle.insuranceProvider}
+                        </p>
                       </div>
 
                       <div>
@@ -664,7 +666,9 @@ export default function VehicleDetailPage({
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Validade
                         </h3>
-                        <p className="font-medium">{formatDate(vehicle.insuranceExpires)}</p>
+                        <p className="font-medium">
+                          {formatDate(vehicle.insuranceExpires)}
+                        </p>
                       </div>
 
                       <div>
@@ -697,10 +701,14 @@ export default function VehicleDetailPage({
                         </h3>
                         <p
                           className={`${
-                            new Date() < new Date(vehicle.ipvaDueDate) ? "bg-emerald-600" : "bg-rose-600"
+                            new Date() < new Date(vehicle.ipvaDueDate)
+                              ? "bg-emerald-600"
+                              : "bg-rose-600"
                           } w-fit py-0.5 px-3 rounded-2xl`}
                         >
-                          {new Date() < new Date(vehicle.ipvaDueDate) ? "Pago" : "Pendente"}
+                          {new Date() < new Date(vehicle.ipvaDueDate)
+                            ? "Pago"
+                            : "Pendente"}
                         </p>
                       </div>
 
@@ -708,14 +716,18 @@ export default function VehicleDetailPage({
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Valor
                         </h3>
-                        <p className="font-medium">{formatCurrency(vehicle.ipvaValue)}</p>
+                        <p className="font-medium">
+                          {formatCurrency(vehicle.ipvaValue)}
+                        </p>
                       </div>
 
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Vencimento
                         </h3>
-                        <p className="font-medium">{formatDate(vehicle.ipvaDueDate)}</p>
+                        <p className="font-medium">
+                          {formatDate(vehicle.ipvaDueDate)}
+                        </p>
                       </div>
 
                       <button className="flex flex-row items-center justify-center p-2 rounded text-sm w-full bg-indigo-600 hover:bg-indigo-700">
@@ -741,10 +753,14 @@ export default function VehicleDetailPage({
                         </h3>
                         <p
                           className={`${
-                            new Date() < new Date(vehicle.licenseDueDate) ? "bg-emerald-600" : "bg-rose-600"
+                            new Date() < new Date(vehicle.licenseDueDate)
+                              ? "bg-emerald-600"
+                              : "bg-rose-600"
                           } w-fit py-0.5 px-3 rounded-2xl`}
                         >
-                          {new Date() < new Date(vehicle.licenseDueDate) ? "Pago" : "Pendente"}
+                          {new Date() < new Date(vehicle.licenseDueDate)
+                            ? "Pago"
+                            : "Pendente"}
                         </p>
                       </div>
 
@@ -752,14 +768,18 @@ export default function VehicleDetailPage({
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Valor
                         </h3>
-                        <p className="font-medium">{formatCurrency(vehicle.licenseValue)}</p>
+                        <p className="font-medium">
+                          {formatCurrency(vehicle.licenseValue)}
+                        </p>
                       </div>
 
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Vencimento
                         </h3>
-                        <p className="font-medium">{formatDate(vehicle.licenseDueDate)}</p>
+                        <p className="font-medium">
+                          {formatDate(vehicle.licenseDueDate)}
+                        </p>
                       </div>
 
                       <button className="flex flex-row items-center justify-center p-2 rounded text-sm w-full bg-indigo-600 hover:bg-indigo-700">

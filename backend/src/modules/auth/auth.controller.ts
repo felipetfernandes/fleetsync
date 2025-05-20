@@ -2,15 +2,17 @@ import {
   Controller,
   Post,
   UseGuards,
-  Request,
   Res,
   HttpCode,
   Body,
+  Get,
+  Req,
 } from "@nestjs/common";
 import { Response } from "express";
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 
 @ApiTags("auth")
 @Controller("auth")
@@ -29,15 +31,24 @@ export class AuthController {
   ): Promise<any> {
     const loginResult = await this.authService.login(loginDto);
 
-    // Enviando o token como cookie
     res.cookie("access_token", loginResult.access_token, {
-      httpOnly: false,
-      secure: true, // HTTPS em produção
+      httpOnly: true,
+      secure: true,
       sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24, // 1 dia
     });
+  }
 
-    // Retornando apenas dados do usuário (sem o token)
-    return loginResult;
+  @UseGuards(JwtAuthGuard)
+  @Get("me")
+  @HttpCode(200)
+  @ApiOperation({ summary: "Meus dados" })
+  @ApiResponse({
+    status: 200,
+    description: "Informaões do usuário autenticado",
+  })
+  @ApiResponse({ status: 401, description: "Credenciais inválidas" })
+  async me(@Req() req): Promise<any> {
+    return req.user;
   }
 }

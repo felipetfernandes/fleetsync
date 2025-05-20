@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class BranchService {
+  constructor(private readonly prisma: PrismaService) { }
+  
   create(createBranchDto: CreateBranchDto) {
     return 'This action adds a new branch';
   }
 
-  findAll() {
-    return `This action returns all branch`;
+  async findAll(companyId: string) {
+    return this.prisma.branch.findMany({ where: { companyId } });
   }
 
   findOne(id: number) {

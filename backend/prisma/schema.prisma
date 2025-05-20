@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -17,6 +17,12 @@ enum UserRole {
   ADMIN
   DRIVER
   WORKSHOP_MANAGER
+}
+
+enum VehicleStatus {
+  AVAILABLE
+  UNAVAILABLE
+  MAINTENANCE
 }
 
 // Prisma Schema for Company
@@ -70,7 +76,7 @@ model Vehicle {
   color           String
   renavam         String    @unique
   chassis         String
-  status          String
+  status          VehicleStatus
   purchaseDate    DateTime? @map("purchase_date")
   purchaseType    String?   @map("purchase_type")
   purchaseValue   Float?    @map("purchase_value")

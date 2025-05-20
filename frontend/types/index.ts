@@ -11,6 +11,12 @@ enum OrderType {
   PERIODIC,
 }
 
+enum VehicleStatus {
+  AVAILABLE,
+  UNAVAILABLE,
+  MAINTENANCE,
+}
+
 type User = {
   id: string;
   name: string;

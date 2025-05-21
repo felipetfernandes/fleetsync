@@ -1,15 +1,29 @@
-import { Injectable } from '@nestjs/common';
-import { CreateWorkshopDto } from './dto/create-workshop.dto';
-import { UpdateWorkshopDto } from './dto/update-workshop.dto';
+import { Injectable } from "@nestjs/common";
+import { CreateWorkshopDto } from "./dto/create-workshop.dto";
+import { UpdateWorkshopDto } from "./dto/update-workshop.dto";
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class WorkshopService {
+  constructor(private readonly prisma: PrismaService) {}
   create(createWorkshopDto: CreateWorkshopDto) {
-    return 'This action adds a new workshop';
+    return "This action adds a new workshop";
   }
 
-  findAll() {
-    return `This action returns all workshop`;
+  async findAll(companyId) {
+    return await this.prisma.workshop.findMany({ where: { companyId } });
+  }
+
+  async findAllByBranch({
+    branchId,
+    companyId,
+  }: {
+    branchId: number;
+    companyId: string;
+  }) {
+    return await this.prisma.workshop.findMany({
+      where: { branchId, companyId },
+    });
   }
 
   findOne(id: number) {

@@ -35,6 +35,12 @@ export class VehiclesService {
     });
   }
 
+  async findManyByBranch({branchId, companyId}: {branchId: number, companyId: string}) {
+    return this.prisma.vehicle.findMany({
+      where: { branchId, companyId },
+    });
+  }
+
   // Método para encontrar um veículo pelo id
   async findOne(plate: string) {
     const vehicle = await this.prisma.vehicle.findUnique({

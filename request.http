@@ -1,39 +1,45 @@
-@Cookie1 = access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhhYTJmYzk1LWRiYjYtNDNhMC04MTgwLTM1OTI4YjdlZmFlMiIsIm5hbWUiOiJBZG1pbiAxIEVtcHJlc2EgMSIsImVtYWlsIjoiYWRtaW4xX2NvbXBhbnkxQGV4YW1wbGUuY29tIiwicGhvbmUiOiIxMTkxMDAwMDAxIiwicm9sZSI6IkFETUlOIiwiZW1haWxWZXJpZmllZCI6dHJ1ZSwicmVzZXRQYXNzd29yZFRva2VuIjpudWxsLCJyZXNldFBhc3N3b3JkRXhwaXJlcyI6bnVsbCwibGljZW5zZU51bWJlciI6bnVsbCwibGljZW5zZUNhdGVnb3J5IjpudWxsLCJsaWNlbnNlRXhwaXJhdGlvbiI6bnVsbCwiYnJhbmNoSWQiOm51bGwsImNvbXBhbnlJZCI6ImE2MjIxZTA3LTliOWItNGZlNi1hZmZiLWJkMmI5NjVmMzNhNSIsImNyZWF0ZWRBdCI6IjIwMjUtMDUtMThUMjI6Mjk6MTUuMTU5WiIsInVwZGF0ZWRBdCI6IjIwMjUtMDUtMThUMjI6Mjk6MTUuMTU5WiIsImlhdCI6MTc0NzYwNzQ0MiwiZXhwIjoxNzQ3NjkzODQyfQ.vPGAqs-QQeywMQMVf-Ieph7itwEWBmB5jszHWzBtgc8
-@Cookie2 = access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhhYTJmYzk1LWRiYjYtNDNhMC04MTgwLTM1OTI4YjdlZmFlMiIsIm5hbWUiOiJBZG1pbiAxIEVtcHJlc2EgMSIsImVtYWlsIjoiYWRtaW4xX2NvbXBhbnkxQGV4YW1wbGUuY29tIiwicGhvbmUiOiIxMTkxMDAwMDAxIiwicm9sZSI6IkFETUlOIiwiZW1haWxWZXJpZmllZCI6dHJ1ZSwicmVzZXRQYXNzd29yZFRva2VuIjpudWxsLCJyZXNldFBhc3N3b3JkRXhwaXJlcyI6bnVsbCwibGljZW5zZU51bWJlciI6bnVsbCwibGljZW5zZUNhdGVnb3J5IjpudWxsLCJsaWNlbnNlRXhwaXJhdGlvbiI6bnVsbCwiYnJhbmNoSWQiOm51bGwsImNvbXBhbnlJZCI6ImE2MjIxZTA3LTliOWItNGZlNi1hZmZiLWJkMmI5NjVmMzNhNSIsImNyZWF0ZWRBdCI6IjIwMjUtMDUtMThUMjI6Mjk6MTUuMTU5WiIsInVwZGF0ZWRBdCI6IjIwMjUtMDUtMThUMjI6Mjk6MTUuMTU5WiIsImlhdCI6MTc0NzY5Njg0OCwiZXhwIjoxNzQ3NzgzMjQ4fQ.7lHs36L2Xv-freK-v6lt74Ws8qXOfnYSAvv2rlPHm3o
+@Cookie = access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ0NTgwZmE2LTI4MDYtNGY4Mi04YTc0LWEyZGRlNzlkMjk1MSIsIm5hbWUiOiJBbGZyZWQgTydSZWlsbHkiLCJlbWFpbCI6Ikp1bGVzLk11bGxlckB5YWhvby5jb20iLCJwaG9uZSI6Iig0NzMpIDMwOS03MjA2Iiwicm9sZSI6IkFETUlOIiwiZW1haWxWZXJpZmllZCI6ZmFsc2UsImxpY2Vuc2VOdW1iZXIiOm51bGwsImxpY2Vuc2VDYXRlZ29yeSI6bnVsbCwibGljZW5zZUV4cGlyYXRpb24iOm51bGwsImJyYW5jaElkIjpudWxsLCJjb21wYW55SWQiOiJkZGY4NTc1NS01ODQ4LTQ0MjQtYjY4Yy00ZTkyYmUzMTU2MjYiLCJjcmVhdGVkQXQiOiIyMDI1LTA1LTIxVDAzOjQ5OjIwLjA5M1oiLCJ1cGRhdGVkQXQiOiIyMDI1LTA1LTIxVDAzOjQ5OjIwLjA5M1oiLCJpYXQiOjE3NDc3OTk0MzAsImV4cCI6MTc0Nzg4NTgzMH0.d4k3lGvbm7VwmHQQjXWq2sbUHCqiu5hmyCaSIG4mC98
 ### Fazer login
 POST http://localhost:3001/auth/login
 Content-Type: application/json
 
 {
-  "email": "admin1_company1@example.com",
-  "password": "senha123"
+  "email": "Jules.Muller@yahoo.com",
+  "password": "teste123"
 }
 
 ### Dados do usuário
 GET http://localhost:3001/auth/me
 Content-Type: application/json
-Cookie: {{Cookie2}}
+Cookie: {{Cookie}}
 
 ### Buscar veículos
 GET http://localhost:3001/vehicles
-Cookie: {{Cookie2}}
+Cookie: {{Cookie}}
 
+###Buscar ordens de uma compania
+GET http://localhost:3001/orders
+Cookie: {{Cookie}}
 
 ### Buscar ordens de um veículo
-GET http://localhost:3001/orders/plate/UCD331XZ
-Cookie: {{Cookie2}}
+GET http://localhost:3001/orders/plate/RH84AOG
+Cookie: {{Cookie}}
 
 ### Buscar veículo pela placa
-GET http://localhost:3001/vehicles/QQX4012XZ
-Cookie: {{Cookie2}}
+GET http://localhost:3001/vehicles/RH84AOG
+Cookie: {{Cookie}}
 
 ### Buscar todas as branchs
 GET http://localhost:3001/branchs/
-Cookie: {{Cookie2}}
+Cookie: {{Cookie}}
+
+### Buscar todas as workshops
+GET http://localhost:3001/workshops/
+Cookie: {{Cookie}}
 
 ### Criar novo veículo
 POST http://localhost:3001/vehicles
-Cookie: {{Cookie2}}
+Cookie: {{Cookie}}
 Content-Type: application/json
 
 {

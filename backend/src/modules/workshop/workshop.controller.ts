@@ -1,53 +1,44 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Req,
-  UseGuards,
-  Query,
-} from "@nestjs/common";
-import { WorkshopService } from "./workshop.service";
-import { CreateWorkshopDto } from "./dto/create-workshop.dto";
-import { UpdateWorkshopDto } from "./dto/update-workshop.dto";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { WorkshopService } from './workshop.service';
+import { CreateWorkshopDto } from './dto/create-workshop.dto';
+import { UpdateWorkshopDto } from './dto/update-workshop.dto';
 
-@UseGuards(JwtAuthGuard)
-@Controller("workshops")
+@Controller('workshops')
 export class WorkshopController {
   constructor(private readonly workshopService: WorkshopService) {}
+
+  @Get()
+  findAll() {
+    return this.workshopService.findAll();
+  }
+
+  @Get('company/:companyId')
+  findByCompany(@Param('companyId') companyId: string) {
+    return this.workshopService.findByCompany(companyId);
+  }
+
+  @Get('branch/:branchId')
+  findByBranch(@Param('branchId') branchId: number) {
+    return this.workshopService.findByBranch(branchId);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.workshopService.findOne(id);
+  }
 
   @Post()
   create(@Body() createWorkshopDto: CreateWorkshopDto) {
     return this.workshopService.create(createWorkshopDto);
   }
 
-  @Get()
-  findAll(@Req() req, @Query('branchId') branchId?: string) {
-    const { companyId } = req.user;
-    if (!branchId) return this.workshopService.findAll(companyId);
-
-    return this.workshopService.findAllByBranch({branchId: Number(branchId), companyId});
+  @Put(':id')
+  update(@Param('id') id: string, @Body() updateWorkshopDto: UpdateWorkshopDto) {
+    return this.workshopService.update(id, updateWorkshopDto);
   }
 
-  @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.workshopService.findOne(+id);
-  }
-
-  @Patch(":id")
-  update(
-    @Param("id") id: string,
-    @Body() updateWorkshopDto: UpdateWorkshopDto
-  ) {
-    return this.workshopService.update(+id, updateWorkshopDto);
-  }
-
-  @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.workshopService.remove(+id);
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.workshopService.remove(id);
   }
 }

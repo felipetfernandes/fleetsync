@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, IsNumber } from 'class-validator';
 
 export class CreateWorkshopDto {
   @ApiProperty({ example: 'Oficina São José' })
@@ -32,12 +32,18 @@ export class CreateWorkshopDto {
   @IsNotEmpty()
   password: string;
 
+  @ApiProperty({ example: 'uuid-da-empresa' })
+  @IsUUID()
+  @IsNotEmpty()
+  companyId: string;  // <-- obrigatório para relacionar empresa
+
   @ApiProperty({ example: 1 })
+  @IsNumber()
   @IsNotEmpty()
   branchId: number;
 
   @ApiProperty({ example: 'uuid-do-gerente', required: false })
   @IsOptional()
-  @IsString()
+  @IsUUID()
   managerId?: string;
 }

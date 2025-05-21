@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -42,13 +43,19 @@ export class VehiclesController {
 
   @Get()
   @ApiOperation({ summary: "Listar todos os veículos" })
-  findAll(@Req() req) {
-    const companyId = req.user.companyId;
-    return this.vehiclesService.findManyByCompany(companyId);
+  findAll(@Req() req, @Query("branchId") branchId?: string) {
+    const { companyId } = req.user;
+
+    if (!branchId) return this.vehiclesService.findManyByCompany(companyId);
+
+    return this.vehiclesService.findManyByBranch({
+      branchId: Number(branchId),
+      companyId,
+    });
   }
 
   @Get(":plate")
-  @ApiOperation({ summary: "Buscar um veículo pelo Placa" })
+  @ApiOperation({ summary: "Buscar um veículo pela Placa" })
   @ApiResponse({ status: 200, description: "Veículo encontrado" })
   @ApiResponse({ status: 404, description: "Veículo não encontrado" })
   findOne(@Param("plate") plate: string) {

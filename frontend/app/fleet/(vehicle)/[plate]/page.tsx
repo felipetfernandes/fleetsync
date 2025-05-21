@@ -490,7 +490,7 @@ export default function VehicleDetailPage({
                       <p className="mt-2 text-sm text-gray-400">
                         Este veículo ainda não possui ordens de serviço.
                       </p>
-                      <button className="mt-6 bg-indigo-600 hover:bg-indigo-700">
+                      <button className="mt-6 bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded text-sm">
                         Criar Nova Ordem
                       </button>
                     </div>

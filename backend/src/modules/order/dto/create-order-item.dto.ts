@@ -21,9 +21,4 @@ export class CreateOrderItemDto {
   @IsNumber()
   @IsNotEmpty()
   totalCost: number;
-
-  @ApiProperty({ example: 'uuid-da-ordem-de-serviço' })
-  @IsString()
-  @IsNotEmpty()
-  orderId: string;
 }

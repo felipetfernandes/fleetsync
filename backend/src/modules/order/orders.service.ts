@@ -8,8 +8,8 @@ import { identity } from "rxjs";
 export class OrderService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(createOrderDto: CreateOrderDto) {
-    const { vehicleId, workshopId, companyId, ...orderData } = createOrderDto;
+  async create(createOrderDto: CreateOrderDto, companyId: string) {
+    const { vehicleId, workshopId,  branchId, items, ...orderData } = createOrderDto;
 
     // Verificar se o veículo existe
     const vehicle = await this.prismaService.vehicle.findUnique({
@@ -38,26 +38,57 @@ export class OrderService {
     }
 
     // Criar ordem de serviço
-    /*return this.prismaService.order.create({
+    const order = await this.prismaService.order.create({
       data: {
         ...orderData,
         vehicle: { connect: { id: vehicleId } },
         workshop: { connect: { id: workshopId } },
         company: { connect: { id: companyId } },
+        branch: { connect: { id: Number(branchId) } },
       },
       include: {
         vehicle: true,
         workshop: true,
-        enterprise: true,
+        company: true,
+        branch: true,
       },
     })
-    */
+
+    await this.prismaService.orderItem.createMany({
+      data: items.map((item) => ({
+        orderId: order.id,
+        description: item.description,
+        cost: item.cost,
+        laborCost: item.laborCost,
+        totalCost: item.totalCost,
+      })),
+    })
+    
     return null;
   }
 
-  async findAll() {
+  async findAll(companyId: string) {
     return this.prismaService.order.findMany({
-      include: { vehicle: true, workshop: true, company: true },
+      where: { companyId },
+      include: {
+        vehicle: {
+          include: {
+            driver: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                licenseNumber: true,
+                licenseCategory: true,
+                licenseExpiration: true,
+              },
+            },
+          },
+        },
+        workshop: true,
+        company: true,
+      },
     });
   }
 
@@ -98,11 +129,11 @@ export class OrderService {
     return service;
   }
 
-  async update(id: string, updateDto: UpdateOrderDto) {
+  async update(id: string, updateDto: UpdateOrderDto, companyId: string) {
     // Verificar se a ordem existe
     await this.findOne(id);
 
-    const { vehicleId, workshopId, companyId, ...rest } = updateDto;
+    const { vehicleId, workshopId, ...rest } = updateDto;
 
     const data: any = { ...rest };
 

@@ -88,6 +88,12 @@ type Workshop = {
   manager: string | null;
 };
 
+type OrderItemForm = {
+  id: string;
+  description: string;
+  cost: string;       // armazenado como string para facilitar uso com input
+  laborCost: string;  // idem
+};
 
 type Order = {
   id: string;

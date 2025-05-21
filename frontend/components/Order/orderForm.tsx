@@ -2,56 +2,14 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Input from "@/components/ui/input";
 
-// Dados de exemplo para os selects
-const mockVehicles = [
-  { plate: "ABC1234", model: "Corolla", brand: "Toyota" },
-  { plate: "DEF5678", model: "Civic", brand: "Honda" },
-  { plate: "GHI9012", model: "Compass", brand: "Jeep" },
-  { plate: "JKL3456", model: "Onix", brand: "Chevrolet" },
-  { plate: "MNO7890", model: "HB20", brand: "Hyundai" },
-];
-
-const mockWorkshops = [
-  { id: "w1", name: "Auto Center Express" },
-  { id: "w2", name: "Mecânica Precisão" },
-  { id: "w3", name: "Oficina Central" },
-  { id: "w4", name: "Auto Elétrica Confiança" },
-];
-
-const mockDrivers = [
-  { id: "d1", name: "Carlos Silva" },
-  { id: "d2", name: "Ana Oliveira" },
-  { id: "d3", name: "Pedro Santos" },
-  { id: "d4", name: "Mariana Costa" },
-];
-
-const mockFiliais = [
-  "São Paulo",
-  "Rio de Janeiro",
-  "Belo Horizonte",
-  "Brasília",
-  "Curitiba",
-];
-
-const serviceTypes = [
-  "Manutenção Preventiva",
-  "Manutenção Corretiva",
-  "Manutenção Emergencial",
-  "Revisão Programada",
-  "Troca de Óleo",
-  "Alinhamento e Balanceamento",
-];
-
-const orderStatus = [
-  "Agendado",
-  "Veículo Entregue",
-  "Em Andamento",
-  "Concluído",
-  "Cancelado",
-];
+const serviceTypes = {
+  PREVENTIVE: "Manutenção Preventiva",
+  CORRECTIVE: "Manutenção Corretiva",
+  PERIODIC: "Manutenção Periódica",
+};
 
 interface OrderFormProps {
   onSubmit: (data: any) => void;
@@ -61,29 +19,143 @@ interface OrderFormProps {
 export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
   const [formData, setFormData] = useState({
     description: "",
-    type: "Manutenção Preventiva",
-    cost: "",
-    vehiclePlate: "",
-    driverId: "",
+    type: "PREVENTIVE",
+    totalCost: 0,
+    vehicleId: "",
     workshopId: "",
-    filial: "",
-    status: "Agendado",
-    notes: "",
+    branchId: "",
   });
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [branchs, setBranchs] = useState<Branch[]>([]);
+
+  const [formItems, setformItems] = useState<OrderItemForm[]>([
+    { id: crypto.randomUUID(), description: "", cost: "", laborCost: "" },
+  ]);
+
+  useEffect(() => {
+    (async () => {
+      const res = await fetch("http://localhost:3001/branchs", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Erro ao buscar branchs");
+
+      const data = await res.json();
+      setFormData((prev) => ({ ...prev, branchId: String(data[0].id) }));
+      setBranchs(data);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (!formData.branchId) return;
+
+    const fetchData = async () => {
+      try {
+        const [vehiclesRes, workshopsRes] = await Promise.all([
+          fetch(
+            `http://localhost:3001/vehicles?branchId=${formData.branchId}`,
+            {
+              method: "GET",
+              credentials: "include",
+            }
+          ),
+          fetch(
+            `http://localhost:3001/workshops?branchId=${formData.branchId}`,
+            {
+              method: "GET",
+              credentials: "include",
+            }
+          ),
+        ]);
+
+        if (!vehiclesRes.ok) throw new Error("Erro ao buscar veículos");
+        if (!workshopsRes.ok) throw new Error("Erro ao buscar workshops");
+
+        const [vehiclesData, workshopsData] = await Promise.all([
+          vehiclesRes.json(),
+          workshopsRes.json(),
+        ]);
+
+        setFormData((prev) => ({
+          ...prev,
+          vehicleId: String(vehiclesData[0].id),
+          workshopId: String(workshopsData[0].id),
+        }));
+        setVehicles(vehiclesData);
+        setWorkshops(workshopsData);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchData();
+  }, [formData.branchId]);
+
+  const handleItemChange = (
+    id: string,
+    field: keyof Omit<OrderItemForm, "id">,
+    value: string
+  ) => {
+    setformItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+    );
+  };
+
+  const handleAddItem = () => {
+    setformItems((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), description: "", cost: "", laborCost: "" },
+    ]);
+  };
+
+  const handleRemoveItem = (id: string) => {
+    setformItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const items = formItems.map((item) => {
+      const cost = parseFloat(item.cost.replace(",", "."));
+      const laborCost = parseFloat(item.laborCost.replace(",", "."));
+      return {
+        description: item.description,
+        cost,
+        laborCost,
+        totalCost: cost + laborCost,
+      };
+    });
+
+    const res = await fetch("http://localhost:3001/orders", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({...formData, items, startDate: new Date().toISOString()}),
+    });
+
+    if (!res.ok) throw new Error("Erro ao criar ordem de serviço");
+    onSubmit(res);
+  };
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      totalCost: formItems.reduce((acc, item) => acc + Number(item.cost) + Number(item.laborCost), 0),
+    }));
+  }, [formItems]);
+  
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    return null;
   };
 
   return (
@@ -105,36 +177,53 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
         <div className="space-y-2 flex flex-col">
-          <label htmlFor="type" className="-mb-2">Tipo de Serviço</label>
-          <select className="bg-gray-800 border-gray-700 p-2 rounded border" value={formData.type}>
-            {serviceTypes.map((type) => (
+          <label htmlFor="type" className="-mb-2">
+            Tipo de Serviço
+          </label>
+          <select
+            className="bg-gray-800 border-gray-700 p-2 rounded border"
+            value={formData.type}
+            name="type"
+            onChange={handleChange}
+          >
+            {(
+              Object.keys(serviceTypes) as Array<keyof typeof serviceTypes>
+            ).map((type) => (
               <option key={type} value={type}>
-                {type}
+                {serviceTypes[type]}
               </option>
             ))}
           </select>
         </div>
 
         <div className="space-y-2 flex flex-col">
-          <label htmlFor="cost" className="-mb-2">Custo Estimado (R$)</label>
-          <Input
-            id="cost"
-            name="cost"
-            value={formData.cost}
-            onChange={handleChange}
-            placeholder="0,00"
-            className="bg-gray-800 border-gray-700"
-            required
-          />
-        </div>
-
-        <div className="space-y-2 flex flex-col">
-          <label htmlFor="vehiclePlate" className="-mb-2">Veículo</label>
+          <label htmlFor="branch" className="-mb-2">
+            Filial
+          </label>
           <select
-            value={formData.vehiclePlate}
+            className="bg-gray-800 border-gray-700 p-2 rounded border"
+            name="branchId"
+            value={formData.branchId}
+            onChange={handleChange}
+          >
+            {branchs.map((branch) => (
+              <option key={branch.id} value={branch.id}>
+                {branch.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-2 flex flex-col">
+          <label htmlFor="vehiclePlate" className="-mb-2">
+            Veículo
+          </label>
+          <select
+            name="vehicleId"
+            value={formData.vehicleId}
+            onChange={handleChange}
             className="bg-gray-800 border-gray-700 p-2 rounded border"
           >
-            {mockVehicles.map((vehicle) => (
+            {vehicles.map((vehicle) => (
               <option key={vehicle.plate} value={vehicle.plate}>
                 {vehicle.plate} - {vehicle.brand} {vehicle.model}
               </option>
@@ -143,73 +232,99 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
         </div>
 
         <div className="space-y-2 flex flex-col">
-          <label htmlFor="driverId" className="-mb-2">Motorista</label>
+          <label htmlFor="workshopId" className="-mb-2">
+            Oficina
+          </label>
           <select
-            value={formData.driverId}
-            className="bg-gray-800 border-gray-700 p-2 rounded border"
-          >
-            {mockDrivers.map((driver) => (
-              <option key={driver.id} value={driver.id}>
-                {driver.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="space-y-2 flex flex-col">
-          <label htmlFor="workshopId" className="-mb-2">Oficina</label>
-          <select
+            name="workshopId"
             value={formData.workshopId}
+            onChange={handleChange}
             className="bg-gray-800 border-gray-700 p-2 rounded border"
           >
-            {mockWorkshops.map((workshop) => (
+            {workshops.map((workshop) => (
               <option key={workshop.id} value={workshop.id}>
                 {workshop.name}
               </option>
             ))}
           </select>
         </div>
-
-        <div className="space-y-2 flex flex-col">
-          <label htmlFor="filial" className="-mb-2">Filial</label>
-          <select
-            value={formData.filial}
-            className="bg-gray-800 border-gray-700 p-2 rounded border"
-          >
-            {mockFiliais.map((filial) => (
-              <option key={filial} value={filial}>
-                {filial}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="space-y-2 flex flex-col">
-          <label htmlFor="status" className="-mb-2">Status</label>
-          <select
-            value={formData.status}
-            className="bg-gray-800 border-gray-700 p-2 rounded border"
-          >
-            {orderStatus.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="space-y-2 flex flex-col md:col-span-2">
-          <label htmlFor="notes" className="-mb-2">Observações</label>
-          <Input
-            id="notes"
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-            placeholder="Observações adicionais sobre o serviço"
-            className="bg-gray-800 border-gray-700 min-h-[80px]"
-          />
-        </div>
       </div>
+
+      {formItems.map((item, index) => (
+        <div
+          key={item.id}
+          className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end"
+        >
+          <div className="md:col-span-5 space-y-2 flex flex-col">
+            <label htmlFor={`desc-${item.id}`} className="-mb-2">
+              Descrição do item
+            </label>
+            <Input
+              id={`desc-${item.id}`}
+              value={item.description}
+              onChange={(e) =>
+                handleItemChange(item.id, "description", e.target.value)
+              }
+              placeholder={`Item ${index + 1}`}
+              className="bg-gray-800 border-gray-700"
+              required
+            />
+          </div>
+
+          <div className="md:col-span-3 space-y-2 flex flex-col">
+            <label htmlFor={`cost-${item.id}`} className="-mb-2">
+              Custo Estimado (R$)
+            </label>
+            <Input
+              id={`cost-${item.id}`}
+              value={item.cost}
+              onChange={(e) =>
+                handleItemChange(item.id, "cost", e.target.value)
+              }
+              placeholder="0,00"
+              className="bg-gray-800 border-gray-700"
+              required
+            />
+          </div>
+
+          <div className="md:col-span-3 space-y-2 flex flex-col">
+            <label htmlFor={`labor-${item.id}`} className="-mb-2">
+              Mão de Obra (R$)
+            </label>
+            <Input
+              id={`labor-${item.id}`}
+              value={item.laborCost}
+              onChange={(e) =>
+                handleItemChange(item.id, "laborCost", e.target.value)
+              }
+              placeholder="0,00"
+              className="bg-gray-800 border-gray-700"
+              required
+            />
+          </div>
+
+          <div className="md:col-span-1 flex justify-center md:justify-end">
+            <button
+              type="button"
+              onClick={() => handleRemoveItem(item.id)}
+              className="bg-red-800 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Remover
+            </button>
+          </div>
+        </div>
+      ))}
+
+      <div className="flex justify-between gap-4">
+        <button
+          type="button"
+          onClick={handleAddItem}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Adicionar item
+        </button>
+      </div>
+
       <div className="flex justify-end space-x-4 pt-4">
         <button
           type="button"

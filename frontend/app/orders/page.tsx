@@ -3,12 +3,27 @@
 import { Search, PlusCircle } from "lucide-react";
 import Input from "@/components/ui/input";
 import OrderCard from "@/components/Order/orderCard";
-import { mockOrders } from "@/lib/mockData";
 import OrderForm from "@/components/Order/orderForm";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function OrdersPage() {
   const [showForm, setShowForm] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const res = await fetch("http://localhost:3001/orders", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Erro ao buscar ordens");
+
+      const data = await res.json();
+      setOrders(data);
+    };
+    fetchOrders();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
@@ -41,7 +56,7 @@ export default function OrdersPage() {
           />
         )}
         <div className="space-y-4">
-          {mockOrders.length === 0 ? (
+          {orders.length === 0 ? (
             <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-800">
                 <Search className="h-6 w-6 text-gray-400" />
@@ -59,8 +74,15 @@ export default function OrdersPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {mockOrders.map((order) => {
-                return <OrderCard key={order.id} order={order} />;
+              {orders.map((order) => {
+                return (
+                  <OrderCard
+                    key={order.id}
+                    order={order}
+                    statusInfo={{ icon: "", color: "" }}
+                    vehicle={order.vehicle}
+                  />
+                );
               })}
             </div>
           )}

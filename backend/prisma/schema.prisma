@@ -37,10 +37,11 @@ model Company {
   vehicles Vehicle[]
   users    User[]
   order    Order[]
+  Workshop  Workshop[]
 
   // Timestamps
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
 
   @@map("company")
 }
@@ -67,22 +68,22 @@ model Branch {
 
 // Prisma Schema, Interface e DTO para Vehicle
 model Vehicle {
-  id              String    @id @default(uuid())
-  plate           String    @unique
+  id              String        @id @default(uuid())
+  plate           String        @unique
   brand           String
   model           String
-  modelYear       Int       @map("model_year")
-  manufactureYear Int       @map("manufacture_year")
+  modelYear       Int           @map("model_year")
+  manufactureYear Int           @map("manufacture_year")
   color           String
-  renavam         String    @unique
+  renavam         String        @unique
   chassis         String
   status          VehicleStatus
-  purchaseDate    DateTime? @map("purchase_date")
-  purchaseType    String?   @map("purchase_type")
-  purchaseValue   Float?    @map("purchase_value")
+  purchaseDate    DateTime?     @map("purchase_date")
+  purchaseType    String?       @map("purchase_type")
+  purchaseValue   Float?        @map("purchase_value")
   seller          String?
-  mileageStart    Int       @map("mileage_start")
-  mileageCurrent  Int       @map("mileage_current")
+  mileageStart    Int           @map("mileage_start")
+  mileageCurrent  Int           @map("mileage_current")
 
   // Insurance
   insuranceProvider String?   @map("insurance_provider")
@@ -140,6 +141,8 @@ model Workshop {
   password String
 
   // Relationships
+  company   Company @relation(fields: [companyId], references: [id])
+  companyId String
   branch    Branch  @relation(fields: [branchId], references: [id])
   branchId  Int
   manager   User?   @relation(fields: [managerId], references: [id])
@@ -185,6 +188,8 @@ model OrderItem {
   cost        Float
   laborCost   Float  @map("labor_cost")
   totalCost   Float  @map("total_cost")
+
+  // Relationships
   orderId     String
   order       Order  @relation(fields: [orderId], references: [id])
 
@@ -212,14 +217,14 @@ model User {
   licenseExpiration DateTime? @map("license_expiration")
 
   // Relationships
-  branchId  Int?
-  branch    Branch?   @relation(fields: [branchId], references: [id])
-  
-  Company   Company?  @relation(fields: [companyId], references: [id])
+  branchId Int?
+  branch   Branch? @relation(fields: [branchId], references: [id])
+
+  Company   Company? @relation(fields: [companyId], references: [id])
   companyId String?
-  
-  Vehicle   Vehicle?
-  Workshop  Workshop?
+
+  Vehicle  Vehicle?
+  Workshop Workshop?
 
   // Timestamps
   createdAt DateTime @default(now()) @map("created_at")

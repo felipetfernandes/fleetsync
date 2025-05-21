@@ -85,6 +85,7 @@ CREATE TABLE `workshop` (
     `phone` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
+    `companyId` VARCHAR(191) NOT NULL,
     `branchId` INTEGER NOT NULL,
     `managerId` VARCHAR(191) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -165,6 +166,9 @@ ALTER TABLE `vehicle` ADD CONSTRAINT `vehicle_driverId_fkey` FOREIGN KEY (`drive
 
 -- AddForeignKey
 ALTER TABLE `mileage_history` ADD CONSTRAINT `mileage_history_vehicleId_fkey` FOREIGN KEY (`vehicleId`) REFERENCES `vehicle`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `workshop` ADD CONSTRAINT `workshop_companyId_fkey` FOREIGN KEY (`companyId`) REFERENCES `company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `workshop` ADD CONSTRAINT `workshop_branchId_fkey` FOREIGN KEY (`branchId`) REFERENCES `branch`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

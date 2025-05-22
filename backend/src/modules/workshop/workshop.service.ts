@@ -11,7 +11,11 @@ export class WorkshopService {
   }
 
   async findAll(companyId) {
-    return await this.prisma.workshop.findMany({ where: { companyId } });
+    return await this.prisma.workshop.findMany({ where: { companyId }, 
+      include: {
+        order: true,
+      }
+ });
   }
 
   async findAllByBranch({

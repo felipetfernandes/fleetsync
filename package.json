@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup:permissions": "chmod +x setup_dev.sh",
+    "setup:local": "./setup_dev.sh",
+    "dev:start": "npm run setup:permissions && npm run setup:local"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.0",

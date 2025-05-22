@@ -6,9 +6,9 @@ enum UserRole {
 }
 
 enum OrderType {
-  PREVENTIVE,
-  CORRECTIVE,
-  PERIODIC,
+  PREVENTIVE = 'PREVENTIVE',
+  CORRECTIVE = 'CORRECTIVE',
+  PERIODIC = 'PERIODIC',
 }
 
 enum VehicleStatus {
@@ -86,6 +86,7 @@ type Workshop = {
   phone: string;
   email: string;
   manager: string | null;
+  order: Order[];
 };
 
 type OrderItemForm = {
@@ -131,3 +132,4 @@ type Company = {
   createdAt: string; // ou Date, se estiver parseando
   updatedAt: string;
 };
+

@@ -1,0 +1,34 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+
+export class RegisterWorkshopDto {
+    @ApiProperty({ example: 'Oficina São José' })
+    @IsString()
+    @IsNotEmpty()
+    name: string;
+
+    @ApiProperty({ example: '12345678000190' })
+    @IsString()
+    @IsNotEmpty()
+    cnpj: string;
+
+    @ApiProperty({ example: 'Rua das Oficinas, 1000' })
+    @IsString()
+    @IsNotEmpty()
+    address: string;
+
+    @ApiProperty({ example: '+5511999999999' })
+    @IsString()
+    @IsNotEmpty()
+    phone: string;
+
+    @ApiProperty({ example: 'oficina@email.com' })
+    @IsEmail()
+    @IsNotEmpty()
+    email: string;
+
+    @ApiProperty({ example: 'senhaSegura123', required: false })
+    @IsString()
+    @IsNotEmpty()
+    password: string;
+}

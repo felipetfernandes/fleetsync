@@ -2,6 +2,7 @@ import { Injectable, ConflictException, NotFoundException } from '@nestjs/common
 import { PrismaService } from 'src/modules/prisma/prisma.service';
 import { CreateWorkshopDto } from './dto/create-workshop.dto';
 import { UpdateWorkshopDto } from './dto/update-workshop.dto';
+import { RegisterWorkshopDto } from './dto/register-workshop.dto';
 
 @Injectable()
 export class WorkshopService {
@@ -45,6 +46,62 @@ export class WorkshopService {
     }
 
     return workshop;
+  }
+
+  // No WorkshopService
+  async register(registerWorkshopDto: RegisterWorkshopDto, companyId?: string) {
+    const existingWorkshop = await this.prisma.workshop.findUnique({
+      where: { cnpj: registerWorkshopDto.cnpj },
+    });
+
+    if (existingWorkshop) {
+      throw new ConflictException('Oficina já cadastrada com este CNPJ');
+    }
+
+    // Usar o companyId fornecido ou buscar uma empresa padrão
+    let company;
+    if (companyId) {
+      company = await this.prisma.company.findUnique({
+        where: { id: companyId },
+      });
+
+      if (!company) {
+        throw new NotFoundException(`Empresa com ID ${companyId} não encontrada`);
+      }
+    } else {
+      company = await this.prisma.company.findFirst();
+
+      if (!company) {
+        throw new NotFoundException('Nenhuma empresa encontrada para associar à oficina');
+      }
+    }
+
+    // Buscar a primeira filial disponível
+    const defaultBranch = await this.prisma.branch.findFirst({
+      where: { companyId: company.id }, // Buscar filial da mesma empresa
+    });
+
+    if (!defaultBranch) {
+      throw new NotFoundException('Nenhuma filial encontrada para associar à oficina');
+    }
+
+    // Verificar se a senha foi fornecida
+    if (!registerWorkshopDto.password) {
+      throw new Error('A senha é obrigatória para o cadastro de oficinas');
+    }
+
+    return this.prisma.workshop.create({
+      data: {
+        name: registerWorkshopDto.name,
+        cnpj: registerWorkshopDto.cnpj,
+        email: registerWorkshopDto.email,
+        phone: registerWorkshopDto.phone,
+        address: registerWorkshopDto.address,
+        password: registerWorkshopDto.password, // Adicionando o campo password
+        company: { connect: { id: company.id } },
+        branch: { connect: { id: defaultBranch.id } },
+      },
+    });
   }
 
   async create(createWorkshopDto: CreateWorkshopDto) {

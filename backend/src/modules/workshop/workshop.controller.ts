@@ -21,16 +21,21 @@ import { UpdateWorkshopDto } from './dto/update-workshop.dto';
 import { RegisterWorkshopDto } from './dto/register-workshop.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
+interface JwtPayload {
+  userId: string;
+  companyId: string;
+}
+
 @ApiTags('workshops')
 @Controller('workshops')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class WorkshopController {
-  constructor(private readonly workshopService: WorkshopService) { }
+  constructor(private readonly workshopService: WorkshopService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Listar todas as oficinas' })
-  findAll(@Req() req) {
+  @ApiOperation({ summary: 'Listar todas as oficinas da empresa' })
+  findAll(@Req() req: { user: JwtPayload }) {
     const { companyId } = req.user;
     return this.workshopService.findByCompany(companyId);
   }
@@ -59,17 +64,22 @@ export class WorkshopController {
   @ApiOperation({ summary: 'Criar uma nova oficina com todos os detalhes' })
   @ApiResponse({ status: 201, description: 'Oficina criada com sucesso' })
   @ApiResponse({ status: 409, description: 'CNPJ já cadastrado' })
-  create(@Body() createWorkshopDto: CreateWorkshopDto, @Req() req) {
+  create(
+    @Body() createWorkshopDto: CreateWorkshopDto,
+    @Req() req: { user: JwtPayload }
+  ) {
     const { companyId } = req.user;
-    return this.workshopService.create(createWorkshopDto);
+    return this.workshopService.create({ ...createWorkshopDto, companyId });
   }
 
-  // Endpoint para registro simplificado de oficinas por administradores
   @Post('register')
   @ApiOperation({ summary: 'Registrar uma nova oficina de forma simplificada' })
   @ApiResponse({ status: 201, description: 'Oficina registrada com sucesso' })
   @ApiResponse({ status: 409, description: 'CNPJ já cadastrado' })
-  register(@Body() registerWorkshopDto: RegisterWorkshopDto, @Req() req) {
+  register(
+    @Body() registerWorkshopDto: RegisterWorkshopDto,
+    @Req() req: { user: JwtPayload }
+  ) {
     const { companyId } = req.user;
     return this.workshopService.register(registerWorkshopDto, companyId);
   }
@@ -78,9 +88,13 @@ export class WorkshopController {
   @ApiOperation({ summary: 'Atualizar uma oficina' })
   @ApiResponse({ status: 200, description: 'Oficina atualizada com sucesso' })
   @ApiResponse({ status: 404, description: 'Oficina não encontrada' })
-  update(@Param('id') id: string, @Body() updateWorkshopDto: UpdateWorkshopDto, @Req() req) {
+  update(
+    @Param('id') id: string,
+    @Body() updateWorkshopDto: UpdateWorkshopDto,
+    @Req() req: { user: JwtPayload }
+  ) {
     const { companyId } = req.user;
-    return this.workshopService.update(id, updateWorkshopDto);
+    return this.workshopService.update(id, { ...updateWorkshopDto, companyId });
   }
 
   @Delete(':id')

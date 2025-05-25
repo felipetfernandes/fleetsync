@@ -8,6 +8,7 @@ import {
   Put,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -20,6 +21,7 @@ import { CreateWorkshopDto } from './dto/create-workshop.dto';
 import { UpdateWorkshopDto } from './dto/update-workshop.dto';
 import { RegisterWorkshopDto } from './dto/register-workshop.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ap } from '@faker-js/faker/dist/airline-BUL6NtOJ';
 
 @ApiTags('workshops')
 @Controller('workshops')
@@ -29,29 +31,27 @@ export class WorkshopController {
   constructor(private readonly workshopService: WorkshopService) { }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todas as oficinas' })
-  findAll(@Req() req) {
+  @ApiOperation({ summary: "Listar todos as oficinas" })
+  findAll(@Req() req, @Query("branchId") branchId?: string) {
     const { companyId } = req.user;
-    return this.workshopService.findByCompany(companyId);
+
+    if (!branchId) return this.workshopService.findManyByCompany(companyId);
+
+    return this.workshopService.findManyByBranch({
+      branchId: Number(branchId),
+      companyId,
+    });
   }
 
-  @Get('company/:companyId')
-  @ApiOperation({ summary: 'Listar oficinas por empresa' })
-  findByCompany(@Param('companyId') companyId: string) {
-    return this.workshopService.findByCompany(companyId);
+  @Get('vehicles')
+  @ApiOperation({ summary: "Listar todos as oficinas com veículos" })
+  findAllWithVehicles(@Req() req) {
+    const { companyId } = req.user;
+    return this.workshopService.findAllWithVehicles(companyId);
   }
 
-  @Get('branch/:branchId')
-  @ApiOperation({ summary: 'Listar oficinas por filial' })
-  findByBranch(@Param('branchId') branchId: number) {
-    return this.workshopService.findByBranch(branchId);
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Buscar uma oficina pelo ID' })
-  @ApiResponse({ status: 200, description: 'Oficina encontrada' })
-  @ApiResponse({ status: 404, description: 'Oficina não encontrada' })
-  findOne(@Param('id') id: string) {
+  @Get(":id")
+  findOne(@Param("id") id: string) {
     return this.workshopService.findOne(id);
   }
 
@@ -79,7 +79,6 @@ export class WorkshopController {
   @ApiResponse({ status: 200, description: 'Oficina atualizada com sucesso' })
   @ApiResponse({ status: 404, description: 'Oficina não encontrada' })
   update(@Param('id') id: string, @Body() updateWorkshopDto: UpdateWorkshopDto, @Req() req) {
-    const { companyId } = req.user;
     return this.workshopService.update(id, updateWorkshopDto);
   }
 

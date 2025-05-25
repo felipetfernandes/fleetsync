@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -38,7 +39,8 @@ export class OrderController {
 
   @Get()
   @ApiOperation({ summary: "Listar todos os serviços" })
-  findAll(@Req() req) {
+  findAll(@Req() req, @Query("plate") plate?: string) {
+    if (plate) return this.ordersService.findAllByPlate(plate);
     const { companyId } = req.user;
     return this.ordersService.findAll(companyId);
   }
@@ -66,14 +68,5 @@ export class OrderController {
   @ApiResponse({ status: 404, description: "Serviço não encontrado" })
   remove(@Param("id") id: string) {
     return this.ordersService.remove(id);
-  }
-
-  @Get("plate/:plate")
-  @ApiOperation({ summary: "Listar todos os serviços de um veículo" })
-  @ApiResponse({ status: 200, description: "Serviços encontrados" })
-  @ApiResponse({ status: 404, description: "Serviços não encontrados" })
-  findAllbyPlate(@Param("plate") plate: string) {
-    console.log(plate);
-    return this.ordersService.findAllByPlate(plate);
   }
 }

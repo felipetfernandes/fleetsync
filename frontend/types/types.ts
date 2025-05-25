@@ -1,22 +1,6 @@
+import { OrderStatus, OrderType, UserRole } from "./enums";
+
 // Tipos de dados
-enum UserRole {
-  ADMIN = 'ADMIN',
-  DRIVER = 'DRIVER',
-  WORKSHOP_MANAGER = 'WORKSHOP_MANAGER',
-}
-
-enum OrderType {
-  PREVENTIVE = 'PREVENTIVE',
-  CORRECTIVE = 'CORRECTIVE',
-  PERIODIC = 'PERIODIC',
-}
-
-enum VehicleStatus {
-  AVAILABLE,
-  UNAVAILABLE,
-  MAINTENANCE,
-}
-
 type User = {
   id: string;
   name: string;
@@ -98,7 +82,8 @@ type OrderItemForm = {
 
 type Order = {
   id: string;
-  type: OrderType
+  type: OrderType;
+  status: OrderStatus;
   description: string;
   startDate: string;
   endDate: string;
@@ -111,6 +96,9 @@ type Order = {
   updatedAt: string;
   workshop: Workshop;
   company: Company;
+  vehicle: Vehicle;
+  branch: Branch;
+  items: OrderItemForm[];
 };
 
 type Branch = {
@@ -133,3 +121,12 @@ type Company = {
   updatedAt: string;
 };
 
+export type {
+  User,
+  Vehicle,
+  Workshop,
+  Order,
+  Branch,
+  Company,
+  OrderItemForm,
+};

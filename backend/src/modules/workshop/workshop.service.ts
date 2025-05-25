@@ -9,22 +9,36 @@ export class WorkshopService {
   constructor(private readonly prisma: PrismaService) { }
 
   async findAll() {
-    return this.prisma.workshop.findMany();
-  }
-  
-  async findAll(companyId) {
-    return await this.prisma.workshop.findMany({ where: { companyId }, 
-      include: {
-        order: true,
-      }
- });
+    return await this.prisma.workshop.findMany();
   }
 
-  async findByBranch(branchId: number) {
+  async findManyByCompany(companyId: string) {
     return this.prisma.workshop.findMany({
-      where: { branchId },
+      where: { companyId }, include: {
+        order: true
+      }
     });
   }
+
+  async findManyByBranch({branchId, companyId}: {branchId: number, companyId: string}) {
+    return this.prisma.workshop.findMany({
+      where: { branchId, companyId },
+    });
+  }
+
+  findAllWithVehicles(companyId: string) {
+  return this.prisma.workshop.findMany({
+    where: { companyId },
+    include: {
+      order: {
+        where: { endDate: null },
+        include: {
+          vehicle: true,
+        },
+      },
+    },
+  });
+}
 
   async findOne(id: string) {
     const workshop = await this.prisma.workshop.findUnique({

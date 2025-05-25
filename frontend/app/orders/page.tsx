@@ -5,6 +5,7 @@ import Input from "@/components/ui/input";
 import OrderCard from "@/components/Order/orderCard";
 import OrderForm from "@/components/Order/orderForm";
 import { useEffect, useState } from "react";
+import { Order } from "@/types/types";
 
 export default function OrdersPage() {
   const [showForm, setShowForm] = useState(false);

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import {
   Car,
   Wrench,
@@ -12,34 +11,11 @@ import {
   Calendar,
   ArrowRight,
   ArrowUpRight,
-  ArrowDownRight,
   RotateCcw,
 } from "lucide-react";
-
-async function fetchWithErrorHandling<T>(url: string): Promise<T> {
-  try {
-    const access_token = cookies().get("access_token")?.value;
-    const res = await fetch(url, {
-      method: "GET",
-      credentials: "include",
-      next: { revalidate: 120 },
-      headers: {
-        "Content-Type": "application/json",
-        cookie: `access_token=${access_token}`,
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error(`Erro ao buscar ${url}: ${res.status} ${res.statusText}`);
-    }
-
-    const data = await res.json();
-    return data as T;
-  } catch (error) {
-    console.error(`Erro ao buscar dados de ${url}:`, error);
-    throw error;
-  }
-}
+import { Order, Vehicle, Workshop } from "@/types/types";
+import { StatusBadge } from "@/components/ui/statusBadge";
+import { fetchClientSide } from "@/lib/utils/fetchFunctions";
 
 function getStatusInfo(status: string) {
   switch (status) {
@@ -69,9 +45,9 @@ export default async function DashboardPage() {
   const baseUrl = "http://backend:3001";
 
   const [vehicles, orders, workshops] = await Promise.all([
-    fetchWithErrorHandling<Vehicle[]>(`${baseUrl}/vehicles`),
-    fetchWithErrorHandling<Order[]>(`${baseUrl}/orders`),
-    fetchWithErrorHandling<Workshop[]>(`${baseUrl}/workshops`),
+    fetchClientSide<Vehicle[]>(`${baseUrl}/vehicles`),
+    fetchClientSide<Order[]>(`${baseUrl}/orders`),
+    fetchClientSide<Workshop[]>(`${baseUrl}/workshops`),
   ]);
 
   const dashboardData = {
@@ -390,11 +366,10 @@ export default async function DashboardPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p
-                            className={`px-2 py-0.5 rounded-full text-sm ${statusInfo.color}`}
-                          >
-                            {order.status}
-                          </p>
+                          <StatusBadge
+                            status={order.status}
+                            type="orderStatus"
+                          />
                           <p className="text-sm font-medium mt-1">
                             {formatCurrency(order.totalCost)}
                           </p>
@@ -424,7 +399,8 @@ export default async function DashboardPage() {
               <div className="space-y-4">
                 {dashboardData.topWorkshops?.map(
                   (workshop: any, index: number) => (
-                    <div
+                    <Link
+                      href={`/workshops/${workshop.id}`}
                       key={workshop.name}
                       className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition-colors"
                     >
@@ -458,7 +434,7 @@ export default async function DashboardPage() {
                           {workshop.ordersCount} ordens
                         </p>
                       </div>
-                    </div>
+                    </Link>
                   )
                 )}
               </div>

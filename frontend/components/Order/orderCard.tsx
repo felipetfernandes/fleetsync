@@ -1,31 +1,16 @@
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { Order, Vehicle } from "@/types/types";
 import { Building, Calendar, Car, User, Wrench } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-
-// Formatar valores monetários
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
-};
-
-// Formatar datas
-const formatDate = (date: Date | string) => {
-  const parsedDate = typeof date === "string" ? new Date(date) : date;
-  return format(parsedDate, "dd/MM/yyyy", { locale: ptBR });
-};
+import { StatusBadge } from "../ui/statusBadge";
+import { formatCurrency, formatDate } from "@/lib/utils/formatFunctions";
 
 function OrderCard({
   order,
   vehicle,
-  statusInfo,
 }: {
   order: Order;
   vehicle: Vehicle;
-  statusInfo: { icon: React.ReactNode; color: string };
 }) {
   return (
     <Link href={`/orders/${order.id}`} key={order.id}>
@@ -34,17 +19,10 @@ function OrderCard({
           <div className="p-4 md:p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-start gap-4">
-                <div className={`p-2 rounded-md ${statusInfo.color} mt-1`}>
-                  {statusInfo.icon}
-                </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
+                    <StatusBadge status={order.status} type="orderStatus" />
                     <h3 className="font-medium text-lg">Ordem #{order.id}</h3>
-                    <div
-                      className={`px-2 py-0.5 rounded-2xl ${statusInfo.color}`}
-                    >
-                      {vehicle.status}
-                    </div>
                   </div>
                   <p className="text-gray-400">{order.description}</p>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm mt-2">
@@ -60,7 +38,7 @@ function OrderCard({
                     </div>
                     <div className="flex items-center">
                       <Building className="h-4 w-4 mr-1 text-indigo-400" />
-                      <span>{order.branchId}</span>
+                      <span>{order.branch.name}</span>
                     </div>
                     <div className="flex items-center">
                       <Wrench className="h-4 w-4 mr-1 text-indigo-400" />

@@ -100,6 +100,7 @@ CREATE TABLE `workshop` (
 CREATE TABLE `order` (
     `id` VARCHAR(191) NOT NULL,
     `type` ENUM('PREVENTIVE', 'CORRECTIVE', 'PERIODIC') NOT NULL,
+    `status` ENUM('PENDING', 'APPROVED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED') NOT NULL,
     `description` VARCHAR(191) NOT NULL,
     `start_date` DATETIME(3) NOT NULL,
     `end_date` DATETIME(3) NULL,
@@ -135,7 +136,7 @@ CREATE TABLE `user` (
     `email` VARCHAR(191) NOT NULL,
     `phone` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
-    `role` ENUM('ADMIN', 'DRIVER', 'WORKSHOP_MANAGER') NOT NULL,
+    `role` ENUM('ADMIN', 'BRANCH_MANAGER', 'WORKSHOP_MANAGER', 'DRIVER') NOT NULL,
     `email_verified` BOOLEAN NOT NULL DEFAULT false,
     `reset_password_token` VARCHAR(191) NULL,
     `reset_password_expires` DATETIME(3) NULL,

@@ -2,14 +2,14 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { PrismaService } from "src/modules/prisma/prisma.service";
-import { identity } from "rxjs";
 
 @Injectable()
 export class OrderService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createOrderDto: CreateOrderDto, companyId: string) {
-    const { vehicleId, workshopId,  branchId, items, ...orderData } = createOrderDto;
+    const { vehicleId, workshopId, branchId, items, ...orderData } =
+      createOrderDto;
 
     // Verificar se o veículo existe
     const vehicle = await this.prismaService.vehicle.findUnique({
@@ -52,7 +52,7 @@ export class OrderService {
         company: true,
         branch: true,
       },
-    })
+    });
 
     await this.prismaService.orderItem.createMany({
       data: items.map((item) => ({
@@ -62,8 +62,8 @@ export class OrderService {
         laborCost: item.laborCost,
         totalCost: item.totalCost,
       })),
-    })
-    
+    });
+
     return null;
   }
 
@@ -88,6 +88,7 @@ export class OrderService {
         },
         workshop: true,
         company: true,
+        branch: true,
       },
     });
   }
@@ -112,6 +113,7 @@ export class OrderService {
           },
         },
         company: true,
+        branch: true,
       },
     });
   }

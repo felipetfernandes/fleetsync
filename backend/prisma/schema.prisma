@@ -13,10 +13,19 @@ enum OrderType {
   PERIODIC
 }
 
+enum OrderStatus {
+  PENDING
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
 enum UserRole {
   ADMIN
-  DRIVER
+  BRANCH_MANAGER
   WORKSHOP_MANAGER
+  DRIVER
 }
 
 enum VehicleStatus {
@@ -37,11 +46,11 @@ model Company {
   vehicles Vehicle[]
   users    User[]
   order    Order[]
-  Workshop  Workshop[]
+  Workshop Workshop[]
 
   // Timestamps
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("company")
 }
@@ -157,12 +166,14 @@ model Workshop {
 }
 
 model Order {
-  id          String    @id @default(uuid())
+  id          String      @id @default(uuid())
   type        OrderType
+  status      OrderStatus
   description String
-  startDate   DateTime  @map("start_date")
-  endDate     DateTime? @map("end_date")
-  totalCost   Float     @map("total_cost")
+  startDate   DateTime    @map("start_date")
+  endDate     DateTime?   @map("end_date")
+  totalCost   Float       @map("total_cost")
+  OrderItems  OrderItem[]
 
   // Relationships
   company    Company  @relation(fields: [companyId], references: [id])
@@ -175,9 +186,8 @@ model Order {
   workshopId String
 
   // Timestamps
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @updatedAt @map("updated_at")
-  OrderItem OrderItem[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("order")
 }
@@ -190,8 +200,8 @@ model OrderItem {
   totalCost   Float  @map("total_cost")
 
   // Relationships
-  orderId     String
-  order       Order  @relation(fields: [orderId], references: [id])
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id])
 
   // Timestamps
   createdAt DateTime @default(now()) @map("created_at")
@@ -217,14 +227,12 @@ model User {
   licenseExpiration DateTime? @map("license_expiration")
 
   // Relationships
-  branchId Int?
-  branch   Branch? @relation(fields: [branchId], references: [id])
-
-  Company   Company? @relation(fields: [companyId], references: [id])
+  branchId  Int?
+  branch    Branch?   @relation(fields: [branchId], references: [id])
+  Company   Company?  @relation(fields: [companyId], references: [id])
   companyId String?
-
-  Vehicle  Vehicle?
-  Workshop Workshop?
+  Vehicle   Vehicle?
+  Workshop  Workshop?
 
   // Timestamps
   createdAt DateTime @default(now()) @map("created_at")

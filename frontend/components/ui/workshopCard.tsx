@@ -12,6 +12,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useState } from "react";
+import { Workshop } from "@/types/types";
 
 export default function WorkshopCard({ workshop }: { workshop: Workshop }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,9 +28,9 @@ export default function WorkshopCard({ workshop }: { workshop: Workshop }) {
             <Wrench className="mr-2 h-5 w-5 text-indigo-400" />
             {workshop.name}
           </h1>
-          {workshop.vehiclesInMaintenance && (
+          {workshop.order?.length > 0 && (
             <div className="bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-3 py-0.5">
-              {workshop.vehiclesInMaintenance.length} veículo(s)
+              {workshop.order.length} veículo(s)
             </div>
           )}
         </div>
@@ -67,7 +68,7 @@ export default function WorkshopCard({ workshop }: { workshop: Workshop }) {
             </div>
           </div>
 
-          {workshop.vehiclesInMaintenance?.length > 0 && (
+          {workshop.order?.length > 0 && (
             <div className="w-full">
               <div className="border-gray-800">
                 <button
@@ -80,20 +81,20 @@ export default function WorkshopCard({ workshop }: { workshop: Workshop }) {
                 <div>
                   <div className="space-y-3 pt-2">
                     {isOpen &&
-                      workshop.vehiclesInMaintenance.map((vehicle) => (
+                      workshop.order.map((order) => (
                         <div
-                          key={vehicle.id}
+                          key={order.vehicle!.id}
                           className="bg-gray-800 rounded-md p-3"
                         >
                           <div className="flex justify-between items-start mb-2">
                             <div className="flex items-center">
                               <Car className="h-4 w-4 mr-2 text-indigo-400" />
                               <span className="font-medium">
-                                {vehicle.plate}
+                                {order.vehicle!.plate}
                               </span>
                             </div>
                             <div className="text-xs border-amber-600 text-amber-400">
-                              {vehicle.status}
+                              {order.vehicle!.status}
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-2 text-sm mb-2">
@@ -102,18 +103,18 @@ export default function WorkshopCard({ workshop }: { workshop: Workshop }) {
                                 Marca/Modelo
                               </p>
                               <p>
-                                {vehicle.brand} {vehicle.model}
+                                {order.vehicle!.brand} {order.vehicle!.model}
                               </p>
                             </div>
                             <div>
                               <p className="text-gray-400 text-xs">Cor</p>
-                              <p>{vehicle.color}</p>
+                              <p>{order.vehicle!.color}</p>
                             </div>
                           </div>
                           <div>
                             <p className="text-gray-400 text-xs">Serviço</p>
                             <p className="text-sm">
-                              {vehicle.serviceDescription}
+                              {order.description}
                             </p>
                           </div>
                         </div>

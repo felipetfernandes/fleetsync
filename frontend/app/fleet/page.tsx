@@ -2,6 +2,7 @@
 
 import VehicleCard from "@/components/Vehicle/vehicleCard";
 import VehicleForm from "@/components/Vehicle/vehicleForm";
+import { Vehicle } from "@/types/types";
 import { PlusCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
 

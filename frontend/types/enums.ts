@@ -1,0 +1,27 @@
+enum UserRole {
+  ADMIN = 'ADMIN',
+  DRIVER = 'DRIVER',
+  WORKSHOP_MANAGER = 'WORKSHOP_MANAGER',
+}
+
+enum OrderType {
+  PREVENTIVE = 'PREVENTIVE',
+  CORRECTIVE = 'CORRECTIVE',
+  PERIODIC = 'PERIODIC',
+}
+
+enum VehicleStatus {
+  AVAILABLE = "AVAILABLE",
+  UNAVAILABLE = "UNAVAILABLE",
+  MAINTENANCE = "MAINTENANCE",
+}
+
+enum OrderStatus {
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+}
+
+export { UserRole, OrderType, VehicleStatus, OrderStatus };

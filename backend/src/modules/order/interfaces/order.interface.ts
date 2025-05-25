@@ -1,12 +1,9 @@
-export enum OrderType {
-  PREVENTIVE = 'PREVENTIVE',
-  CORRECTIVE = 'CORRECTIVE',
-  PERIODIC = 'PERIODIC',
-}
+import { OrderType, OrderStatus } from '@prisma/client';
 
 export interface Order {
   id: string;
   type: OrderType;
+  status: OrderStatus;
   description: string;
   startDate: Date;
   endDate?: Date;

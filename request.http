@@ -1,11 +1,11 @@
-@Cookie = access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ0NTgwZmE2LTI4MDYtNGY4Mi04YTc0LWEyZGRlNzlkMjk1MSIsIm5hbWUiOiJBbGZyZWQgTydSZWlsbHkiLCJlbWFpbCI6Ikp1bGVzLk11bGxlckB5YWhvby5jb20iLCJwaG9uZSI6Iig0NzMpIDMwOS03MjA2Iiwicm9sZSI6IkFETUlOIiwiZW1haWxWZXJpZmllZCI6ZmFsc2UsImxpY2Vuc2VOdW1iZXIiOm51bGwsImxpY2Vuc2VDYXRlZ29yeSI6bnVsbCwibGljZW5zZUV4cGlyYXRpb24iOm51bGwsImJyYW5jaElkIjpudWxsLCJjb21wYW55SWQiOiJkZGY4NTc1NS01ODQ4LTQ0MjQtYjY4Yy00ZTkyYmUzMTU2MjYiLCJjcmVhdGVkQXQiOiIyMDI1LTA1LTIxVDAzOjQ5OjIwLjA5M1oiLCJ1cGRhdGVkQXQiOiIyMDI1LTA1LTIxVDAzOjQ5OjIwLjA5M1oiLCJpYXQiOjE3NDc5NDIyMDIsImV4cCI6MTc0ODAyODYwMn0.x1qlZYlDi_LRcKDnB1FVEMdkxRuUmxwNfeQ5Re0Cf84
+@Cookie = access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUyYWI1YTk3LTJmNjAtNDQ4Yy1hZTlhLTQ4M2Q4ZmMyNWRkYyIsIm5hbWUiOiJHdWlsaGVybWUgTWVsbyIsImVtYWlsIjoiYWRtaW5Ac2FudG9zbHRkYS5jb20iLCJwaG9uZSI6Iis1NTI0NjQxMjY3NjA2Iiwicm9sZSI6IkFETUlOIiwiZW1haWxWZXJpZmllZCI6dHJ1ZSwibGljZW5zZU51bWJlciI6bnVsbCwibGljZW5zZUNhdGVnb3J5IjpudWxsLCJsaWNlbnNlRXhwaXJhdGlvbiI6bnVsbCwiYnJhbmNoSWQiOm51bGwsImNvbXBhbnlJZCI6ImNmM2YwYmQyLWI4MzUtNDNhNy1hY2I5LWZmOTVjNzhkOWU2NSIsImNyZWF0ZWRBdCI6IjIwMjUtMDUtMjVUMTk6NDU6MTUuMjE2WiIsInVwZGF0ZWRBdCI6IjIwMjUtMDUtMjVUMTk6NDU6MTUuMjE2WiIsImlhdCI6MTc0ODIwNDY0MCwiZXhwIjoxNzQ4MjkxMDQwfQ.N9gqocezIB4v-lT1wuMDLTbTOchykO2JUDq28LB06ik
 ### Fazer login
 POST http://localhost:3001/auth/login
 Content-Type: application/json
 
 {
-  "email": "Jules.Muller@yahoo.com",
-  "password": "teste123"
+  "email": "admin@santosltda.com",
+  "password": "password123"
 }
 
 ### Dados do usuário
@@ -22,7 +22,7 @@ GET http://localhost:3001/orders
 Cookie: {{Cookie}}
 
 ### Buscar ordens de um veículo
-GET http://localhost:3001/orders/plate/RH84AOG
+GET http://localhost:3001/orders/?plate=RV54JNI64
 Cookie: {{Cookie}}
 
 ### Buscar veículo pela placa
@@ -35,6 +35,10 @@ Cookie: {{Cookie}}
 
 ### Buscar todas as workshops
 GET http://localhost:3001/workshops/
+Cookie: {{Cookie}}
+
+### Buscar todas as workshops e veículos em manutenção
+GET http://localhost:3001/workshops/vehicles/
 Cookie: {{Cookie}}
 
 ### Criar novo veículo

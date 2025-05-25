@@ -4,55 +4,21 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Car,
-  Calendar,
   ClipboardList,
-  CheckCircle2,
-  RotateCcw,
   FileText,
   Edit,
   Trash2,
   PlusCircle,
 } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import VehicleCard from "@/components/Vehicle/vehicleCard";
 import OrderCard from "@/components/Order/orderCard";
 import { useEffect, useState } from "react";
 import OrderForm from "@/components/Order/orderForm";
+import { Order, Vehicle } from "@/types/types";
+import { formatCurrency, formatDate, formatShortDate } from "@/lib/utils/formatFunctions";
+import { StatusBadge } from "@/components/ui/statusBadge";
+import { VehicleStatus } from "@/types/enums";
 
-// Função para obter o ícone do status
-function getStatusInfo(startDate: string, endDate: string) {
-  if (!startDate)
-    return {
-      icon: <Calendar className="h-4 w-4" />,
-      color: "bg-blue-600 hover:bg-blue-700",
-    };
-
-  if (!endDate)
-    return {
-      icon: <RotateCcw className="h-4 w-4" />,
-      color: "bg-amber-600 hover:bg-amber-700",
-    };
-
-  return {
-    icon: <CheckCircle2 className="h-4 w-4" />,
-    color: "bg-emerald-600 hover:bg-emerald-700",
-  };
-}
-
-// Função para obter a cor do badge de status do veículo
-function getVehicleStatusColor(status: string) {
-  switch (status) {
-    case "Ativo":
-      return "bg-emerald-600 hover:bg-emerald-700";
-    case "Manutenção":
-      return "bg-amber-600 hover:bg-amber-700";
-    case "Inativo":
-      return "bg-rose-600 hover:bg-rose-700";
-    default:
-      return "bg-gray-600 hover:bg-gray-700";
-  }
-}
 
 export default function VehicleDetailPage({
   params,
@@ -87,7 +53,7 @@ export default function VehicleDetailPage({
 
     const fetchOrders = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/orders/plate/${plate}`, {
+        const res = await fetch(`http://localhost:3001/orders/?plate=${plate}`, {
           method: "GET",
           credentials: "include",
         });
@@ -98,7 +64,7 @@ export default function VehicleDetailPage({
         if (data.length > 0) setOrders(data);
       } catch (error) {
         console.error("Erro ao buscar veículos:", error);
-        // redirecionar para login se necesario
+
       }
     };
 
@@ -135,28 +101,6 @@ export default function VehicleDetailPage({
     console.log("Exclusão do veículo cancelada pelo usuário.");
   }
 };
-
-  // Formatar valores monetários
-  const formatCurrency = (value: number | undefined) => {
-    if (!value) return "não informado";
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
-  };
-
-  // Formatar datas
-  const formatDate = (date: Date | string | undefined) => {
-    if (!date) return "não informado";
-    const parsedDate = typeof date === "string" ? new Date(date) : date;
-    return format(parsedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-  };
-
-  const formatShortDate = (date: Date | string | undefined) => {
-    if (!date) return "não informado";
-    const parsedDate = typeof date === "string" ? new Date(date) : date;
-    return format(parsedDate, "dd/MM/yyyy", { locale: ptBR });
-  };
 
   // Calcular a distribuição de tipos de manutenção
   const maintenanceTypeDistribution = () => {
@@ -211,7 +155,7 @@ export default function VehicleDetailPage({
     };
   };
 
-  if (!vehicle && orders.length === 0) {
+  if (!vehicle) {
     return <div>Carregando...</div>;
   }
 
@@ -231,13 +175,7 @@ export default function VehicleDetailPage({
                 <Car className="mr-3 h-10 w-10 text-indigo-400" />
                 Veículo {vehicle.plate}
               </h1>
-              <p
-                className={`${getVehicleStatusColor(
-                  vehicle.status
-                )} px-2 py-0.5 rounded-2xl`}
-              >
-                {vehicle.status}
-              </p>
+              <StatusBadge status={vehicle.status as VehicleStatus} type="vehicleStatus" />
             </div>
             <p className="text-gray-400 mt-1">
               {vehicle.brand} {vehicle.model} • {vehicle.modelYear}/
@@ -497,15 +435,9 @@ export default function VehicleDetailPage({
                   </div>
                 ) : (
                   orders.map((order: Order) => {
-                    const statusInfo = getStatusInfo(
-                      order.startDate,
-                      order.endDate
-                    );
-
                     return (
                       <OrderCard
                         key={order.id}
-                        statusInfo={statusInfo}
                         order={order}
                         vehicle={vehicle}
                       />

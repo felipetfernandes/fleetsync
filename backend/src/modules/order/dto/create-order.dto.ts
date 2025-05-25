@@ -8,7 +8,7 @@ import {
   IsString,
   ValidateNested,
 } from "class-validator";
-import { OrderType } from "../interfaces/order.interface";
+import { OrderStatus, OrderType } from "@prisma/client";
 import { CreateOrderItemDto } from "./create-order-item.dto";
 import { Type } from "class-transformer";
 
@@ -17,6 +17,11 @@ export class CreateOrderDto {
   @IsEnum(OrderType)
   @IsNotEmpty()
   type: OrderType;
+
+  @ApiProperty({ example: "IN_PROGRESS", enum: OrderStatus })
+  @IsEnum(OrderStatus)
+  @IsNotEmpty()
+  status: OrderStatus;
 
   @ApiProperty({ example: "Troca de óleo e filtros" })
   @IsString()

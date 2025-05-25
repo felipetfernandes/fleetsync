@@ -3,6 +3,7 @@ import { PrismaService } from 'src/modules/prisma/prisma.service';
 import { CreateWorkshopDto } from './dto/create-workshop.dto';
 import { UpdateWorkshopDto } from './dto/update-workshop.dto';
 import { RegisterWorkshopDto } from './dto/register-workshop.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class WorkshopService {
@@ -45,12 +46,7 @@ export class WorkshopService {
       where: { id },
       include: {
         manager: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-          },
+          select: { id: true, name: true, email: true, phone: true },
         },
       },
     });
@@ -62,7 +58,6 @@ export class WorkshopService {
     return workshop;
   }
 
-  // No WorkshopService
   async register(registerWorkshopDto: RegisterWorkshopDto, companyId?: string) {
     const existingWorkshop = await this.prisma.workshop.findUnique({
       where: { cnpj: registerWorkshopDto.cnpj },
@@ -72,37 +67,27 @@ export class WorkshopService {
       throw new ConflictException('Oficina já cadastrada com este CNPJ');
     }
 
-    // Usar o companyId fornecido ou buscar uma empresa padrão
-    let company;
-    if (companyId) {
-      company = await this.prisma.company.findUnique({
-        where: { id: companyId },
-      });
+    const company = companyId
+      ? await this.prisma.company.findUnique({ where: { id: companyId } })
+      : await this.prisma.company.findFirst();
 
-      if (!company) {
-        throw new NotFoundException(`Empresa com ID ${companyId} não encontrada`);
-      }
-    } else {
-      company = await this.prisma.company.findFirst();
-
-      if (!company) {
-        throw new NotFoundException('Nenhuma empresa encontrada para associar à oficina');
-      }
+    if (!company) {
+      throw new NotFoundException('Nenhuma empresa encontrada para associar à oficina');
     }
 
-    // Buscar a primeira filial disponível
     const defaultBranch = await this.prisma.branch.findFirst({
-      where: { companyId: company.id }, // Buscar filial da mesma empresa
+      where: { companyId: company.id },
     });
 
     if (!defaultBranch) {
       throw new NotFoundException('Nenhuma filial encontrada para associar à oficina');
     }
 
-    // Verificar se a senha foi fornecida
     if (!registerWorkshopDto.password) {
       throw new Error('A senha é obrigatória para o cadastro de oficinas');
     }
+
+    const hashedPassword = await bcrypt.hash(registerWorkshopDto.password, 10);
 
     return this.prisma.workshop.create({
       data: {
@@ -111,7 +96,7 @@ export class WorkshopService {
         email: registerWorkshopDto.email,
         phone: registerWorkshopDto.phone,
         address: registerWorkshopDto.address,
-        password: registerWorkshopDto.password, // Adicionando o campo password
+        password: hashedPassword,
         company: { connect: { id: company.id } },
         branch: { connect: { id: defaultBranch.id } },
       },
@@ -127,13 +112,12 @@ export class WorkshopService {
       throw new ConflictException('Oficina já cadastrada com este CNPJ');
     }
 
-    // Extrai companyId, branchId e managerId do DTO
     const { companyId, branchId, managerId, ...rest } = createWorkshopDto;
 
     return this.prisma.workshop.create({
       data: {
         ...rest,
-        company: { connect: { id: companyId } },   // conecta empresa via relacionamento
+        company: { connect: { id: companyId } },
         branch: { connect: { id: branchId } },
         ...(managerId && { manager: { connect: { id: managerId } } }),
       },
@@ -151,6 +135,7 @@ export class WorkshopService {
         ...rest,
         ...(branchId && { branch: { connect: { id: branchId } } }),
         ...(managerId && { manager: { connect: { id: managerId } } }),
+        ...(companyId && { company: { connect: { id: companyId } } }),
       },
     });
   }

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class RegisterWorkshopDto {
     @ApiProperty({ example: 'Oficina São José' })
@@ -27,7 +27,10 @@ export class RegisterWorkshopDto {
     @IsNotEmpty()
     email: string;
 
-    @ApiProperty({ example: 'senhaSegura123', required: false })
+    @ApiProperty({
+      example: 'senhaSegura123',
+      description: 'A senha será criptografada automaticamente ao salvar',
+    })
     @IsString()
     @IsNotEmpty()
     password: string;

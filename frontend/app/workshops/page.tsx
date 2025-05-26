@@ -9,9 +9,11 @@ export default function WorkshopsPage() {
   const [showForm, setShowForm] = useState(false);
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
 
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
   useEffect(() => {
     (async () => {
-      const res = await fetch("http://localhost:3001/workshops/vehicles/", {
+      const res = await fetch(`${BASE_URL}/workshops/vehicles/`, {
         method: "GET",
         credentials: "include",
       });

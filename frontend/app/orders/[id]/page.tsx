@@ -11,9 +11,11 @@ import { Order } from "@/types/types";
 export default async function OrderDetailPage({ params }: PageProps) {
 const [order, setOrder] = useState({} as Order);
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 useEffect(() => {
     const fetchOrders = async () => {
-      const res = await fetch(`http://localhost:3001/orders/${params.id}`, {
+      const res = await fetch(`${BASE_URL}/orders/${params.id}`, {
         method: "GET",
         credentials: "include",
       });

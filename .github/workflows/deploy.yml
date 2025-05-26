@@ -1,1 +1,61 @@
+name: Deploy to Production VPS
 
+on:
+  push:
+    branches:
+      - main # Ou a branch que você usa para produção
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+
+      - name: Add VPS to known_hosts
+        run: ssh-keyscan -H ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to VPS
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} << EOF
+            # Navega para o diretório do projeto (ajuste o caminho se necessário)
+            cd /path/to/your/project/on/vps || exit 1
+            
+            # Puxa as últimas alterações do repositório
+            git pull origin main
+            
+            # Cria/Sobrescreve o arquivo .env.prod do backend com secrets
+            echo "NODE_ENV=production" > backend/.env.prod
+            echo "PORT=3001" >> backend/.env.prod
+            echo "MYSQL_ROOT_PASSWORD=\"\${{ secrets.MYSQL_ROOT_PASSWORD }}\"" >> backend/.env.prod
+            echo "MYSQL_DATABASE=\"\${{ secrets.MYSQL_DATABASE }}\"" >> backend/.env.prod
+            # Ajuste o host do DATABASE_URL conforme a configuração da sua VPS!
+            echo "DATABASE_URL=\"mysql://\${{ secrets.MYSQL_PROD_USER }}:\${{ secrets.MYSQL_PROD_PASSWORD }}@\${{ secrets.MYSQL_HOST }}:3306/\${{ secrets.MYSQL_DATABASE }}\"" >> backend/.env.prod
+            echo "JWT_SECRET=\"\${{ secrets.JWT_SECRET }}\"" >> backend/.env.prod
+            echo "JWT_EXPIRATION=1h" >> backend/.env.prod
+            
+            # Cria/Sobrescreve o arquivo .env.prod do frontend com secrets
+            echo "NODE_ENV=production" > frontend/.env.prod
+            echo "NEXT_PUBLIC_API_URL=/api" >> frontend/.env.prod
+            
+            # Garante que o Docker está rodando
+            sudo systemctl status docker || sudo systemctl start docker
+            
+            # Executa o Docker Compose para produção
+            # O --build reconstruirá as imagens se os Dockerfiles ou código mudarem
+            # O -d roda em background
+            # O --remove-orphans remove containers de serviços que não existem mais no compose
+            docker-compose -f docker-compose.prod.yml pull # Tenta puxar imagens base atualizadas
+            docker-compose -f docker-compose.prod.yml up --build -d --remove-orphans
+            
+            # Opcional: Limpa imagens Docker não utilizadas (dangling images)
+            docker image prune -f
+            
+            echo "Deploy concluído com sucesso!"
+          EOF

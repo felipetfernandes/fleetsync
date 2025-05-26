@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: backend_prod
+    build:
+      context: ./backend
+      dockerfile: Dockerfile # Será ajustado para multi-stage
+      target: production # Assumindo Dockerfile multi-stage posteriormente
+    env_file:
+      - ./backend/.env.prod
+    networks:
+      - prod_network
+    restart: unless-stopped
+    # Não expõe porta diretamente, NGINX fará o proxy
+
+  frontend:
+    container_name: frontend_prod
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile # Será ajustado para multi-stage
+      target: production # Assumindo Dockerfile multi-stage posteriormente
+    env_file:
+      - ./frontend/.env.prod
+    networks:
+      - prod_network
+    restart: unless-stopped
+    # Não expõe porta diretamente, NGINX fará o proxy
+
+  nginx:
+    container_name: nginx_proxy
+    build:
+      context: ./nginx # Diretório a ser criado com Dockerfile e nginx.conf
+      dockerfile: Dockerfile
+    ports:
+      # - "80:80" # Expor porta 80 (HTTP)
+      - "443:443" # Descomentar se configurar HTTPS/SSL
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - prod_network
+    restart: unless-stopped
+
+networks:
+  prod_network:
+    driver: bridge
+

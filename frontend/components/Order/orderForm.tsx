@@ -4,6 +4,7 @@ import type React from "react";
 
 import { useEffect, useState } from "react";
 import Input from "@/components/ui/input";
+import { Branch, OrderItemForm, Vehicle, Workshop } from "@/types/types";
 
 const serviceTypes = {
   PREVENTIVE: "Manutenção Preventiva",
@@ -25,6 +26,8 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
     workshopId: "",
     branchId: "",
   });
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [branchs, setBranchs] = useState<Branch[]>([]);
@@ -35,7 +38,7 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch("http://localhost:3001/branchs", {
+      const res = await fetch(`${BASE_URL}/branchs`, {
         method: "GET",
         credentials: "include",
       });
@@ -55,14 +58,14 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
       try {
         const [vehiclesRes, workshopsRes] = await Promise.all([
           fetch(
-            `http://localhost:3001/vehicles?branchId=${formData.branchId}`,
+            `${BASE_URL}/vehicles?branchId=${formData.branchId}`,
             {
               method: "GET",
               credentials: "include",
             }
           ),
           fetch(
-            `http://localhost:3001/workshops?branchId=${formData.branchId}`,
+            `${BASE_URL}/workshops?branchId=${formData.branchId}`,
             {
               method: "GET",
               credentials: "include",
@@ -128,7 +131,7 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
       };
     });
 
-    const res = await fetch("http://localhost:3001/orders", {
+    const res = await fetch(`${BASE_URL}/orders`, {
       method: "POST",
       credentials: "include",
       headers: {

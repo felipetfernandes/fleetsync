@@ -29,14 +29,15 @@ export default function VehicleDetailPage({
   const plate = decodeURIComponent(params.plate);
   const [tab, setTab] = useState("info");
   const [showForm, setShowForm] = useState(false);
-
   const [vehicle, setvehicle] = useState<Vehicle | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
+
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/vehicles/${plate}`, {
+        const res = await fetch(`${BASE_URL}/vehicles/${plate}`, {
           method: "GET",
           credentials: "include",
         });
@@ -53,7 +54,7 @@ export default function VehicleDetailPage({
 
     const fetchOrders = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/orders/?plate=${plate}`, {
+        const res = await fetch(`${BASE_URL}/orders/?plate=${plate}`, {
           method: "GET",
           credentials: "include",
         });
@@ -79,7 +80,7 @@ export default function VehicleDetailPage({
 
   if (confirmDelete) {
     try {
-      const res = await fetch(`http://localhost:3001/vehicles/${plate}`, {
+      const res = await fetch(`${BASE_URL}/vehicles/${plate}`, {
         method: "DELETE",
         credentials: "include",
       });

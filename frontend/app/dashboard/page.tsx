@@ -42,7 +42,7 @@ function getStatusInfo(status: string) {
 }
 
 export default async function DashboardPage() {
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+  const BASE_URL = process.env.NEXT_PUBLIC_LOCAL_URL;
 
   const [vehicles, orders, workshops] = await Promise.all([
     fetchClientSide<Vehicle[]>(`${BASE_URL}/vehicles`),

@@ -11,9 +11,11 @@ export default function OrdersPage() {
   const [showForm, setShowForm] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
 
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
   useEffect(() => {
     const fetchOrders = async () => {
-      const res = await fetch("http://localhost:3001/orders", {
+      const res = await fetch(`${BASE_URL}/orders`, {
         method: "GET",
         credentials: "include",
       });

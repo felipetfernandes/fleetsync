@@ -7,6 +7,7 @@ import Button from "@/components/ui/button";
 import SupportButton from "@/components/ui/supportButton";
 import Image from "next/image";
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL
 const LogoImage = "/images/logo2.png";
 
 export default function LoginPage() {
@@ -17,7 +18,7 @@ export default function LoginPage() {
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
 
-    const response = await fetch("http://localhost:3001/auth/login", {
+    const response = await fetch(`${BASE_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

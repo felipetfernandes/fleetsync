@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { PlusCircle, X } from "lucide-react";
 import WorkshopForm from "@/components/Workshops/workshopForm";
 import WorkshopCard from "@/components/ui/workshopCard";
+import { Workshop } from "@/types/types";
 
 export default function WorkshopsPage() {
   const [showForm, setShowForm] = useState(false);

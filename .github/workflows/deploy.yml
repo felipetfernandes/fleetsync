@@ -25,7 +25,7 @@ jobs:
         run: |
           ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} << EOF
             # Navega para o diretório do projeto (ajuste o caminho se necessário)
-            cd /path/to/your/project/on/vps || exit 1
+            cd /var/www/html/fleet_manager || exit 1
             
             # Puxa as últimas alterações do repositório
             git pull origin main

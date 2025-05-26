@@ -42,12 +42,12 @@ function getStatusInfo(status: string) {
 }
 
 export default async function DashboardPage() {
-  const baseUrl = "http://backend:3001";
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const [vehicles, orders, workshops] = await Promise.all([
-    fetchClientSide<Vehicle[]>(`${baseUrl}/vehicles`),
-    fetchClientSide<Order[]>(`${baseUrl}/orders`),
-    fetchClientSide<Workshop[]>(`${baseUrl}/workshops`),
+    fetchClientSide<Vehicle[]>(`${BASE_URL}/vehicles`),
+    fetchClientSide<Order[]>(`${BASE_URL}/orders`),
+    fetchClientSide<Workshop[]>(`${BASE_URL}/workshops`),
   ]);
 
   const dashboardData = {

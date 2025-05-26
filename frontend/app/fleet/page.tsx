@@ -11,11 +11,12 @@ export default function FleetPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchBranch, setSearchBranch] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const res = await fetch("http://localhost:3001/vehicles", {
+        const res = await fetch(`${BASE_URL}/vehicles`, {
           method: "GET",
           credentials: "include",
         });

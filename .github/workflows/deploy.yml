@@ -33,11 +33,11 @@ jobs:
             # Cria/Sobrescreve o arquivo .env.prod do backend com secrets
             echo "NODE_ENV=production" > backend/.env.prod
             echo "PORT=3001" >> backend/.env.prod
-            echo "MYSQL_ROOT_PASSWORD="\${{ secrets.MYSQL_ROOT_PASSWORD }}\"" >> backend/.env.prod
-            echo "MYSQL_DATABASE="\${{ secrets.MYSQL_DATABASE }}\"" >> backend/.env.prod
+            echo "MYSQL_ROOT_PASSWORD=\"\${{ secrets.MYSQL_ROOT_PASSWORD }}\"" >> backend/.env.prod
+            echo "MYSQL_DATABASE=\"\${{ secrets.MYSQL_DATABASE }}\"" >> backend/.env.prod
             # Ajuste o host do DATABASE_URL conforme a configuração da sua VPS!
-            echo "DATABASE_URL="mysql://\${{ secrets.MYSQL_PROD_USER }}:\${{ secrets.MYSQL_PROD_PASSWORD }}@\${{ secrets.MYSQL_HOST }}:3306/\${{ secrets.MYSQL_DATABASE }}\"" >> backend/.env.prod
-            echo "JWT_SECRET="\${{ secrets.JWT_SECRET }}\"" >> backend/.env.prod
+            echo "DATABASE_URL=\"mysql://\${{ secrets.MYSQL_PROD_USER }}:\${{ secrets.MYSQL_PROD_PASSWORD }}@\${{ secrets.MYSQL_HOST }}:3306/\${{ secrets.MYSQL_DATABASE }}\"" >> backend/.env.prod
+            echo "JWT_SECRET=\"\${{ secrets.JWT_SECRET }}\"" >> backend/.env.prod
             echo "JWT_EXPIRATION=1h" >> backend/.env.prod
             
             # Cria/Sobrescreve o arquivo .env.prod do frontend com secrets

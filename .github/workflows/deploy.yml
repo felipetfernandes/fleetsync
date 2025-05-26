@@ -59,4 +59,3 @@ jobs:
             
             echo "Deploy concluído com sucesso!"
           EOF
-

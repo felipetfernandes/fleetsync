@@ -29,14 +29,17 @@ services:
       - NEXT_PUBLIC_API_URL=/api
     # Não expõe porta diretamente, NGINX fará o proxy
 
-  nginx:
+ nginx:
     container_name: nginx_proxy
     build:
       context: ./nginx # Diretório a ser criado com Dockerfile e nginx.conf
       dockerfile: Dockerfile
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf  # Volume para persistir o nginx.conf
+      - ./nginx/certificates:/etc/letsencrypt      # Volume para persistir os certificados SSL
     ports:
-      # - "80:80" # Expor porta 80 (HTTP)
-      - "443:443" # Descomentar se configurar HTTPS/SSL
+      - "80:80" # Expor porta 80 (HTTP)
+      - "443:443" # Expor porta 443 (HTTPS)
     depends_on:
       - backend
       - frontend

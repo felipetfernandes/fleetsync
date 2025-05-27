@@ -21,7 +21,6 @@ import { CreateWorkshopDto } from './dto/create-workshop.dto';
 import { UpdateWorkshopDto } from './dto/update-workshop.dto';
 import { RegisterWorkshopDto } from './dto/register-workshop.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ap } from '@faker-js/faker/dist/airline-BUL6NtOJ';
 
 interface JwtPayload {
   userId: string;

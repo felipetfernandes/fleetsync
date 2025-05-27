@@ -20,7 +20,6 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${inter.className} bg-gray-950`}>
-        {// <MainNav/>}
         <main className="container mx-auto">{children}</main>
       </body>
     </html>

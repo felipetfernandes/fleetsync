@@ -46,7 +46,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # Remove devDependencies após o build
-RUN npm prune --production
+## RUN npm prune --production
 
 # Stage 4: Production stage
 FROM node:18-slim AS production

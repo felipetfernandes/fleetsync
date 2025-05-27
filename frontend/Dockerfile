@@ -22,7 +22,7 @@ EXPOSE 3000
 
 # Stage 3: Builder stage for production
 FROM base AS builder
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 
 # Instala dependências de produção e build
 RUN npm ci

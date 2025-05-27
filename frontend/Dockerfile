@@ -66,5 +66,5 @@ EXPOSE 3000
 
 # Comando para iniciar a aplicação em produção
 # Comando padrão do Next.js para produção
-CMD ["npm", "run", "start"] 
+CMD ["npm", "run", "dev"] 
 

@@ -10,13 +10,13 @@ import {
   Trash2,
   PlusCircle,
 } from "lucide-react";
-import VehicleCard from "@/components/Vehicle/vehicleCard";
-import OrderCard from "@/components/Order/orderCard";
+import VehicleCard from "../../components/Vehicle/vehicleCard"; 
+import OrderCard from "../../components/Order/orderCard";
 import { useEffect, useState } from "react";
-import OrderForm from "@/components/Order/orderForm";
+import OrderForm from "../../components/Order/orderForm";
 import { Order, Vehicle } from "@/types/types";
 import { formatCurrency, formatDate, formatShortDate } from "@/lib/utils/formatFunctions";
-import { StatusBadge } from "@/components/ui/statusBadge";
+import { StatusBadge } from "../../components/ui/statusBadge";
 import { VehicleStatus } from "@/types/enums";
 
 

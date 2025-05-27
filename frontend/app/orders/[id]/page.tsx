@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, ClipboardList, CheckCircle2, Phone } from "lucide-react";
@@ -8,12 +8,12 @@ import OrderFullCard from "@/components/Order/orderFullCard";
 import { PageProps } from "@/.next/types/app/layout";
 import { Order } from "@/types/types";
 
-export default async function OrderDetailPage({ params }: PageProps) {
-const [order, setOrder] = useState({} as Order);
+export default function OrderDetailPage({ params }: PageProps) {
+  const [order, setOrder] = useState({} as Order);
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-useEffect(() => {
+  useEffect(() => {
     const fetchOrders = async () => {
       const res = await fetch(`${BASE_URL}/orders/${params.id}`, {
         method: "GET",
@@ -26,8 +26,11 @@ useEffect(() => {
       setOrder(data);
     };
     fetchOrders();
-}, []);
-  
+  }, []);
+
+  if (!order) {
+    return <p>Carregando...</p>;
+  }
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
       <div className="max-w-5xl mx-auto">

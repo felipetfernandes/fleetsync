@@ -25,6 +25,8 @@ services:
     networks:
       - prod_network
     restart: unless-stopped
+    environment:
+      - NEXT_PUBLIC_API_URL=/api
     # Não expõe porta diretamente, NGINX fará o proxy
 
   nginx:

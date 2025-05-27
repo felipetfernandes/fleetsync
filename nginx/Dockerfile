@@ -6,7 +6,10 @@ RUN rm /etc/nginx/conf.d/default.conf
 # Copia a configuração personalizada
 COPY nginx.conf /etc/nginx/conf.d/
 
-# EXPOSE 80
+# Se for usar HTTPS, descomente a linha abaixo
+COPY ./ssl /etc/ssl
+
+EXPOSE 80
 # Se for usar HTTPS
 EXPOSE 443 
 

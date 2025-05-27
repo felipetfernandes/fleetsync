@@ -27,8 +27,6 @@ services:
     restart: unless-stopped
     environment:
       - NEXT_PUBLIC_API_URL=/api
-    args: 
-      - NEXT_PUBLIC_API_URL=/api
     # Não expõe porta diretamente, NGINX fará o proxy
 
   nginx:

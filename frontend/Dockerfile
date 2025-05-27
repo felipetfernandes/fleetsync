@@ -1,5 +1,5 @@
 # Stage 1: Base image
-FROM node:18-alpine AS base
+FROM node:18-slim AS base
 WORKDIR /app
 
 # Copia arquivos de dependências

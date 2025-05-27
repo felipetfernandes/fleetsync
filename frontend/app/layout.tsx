@@ -3,7 +3,7 @@
 import type React from "react"
 import "@/globals.css"
 import { Inter } from "next/font/google"
-import { MainNav } from "@/components/common/mainNav"
+// import { MainNav } from "@/components/common/mainNav"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${inter.className} bg-gray-950`}>
-        <MainNav/>
+        {// <MainNav/>}
         <main className="container mx-auto">{children}</main>
       </body>
     </html>

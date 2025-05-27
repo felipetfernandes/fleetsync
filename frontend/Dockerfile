@@ -45,7 +45,7 @@ RUN npm run build
 # Verifique a necessidade disso para Next.js
 
 # Stage 4: Production stage
-FROM node:18-alpine AS production
+FROM node:18-slim AS production
 WORKDIR /app
 ENV NODE_ENV=production
 
@@ -66,5 +66,5 @@ EXPOSE 3000
 
 # Comando para iniciar a aplicação em produção
 # Comando padrão do Next.js para produção
-CMD ["npm", "run", "dev"] 
+CMD ["npm", "run", "start"] 
 

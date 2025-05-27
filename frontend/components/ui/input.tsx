@@ -16,27 +16,30 @@ type InputProps = {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
 };
+
 const Input = (props: InputProps) => {
   return (
-    <input
-      className={`bg-gray-800 text-white p-2 rounded focus:ring-0 focus:outline-none placeholder:text-gray-400 placeholder:text-sm placeholder:font-light placeholder:font-sans border border-gray-600 ${props.className}`}
-      type={props.type}
-      placeholder={props.placeholder}
-      id={props.id}
-      name={props.name}
-      value={props.value}
-      onChange={props.onChange}
-      required={props.required}
-    >
+    <div className="relative flex items-center">
       {props.image && props.alt && (
         <Image
           src={props.image}
           alt={props.alt}
           width={props.width || 20}
           height={props.height || 20}
+          className="absolute left-2"
         />
       )}
-    </input>
+      <input
+        className={`bg-gray-800 text-white p-2 pl-10 rounded focus:ring-0 focus:outline-none placeholder:text-gray-400 placeholder:text-sm placeholder:font-light placeholder:font-sans border border-gray-600 ${props.className}`}
+        type={props.type}
+        placeholder={props.placeholder}
+        id={props.id}
+        name={props.name}
+        value={props.value}
+        onChange={props.onChange}
+        required={props.required}
+      />
+    </div>
   );
 };
 

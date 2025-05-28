@@ -5,16 +5,15 @@ import { PlusCircle, X } from "lucide-react";
 import WorkshopForm from "@/components/Workshops/workshopForm";
 import WorkshopCard from "@/components/ui/workshopCard";
 import { Workshop } from "@/types/types";
+import { LOCAL_URL } from "@/lib/constants";
 
 export default function WorkshopsPage() {
   const [showForm, setShowForm] = useState(false);
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
 
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
   useEffect(() => {
     (async () => {
-      const res = await fetch(`${BASE_URL}/workshops/vehicles/`, {
+      const res = await fetch(`${LOCAL_URL}/workshops/vehicles/`, {
         method: "GET",
         credentials: "include",
       });

@@ -5,6 +5,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import Input from "@/components/ui/input";
 import { Branch } from "@/types/types";
+import { LOCAL_URL } from "@/lib/constants";
 
 interface VehicleFormProps {
   onSubmit: (data: any) => void;
@@ -29,11 +30,9 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
   });
   const [branchs, setBranchs] = useState<Branch[]>([]);
 
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
   useEffect(() => {
     const fetchBranchs = async () => {
-      const response = await fetch(`${BASE_URL}/branchs`, {
+      const response = await fetch(`${LOCAL_URL}/branchs`, {
         method: "GET",
         credentials: "include",
       });
@@ -61,7 +60,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
       mileageStart: parseInt(formData.mileageStart),
     };
 
-    const res = await fetch(`${BASE_URL}/vehicles`, {
+    const res = await fetch(`${LOCAL_URL}/vehicles`, {
       method: "POST",
       credentials: "include",
       headers: {

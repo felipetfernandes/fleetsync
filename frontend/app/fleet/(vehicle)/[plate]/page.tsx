@@ -18,6 +18,7 @@ import { Order, Vehicle } from "@/types/types";
 import { formatCurrency, formatDate, formatShortDate } from "@/lib/utils/formatFunctions";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { VehicleStatus } from "@/types/enums";
+import { LOCAL_URL } from "@/lib/constants";
 
 
 export default function VehicleDetailPage({
@@ -32,12 +33,10 @@ export default function VehicleDetailPage({
   const [vehicle, setvehicle] = useState<Vehicle | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
 
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/vehicles/${plate}`, {
+        const res = await fetch(`${LOCAL_URL}/vehicles/${plate}`, {
           method: "GET",
           credentials: "include",
         });
@@ -54,7 +53,7 @@ export default function VehicleDetailPage({
 
     const fetchOrders = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/orders/?plate=${plate}`, {
+        const res = await fetch(`${LOCAL_URL}/orders/?plate=${plate}`, {
           method: "GET",
           credentials: "include",
         });
@@ -80,7 +79,7 @@ export default function VehicleDetailPage({
 
   if (confirmDelete) {
     try {
-      const res = await fetch(`${BASE_URL}/vehicles/${plate}`, {
+      const res = await fetch(`${LOCAL_URL}/vehicles/${plate}`, {
         method: "DELETE",
         credentials: "include",
       });

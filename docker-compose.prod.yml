@@ -20,6 +20,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile # Será ajustado para multi-stage
       target: production
+      args:
+        NEXT_PUBLIC_LOCAL_API_URL: /api
+        NEXT_PUBLIC_DOCKER_API_URL: /api
     env_file:
       - ./frontend/.env.prod
     networks:

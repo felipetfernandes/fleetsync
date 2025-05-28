@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile # Será ajustado para multi-stage
       target: production
     env_file:
-      - ./backend/.env
+      - ./backend/.env.prod
     networks:
       - prod_network
     restart: unless-stopped
@@ -21,7 +21,7 @@ services:
       dockerfile: Dockerfile # Será ajustado para multi-stage
       target: production
     env_file:
-      - ./frontend/.env
+      - ./frontend/.env.prod
     networks:
       - prod_network
     restart: unless-stopped

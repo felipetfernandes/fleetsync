@@ -1,0 +1,4 @@
+const LOCAL_URL = process.env.NEXT_PUBLIC_LOCAL_API_URL;
+const DOCKER_URL = process.env.NEXT_PUBLIC_DOCKER_API_URL;
+
+export { LOCAL_URL, DOCKER_URL };

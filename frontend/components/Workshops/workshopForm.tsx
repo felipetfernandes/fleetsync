@@ -4,8 +4,7 @@
 import type React from "react";
 import { useState } from "react";
 import Input from "@/components/ui/input";
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { LOCAL_URL } from "@/lib/constants";
 
 interface WorkshopFormProps {
   onSubmit: () => void;
@@ -81,7 +80,7 @@ export default function WorkshopForm({
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/workshops/register`, {
+      const response = await fetch(`${LOCAL_URL}/workshops/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

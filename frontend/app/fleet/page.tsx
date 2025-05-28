@@ -2,6 +2,7 @@
 
 import VehicleCard from "@/components/Vehicle/vehicleCard";
 import VehicleForm from "@/components/Vehicle/vehicleForm";
+import { LOCAL_URL } from "@/lib/constants";
 import { Vehicle } from "@/types/types";
 import { PlusCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -11,12 +12,11 @@ export default function FleetPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchBranch, setSearchBranch] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/vehicles`, {
+        const res = await fetch(`${LOCAL_URL}/vehicles`, {
           method: "GET",
           credentials: "include",
         });

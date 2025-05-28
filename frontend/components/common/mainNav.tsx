@@ -9,10 +9,6 @@ import {
   ClipboardList,
   BarChart3,
   LogOut,
-  User,
-  Settings,
-  Bell,
-  ChevronDown,
   Menu,
   X,
 } from "lucide-react";

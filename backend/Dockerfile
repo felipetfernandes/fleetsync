@@ -20,10 +20,6 @@ RUN npm install
 # Copia o restante do código
 COPY . .
 
-# Dá permissão de execução ao script (se ainda for necessário)
-# RUN chmod +x ./start.sh 
-# O comando será definido no docker-compose
-
 EXPOSE 3001
 
 # Comando padrão para desenvolvimento (pode ser sobrescrito no docker-compose)
@@ -46,7 +42,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # Remove devDependencies após o build
-## RUN npm prune --production
+RUN npm prune --production
 
 # Stage 4: Production stage
 FROM node:18-slim AS production
@@ -66,13 +62,9 @@ COPY --from=builder /app/dist ./dist
 # Copia o schema do Prisma (necessário em runtime se não usar migrations empacotadas)
 COPY --from=builder /app/prisma ./prisma
 
-# Copia o start.sh se ele for realmente necessário para produção
-# COPY --from=builder /app/start.sh ./start.sh
-# RUN chmod +x ./start.sh
-
 EXPOSE 3001
 
 # Comando para iniciar a aplicação em produção
-CMD ["node", "dist/main"] 
+CMD ["node", "dist/src/main"] 
 # Ou CMD ["./start.sh"] se o script for complexo
 

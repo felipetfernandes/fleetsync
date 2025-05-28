@@ -6,7 +6,7 @@ import OrderCard from "@/components/Order/orderCard";
 import OrderForm from "@/components/Order/orderForm";
 import { useEffect, useState } from "react";
 import { Order } from "@/types/types";
-import { LOCAL_URL } from "@/lib/constants";
+import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants";
 
 export default function OrdersPage() {
   const [showForm, setShowForm] = useState(false);
@@ -14,7 +14,7 @@ export default function OrdersPage() {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const res = await fetch(`${LOCAL_URL}/orders`, {
+      const res = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/orders`, {
         method: "GET",
         credentials: "include",
       });

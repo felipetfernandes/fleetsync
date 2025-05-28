@@ -18,7 +18,7 @@ import { Order, Vehicle } from "@/types/types";
 import { formatCurrency, formatDate, formatShortDate } from "@/lib/utils/formatFunctions";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { VehicleStatus } from "@/types/enums";
-import { LOCAL_URL } from "@/lib/constants";
+import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants";
 
 
 export default function VehicleDetailPage({
@@ -36,7 +36,7 @@ export default function VehicleDetailPage({
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        const res = await fetch(`${LOCAL_URL}/vehicles/${plate}`, {
+        const res = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/vehicles/${plate}`, {
           method: "GET",
           credentials: "include",
         });
@@ -53,7 +53,7 @@ export default function VehicleDetailPage({
 
     const fetchOrders = async () => {
       try {
-        const res = await fetch(`${LOCAL_URL}/orders/?plate=${plate}`, {
+        const res = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/orders/?plate=${plate}`, {
           method: "GET",
           credentials: "include",
         });
@@ -79,7 +79,7 @@ export default function VehicleDetailPage({
 
   if (confirmDelete) {
     try {
-      const res = await fetch(`${LOCAL_URL}/vehicles/${plate}`, {
+      const res = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/vehicles/${plate}`, {
         method: "DELETE",
         credentials: "include",
       });

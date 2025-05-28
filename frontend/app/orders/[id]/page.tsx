@@ -7,14 +7,14 @@ import WorkshopCard from "@/components/ui/workshopCard";
 import OrderFullCard from "@/components/Order/orderFullCard";
 import { PageProps } from "@/.next/types/app/layout";
 import { Order } from "@/types/types";
-import { LOCAL_URL } from "@/lib/constants";
+import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants";
 
 export default function OrderDetailPage({ params }: PageProps) {
   const [order, setOrder] = useState({} as Order);
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const res = await fetch(`${LOCAL_URL}/orders/${params.id}`, {
+      const res = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/orders/${params.id}`, {
         method: "GET",
         credentials: "include",
       });

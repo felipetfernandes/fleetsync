@@ -6,7 +6,7 @@ import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
 import SupportButton from "@/components/ui/supportButton";
 import Image from "next/image";
-import { LOCAL_URL } from "@/lib/constants";
+import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants";
 
 const LogoImage = "/images/logo2.png";
 
@@ -18,7 +18,7 @@ export default function LoginPage() {
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
 
-    const response = await fetch(`api/auth/login`, {
+    const response = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

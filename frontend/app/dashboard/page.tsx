@@ -16,7 +16,7 @@ import {
 import { Order, Vehicle, Workshop } from "@/types/types";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { fetchClientSide } from "@/lib/utils/fetchFunctions";
-import { DOCKER_URL } from "@/lib/constants";
+import { NEXT_PUBLIC_DOCKER_URL } from "@/lib/constants";
 
 function getStatusInfo(status: string) {
   switch (status) {
@@ -44,9 +44,9 @@ function getStatusInfo(status: string) {
 
 export default async function DashboardPage() {
   const [vehicles, orders, workshops] = await Promise.all([
-    fetchClientSide<Vehicle[]>(`${DOCKER_URL}/vehicles`),
-    fetchClientSide<Order[]>(`${DOCKER_URL}/orders`),
-    fetchClientSide<Workshop[]>(`${DOCKER_URL}/workshops`),
+    fetchClientSide<Vehicle[]>(`${NEXT_PUBLIC_DOCKER_URL}/vehicles`),
+    fetchClientSide<Order[]>(`${NEXT_PUBLIC_DOCKER_URL}/orders`),
+    fetchClientSide<Workshop[]>(`${NEXT_PUBLIC_DOCKER_URL}/workshops`),
   ]);
 
   const dashboardData = {

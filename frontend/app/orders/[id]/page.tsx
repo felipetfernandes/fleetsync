@@ -11,26 +11,48 @@ import { fetchClientSide } from "@/lib/utils/fetchClientSide";
 
 export default function OrderDetailPage({ params }: PageProps) {
   const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const data = await fetchClientSide<Order>(
-        "GET",
-        `/orders/${params.id}`
-      );
-      setOrder(data);
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await fetchClientSide<Order>("GET", `/orders/${params.id}`);
+        setOrder(data);
+      } catch (err) {
+        console.error("Erro ao buscar ordem:", err);
+        setError("Erro ao carregar a ordem.");
+        setOrder(null);
+      } finally {
+        setLoading(false);
+      }
     };
+
     fetchOrders();
-  }, []);
+  }, [params.id]);
+
+  if (loading) {
+    return <p className="text-gray-400">Carregando...</p>;
+  }
+
+  if (error) {
+    return <p className="text-red-500">{error}</p>;
+  }
 
   if (!order) {
-    return <p>Carregando...</p>;
+    return <p className="text-yellow-500">Ordem não encontrada.</p>;
   }
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
       <div className="max-w-5xl mx-auto">
-        <header className="flex items-center mb-8">
-          <button onClick={() => window.history.back()}>
+        <header className="flex items-center mb-8 space-x-4">
+          <button
+            onClick={() => window.history.back()}
+            className="text-gray-400 hover:text-white"
+          >
             <ArrowLeft />
           </button>
           <div>
@@ -45,14 +67,7 @@ export default function OrderDetailPage({ params }: PageProps) {
           {/* Coluna principal - Informações da ordem */}
           <div className="lg:col-span-2 flex flex-col space-y-6">
             <OrderFullCard order={order} />
-
             <VehicleCard vehicle={order.vehicle} />
-
-            {/*<div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
-              <div className="pb-2">
-                <h2 className="text-xl font-bold">Histórico de Status</h2>
-              </div>
-            </div>*/}
           </div>
 
           {/* Coluna lateral - Informações da oficina */}

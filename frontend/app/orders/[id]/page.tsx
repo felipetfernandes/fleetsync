@@ -14,14 +14,10 @@ export default function OrderDetailPage({ params }: PageProps) {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const res = await fetchClientSide<Response>(
+      const data = await fetchClientSide<Order>(
         "GET",
         `/orders/${params.id}`
       );
-
-      if (!res.ok) throw new Error("Erro ao buscar ordens");
-
-      const data = await res.json();
       setOrder(data);
     };
     fetchOrders();

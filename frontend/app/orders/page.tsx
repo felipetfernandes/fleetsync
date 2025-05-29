@@ -6,7 +6,7 @@ import OrderCard from "@/components/Order/orderCard";
 import OrderForm from "@/components/Order/orderForm";
 import { useEffect, useState } from "react";
 import { Order } from "@/types/types";
-import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants";
+import { fetchClientSide } from "@/lib/utils/fetchClientSide";
 
 export default function OrdersPage() {
   const [showForm, setShowForm] = useState(false);
@@ -14,14 +14,7 @@ export default function OrdersPage() {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const res = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/orders`, {
-        method: "GET",
-        credentials: "include",
-      });
-
-      if (!res.ok) throw new Error("Erro ao buscar ordens");
-
-      const data = await res.json();
+      const data = await fetchClientSide<Order[]>("GET",`/orders`);
       setOrders(data);
     };
     fetchOrders();

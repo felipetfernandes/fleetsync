@@ -5,7 +5,7 @@ import { PlusCircle, X } from "lucide-react";
 import WorkshopForm from "@/components/Workshops/workshopForm";
 import WorkshopCard from "@/components/ui/workshopCard";
 import { Workshop } from "@/types/types";
-import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants";
+import { fetchClientSide } from "@/lib/utils/fetchClientSide";
 
 export default function WorkshopsPage() {
   const [showForm, setShowForm] = useState(false);
@@ -13,16 +13,10 @@ export default function WorkshopsPage() {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/workshops/vehicles/`, {
-        method: "GET",
-        credentials: "include",
-      });
-
+      const res = await fetchClientSide<Response>("GET",`/workshops/vehicles/`);
       const data = await res.json();
       setWorkshops(data);
-      console.log(data);
     })();
-
   }, []);
 
   const handleOpenForm = () => {

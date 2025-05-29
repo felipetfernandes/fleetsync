@@ -10,16 +10,19 @@ import {
   Trash2,
   PlusCircle,
 } from "lucide-react";
-import VehicleCard from "@/components/Vehicle/vehicleCard"; 
+import VehicleCard from "@/components/Vehicle/vehicleCard";
 import OrderCard from "@/components/Order/orderCard";
 import { useEffect, useState } from "react";
 import OrderForm from "@/components/Order/orderForm";
 import { Order, Vehicle } from "@/types/types";
-import { formatCurrency, formatDate, formatShortDate } from "@/lib/utils/formatFunctions";
+import {
+  formatCurrency,
+  formatDate,
+  formatShortDate,
+} from "@/lib/utils/formatFunctions";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { VehicleStatus } from "@/types/enums";
-import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants";
-
+import { fetchClientSide } from "@/lib/utils/fetchClientSide";
 
 export default function VehicleDetailPage({
   params,
@@ -36,10 +39,10 @@ export default function VehicleDetailPage({
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        const res = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/vehicles/${plate}`, {
-          method: "GET",
-          credentials: "include",
-        });
+        const res = await fetchClientSide<Response>(
+          "GET",
+          `/vehicles/${plate}`
+        );
 
         if (!res.ok) throw new Error("Erro ao buscar veículos");
 
@@ -53,10 +56,10 @@ export default function VehicleDetailPage({
 
     const fetchOrders = async () => {
       try {
-        const res = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/orders/?plate=${plate}`, {
-          method: "GET",
-          credentials: "include",
-        });
+        const res = await fetchClientSide<Response>(
+          "GET",
+          `/orders/?plate=${plate}`
+        );
 
         if (!res.ok) throw new Error("Erro ao buscar veículos");
 
@@ -64,7 +67,6 @@ export default function VehicleDetailPage({
         if (data.length > 0) setOrders(data);
       } catch (error) {
         console.error("Erro ao buscar veículos:", error);
-
       }
     };
 
@@ -73,34 +75,34 @@ export default function VehicleDetailPage({
   }, []);
 
   const handleDeleteVehicle = async () => {
-  const confirmDelete = window.confirm(
-    "Tem certeza que deseja excluir este veículo?\nEsta ação é irreversível."
-  );
+    const confirmDelete = window.confirm(
+      "Tem certeza que deseja excluir este veículo?\nEsta ação é irreversível."
+    );
 
-  if (confirmDelete) {
-    try {
-      const res = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/vehicles/${plate}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+    if (confirmDelete) {
+      try {
+        const res = await fetchClientSide<Response>(
+          "GET",
+          `/vehicles/${plate}`
+        );
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error("Erro ao deletar veículo:", errorData);
-        // Aqui você pode adicionar uma lógica para exibir uma mensagem de erro mais amigável ao usuário
-        throw new Error(`Erro ao deletar veículo: ${res.status}`);
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.error("Erro ao deletar veículo:", errorData);
+          // Aqui você pode adicionar uma lógica para exibir uma mensagem de erro mais amigável ao usuário
+          throw new Error(`Erro ao deletar veículo: ${res.status}`);
+        }
+
+        router.push("/fleet");
+      } catch (error: any) {
+        console.error("Erro ao deletar veículo:", error);
+        // Aqui você pode adicionar uma lógica para exibir uma mensagem de erro ao usuário
       }
-
-      router.push("/fleet");
-    } catch (error: any) {
-      console.error("Erro ao deletar veículo:", error);
-      // Aqui você pode adicionar uma lógica para exibir uma mensagem de erro ao usuário
+    } else {
+      // O usuário cancelou a exclusão, nada acontece
+      console.log("Exclusão do veículo cancelada pelo usuário.");
     }
-  } else {
-    // O usuário cancelou a exclusão, nada acontece
-    console.log("Exclusão do veículo cancelada pelo usuário.");
-  }
-};
+  };
 
   // Calcular a distribuição de tipos de manutenção
   const maintenanceTypeDistribution = () => {
@@ -175,7 +177,10 @@ export default function VehicleDetailPage({
                 <Car className="mr-3 h-10 w-10 text-indigo-400" />
                 Veículo {vehicle.plate}
               </h1>
-              <StatusBadge status={vehicle.status as VehicleStatus} type="vehicleStatus" />
+              <StatusBadge
+                status={vehicle.status as VehicleStatus}
+                type="vehicleStatus"
+              />
             </div>
             <p className="text-gray-400 mt-1">
               {vehicle.brand} {vehicle.model} • {vehicle.modelYear}/

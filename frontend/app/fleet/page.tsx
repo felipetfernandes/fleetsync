@@ -2,7 +2,7 @@
 
 import VehicleCard from "@/components/Vehicle/vehicleCard";
 import VehicleForm from "@/components/Vehicle/vehicleForm";
-import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants";
+import { fetchClientSide } from "@/lib/utils/fetchClientSide";
 import { Vehicle } from "@/types/types";
 import { PlusCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -16,10 +16,7 @@ export default function FleetPage() {
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const res = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/vehicles`, {
-          method: "GET",
-          credentials: "include",
-        });
+        const res = await fetchClientSide<Response>("GET", "/vehicles");
 
         if (!res.ok) throw new Error("Erro ao buscar veículos");
 

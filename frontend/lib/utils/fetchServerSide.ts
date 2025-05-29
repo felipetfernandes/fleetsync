@@ -1,14 +1,16 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export async function fetchClientSide<T>(url: string): Promise<T> {
+const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_DOCKER_API_URL;
+
+export async function fetchServerSide<T>(url: string): Promise<T> {
   try {
     const access_token = cookies().get("access_token")?.value;
 
     if (!access_token) {
       return redirect("/login");
     }
-    const res = await fetch(url, {
+    const res = await fetch(NEXT_PUBLIC_BASE_URL + url, {
       method: "GET",
       credentials: "include",
       next: { revalidate: 120 },

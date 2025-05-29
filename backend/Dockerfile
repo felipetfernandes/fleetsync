@@ -49,6 +49,11 @@ FROM node:18-slim AS production
 WORKDIR /app
 ENV NODE_ENV=production
 
+# Instala OpenSSL (necessário para Prisma)
+RUN apt-get update && \
+    apt-get install -y openssl && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copia dependências de produção do builder
 COPY --from=builder /app/node_modules ./node_modules
 

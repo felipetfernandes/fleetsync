@@ -42,7 +42,8 @@ jobs:
             
             # Cria/Sobrescreve o arquivo .env.prod do frontend com secrets
             echo "NODE_ENV=production" > frontend/.env.prod
-            echo "NEXT_PUBLIC_API_URL=/api" >> frontend/.env.prod
+            echo "NEXT_PUBLIC_LOCAL_API_URL=/api" >> frontend/.env.prod
+            echo "NEXT_PUBLIC_DOCKER_API_URL=http://backend_prod:3001/api/" >> frontend/.env.prod
             
             # Garante que o Docker está rodando
             sudo systemctl status docker || sudo systemctl start docker
@@ -51,8 +52,8 @@ jobs:
             # O --build reconstruirá as imagens se os Dockerfiles ou código mudarem
             # O -d roda em background
             # O --remove-orphans remove containers de serviços que não existem mais no compose
-            docker-compose -f docker-compose.prod.yml pull # Tenta puxar imagens base atualizadas
             docker-compose -f docker-compose.prod.yml up --build -d --remove-orphans
+            docker-compose -f docker-compose.prod.yml pull # Tenta puxar imagens base atualizadas
             
             # Opcional: Limpa imagens Docker não utilizadas (dangling images)
             docker image prune -f

@@ -1,8 +1,10 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-export const formatDateTime = (date: Date | string) => {
+export const formatDateTime = (date: Date | string | null | undefined) => {
+  if (!date) return "não informado";
   const parsedDate = typeof date === "string" ? new Date(date) : date;
+  if (isNaN(parsedDate.getTime())) return "data inválida";
   return format(parsedDate, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
 };
 

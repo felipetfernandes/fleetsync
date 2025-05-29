@@ -22,7 +22,7 @@ services:
       target: production
       args:
         NEXT_PUBLIC_LOCAL_API_URL: /api
-        NEXT_PUBLIC_DOCKER_API_URL: /api
+        NEXT_PUBLIC_DOCKER_API_URL: https://fivecoresolutions.com/api
     env_file:
       - ./frontend/.env.prod
     networks:

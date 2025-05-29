@@ -20,10 +20,10 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post("login")
-  @HttpCode(200)
+  @HttpCode(204)
   @ApiOperation({ summary: "Autenticar usuário" })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ status: 200, description: "Usuário autenticado com sucesso" })
+  @ApiResponse({ status: 204, description: "Usuário autenticado com sucesso" })
   @ApiResponse({ status: 401, description: "Credenciais inválidas" })
   async login(
     @Body() loginDto: LoginDto,

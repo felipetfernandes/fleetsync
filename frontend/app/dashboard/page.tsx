@@ -15,8 +15,7 @@ import {
 } from "lucide-react";
 import { Order, Vehicle, Workshop } from "@/types/types";
 import { StatusBadge } from "@/components/ui/statusBadge";
-import { fetchClientSide } from "@/lib/utils/fetchFunctions";
-import { NEXT_PUBLIC_DOCKER_URL } from "@/lib/constants";
+import { fetchServerSide } from "@/lib/utils/fetchServerSide";
 
 function getStatusInfo(status: string) {
   switch (status) {
@@ -44,9 +43,9 @@ function getStatusInfo(status: string) {
 
 export default async function DashboardPage() {
   const [vehicles, orders, workshops] = await Promise.all([
-    fetchClientSide<Vehicle[]>(`${NEXT_PUBLIC_DOCKER_URL}/vehicles`),
-    fetchClientSide<Order[]>(`${NEXT_PUBLIC_DOCKER_URL}/orders`),
-    fetchClientSide<Workshop[]>(`${NEXT_PUBLIC_DOCKER_URL}/workshops`),
+    fetchServerSide<Vehicle[]>(`/vehicles`),
+    fetchServerSide<Order[]>(`/orders`),
+    fetchServerSide<Workshop[]>(`/workshops`),
   ]);
 
   const dashboardData = {

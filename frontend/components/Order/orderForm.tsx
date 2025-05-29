@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Input from "@/components/ui/input";
 import { Branch, OrderItemForm, Vehicle, Workshop } from "@/types/types";
 import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants";
+import { fetchClientSide } from "@/lib/utils/fetchClientSide";
 
 const serviceTypes = {
   PREVENTIVE: "Manutenção Preventiva",
@@ -38,14 +39,8 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/branchs`, {
-        method: "GET",
-        credentials: "include",
-      });
+      const data = await fetchClientSide<Branch[]>("GET", `/branchs`);
 
-      if (!res.ok) throw new Error("Erro ao buscar branchs");
-
-      const data = await res.json();
       setFormData((prev) => ({ ...prev, branchId: String(data[0].id) }));
       setBranchs(data);
     })();
@@ -56,29 +51,15 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
 
     const fetchData = async () => {
       try {
-        const [vehiclesRes, workshopsRes] = await Promise.all([
-          fetch(
-            `${NEXT_PUBLIC_LOCAL_URL}/vehicles?branchId=${formData.branchId}`,
-            {
-              method: "GET",
-              credentials: "include",
-            }
-          ),
-          fetch(
-            `${NEXT_PUBLIC_LOCAL_URL}/workshops?branchId=${formData.branchId}`,
-            {
-              method: "GET",
-              credentials: "include",
-            }
-          ),
-        ]);
-
-        if (!vehiclesRes.ok) throw new Error("Erro ao buscar veículos");
-        if (!workshopsRes.ok) throw new Error("Erro ao buscar workshops");
-
         const [vehiclesData, workshopsData] = await Promise.all([
-          vehiclesRes.json(),
-          workshopsRes.json(),
+          fetchClientSide<Vehicle[]>(
+            "GET",
+            `/vehicles?branchId=${formData.branchId}`
+          ),
+          fetchClientSide<Workshop[]>(
+            "GET",
+            `/workshops?branchId=${formData.branchId}`
+          ),
         ]);
 
         setFormData((prev) => ({
@@ -137,7 +118,11 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({...formData, items, startDate: new Date().toISOString()}),
+      body: JSON.stringify({
+        ...formData,
+        items,
+        startDate: new Date().toISOString(),
+      }),
     });
 
     if (!res.ok) throw new Error("Erro ao criar ordem de serviço");
@@ -147,10 +132,12 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
-      totalCost: formItems.reduce((acc, item) => acc + Number(item.cost) + Number(item.laborCost), 0),
+      totalCost: formItems.reduce(
+        (acc, item) => acc + Number(item.cost) + Number(item.laborCost),
+        0
+      ),
     }));
   }, [formItems]);
-  
 
   const handleChange = (
     e: React.ChangeEvent<

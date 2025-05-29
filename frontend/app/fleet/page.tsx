@@ -16,11 +16,7 @@ export default function FleetPage() {
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const res = await fetchClientSide<Response>("GET", "/vehicles");
-
-        if (!res.ok) throw new Error("Erro ao buscar veículos");
-
-        const data = await res.json();
+        const data = await fetchClientSide<Vehicle[]>("GET", "/vehicles");
         setVehicles(data);
       } catch (error) {
         console.error("Erro ao buscar veículos:", error);

@@ -39,14 +39,10 @@ export default function VehicleDetailPage({
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        const res = await fetchClientSide<Response>(
+        const data = await fetchClientSide<Vehicle>(
           "GET",
           `/vehicles/${plate}`
         );
-
-        if (!res.ok) throw new Error("Erro ao buscar veículos");
-
-        const data = await res.json();
         setvehicle(data);
       } catch (error) {
         console.error("Erro ao buscar veículos:", error);
@@ -56,14 +52,10 @@ export default function VehicleDetailPage({
 
     const fetchOrders = async () => {
       try {
-        const res = await fetchClientSide<Response>(
+        const data = await fetchClientSide<Order[]>(
           "GET",
           `/orders/?plate=${plate}`
         );
-
-        if (!res.ok) throw new Error("Erro ao buscar veículos");
-
-        const data = await res.json();
         if (data.length > 0) setOrders(data);
       } catch (error) {
         console.error("Erro ao buscar veículos:", error);
@@ -81,18 +73,10 @@ export default function VehicleDetailPage({
 
     if (confirmDelete) {
       try {
-        const res = await fetchClientSide<Response>(
+        await fetchClientSide<Response>(
           "GET",
           `/vehicles/${plate}`
         );
-
-        if (!res.ok) {
-          const errorData = await res.json();
-          console.error("Erro ao deletar veículo:", errorData);
-          // Aqui você pode adicionar uma lógica para exibir uma mensagem de erro mais amigável ao usuário
-          throw new Error(`Erro ao deletar veículo: ${res.status}`);
-        }
-
         router.push("/fleet");
       } catch (error: any) {
         console.error("Erro ao deletar veículo:", error);

@@ -10,7 +10,7 @@ import { Order } from "@/types/types";
 import { fetchClientSide } from "@/lib/utils/fetchClientSide";
 
 export default function OrderDetailPage({ params }: PageProps) {
-  const [order, setOrder] = useState({} as Order);
+  const [order, setOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     const fetchOrders = async () => {

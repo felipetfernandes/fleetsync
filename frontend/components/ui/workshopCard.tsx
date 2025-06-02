@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Workshop } from "@/types/types";
+import Link from "next/link";
 
 export default function WorkshopCard({ workshop }: { workshop: Workshop }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -37,36 +38,38 @@ export default function WorkshopCard({ workshop }: { workshop: Workshop }) {
       </div>
       <div>
         <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-3">
-            <div className="flex items-start">
-              <Building className="h-4 w-4 mr-2 text-gray-400 mt-0.5" />
-              <div>
-                <p className="text-gray-400 text-sm">CNPJ</p>
-                <p className="font-medium">{workshop.cnpj}</p>
+          <Link href={`/workshops/${workshop.id}`}>
+            <div className="grid grid-cols-1 gap-3">
+              <div className="flex items-start">
+                <Building className="h-4 w-4 mr-2 text-gray-400 mt-0.5" />
+                <div>
+                  <p className="text-gray-400 text-sm">CNPJ</p>
+                  <p className="font-medium">{workshop.cnpj}</p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <MapPin className="h-4 w-4 mr-2 text-gray-400 mt-0.5" />
+                <div>
+                  <p className="text-gray-400 text-sm">Endereço</p>
+                  <p className="font-medium">{workshop.address}</p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <Phone className="h-4 w-4 mr-2 text-gray-400 mt-0.5" />
+                <div>
+                  <p className="text-gray-400 text-sm">Telefone</p>
+                  <p className="font-medium">{workshop.phone}</p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <Mail className="h-4 w-4 mr-2 text-gray-400 mt-0.5" />
+                <div>
+                  <p className="text-gray-400 text-sm">Email</p>
+                  <p className="font-medium">{workshop.email}</p>
+                </div>
               </div>
             </div>
-            <div className="flex items-start">
-              <MapPin className="h-4 w-4 mr-2 text-gray-400 mt-0.5" />
-              <div>
-                <p className="text-gray-400 text-sm">Endereço</p>
-                <p className="font-medium">{workshop.address}</p>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <Phone className="h-4 w-4 mr-2 text-gray-400 mt-0.5" />
-              <div>
-                <p className="text-gray-400 text-sm">Telefone</p>
-                <p className="font-medium">{workshop.phone}</p>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <Mail className="h-4 w-4 mr-2 text-gray-400 mt-0.5" />
-              <div>
-                <p className="text-gray-400 text-sm">Email</p>
-                <p className="font-medium">{workshop.email}</p>
-              </div>
-            </div>
-          </div>
+          </Link>
 
           {workshop.order?.length > 0 && (
             <div className="w-full">
@@ -113,9 +116,7 @@ export default function WorkshopCard({ workshop }: { workshop: Workshop }) {
                           </div>
                           <div>
                             <p className="text-gray-400 text-xs">Serviço</p>
-                            <p className="text-sm">
-                              {order.description}
-                            </p>
+                            <p className="text-sm">{order.description}</p>
                           </div>
                         </div>
                       ))}

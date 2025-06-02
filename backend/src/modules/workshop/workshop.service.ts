@@ -1,13 +1,17 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/modules/prisma/prisma.service';
-import { CreateWorkshopDto } from './dto/create-workshop.dto';
-import { UpdateWorkshopDto } from './dto/update-workshop.dto';
-import { RegisterWorkshopDto } from './dto/register-workshop.dto';
-import * as bcrypt from 'bcrypt';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from "@nestjs/common";
+import { PrismaService } from "src/modules/prisma/prisma.service";
+import { CreateWorkshopDto } from "./dto/create-workshop.dto";
+import { UpdateWorkshopDto } from "./dto/update-workshop.dto";
+import { RegisterWorkshopDto } from "./dto/register-workshop.dto";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class WorkshopService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAll() {
     return await this.prisma.workshop.findMany();
@@ -15,38 +19,50 @@ export class WorkshopService {
 
   async findManyByCompany(companyId: string) {
     return this.prisma.workshop.findMany({
-      where: { companyId }, include: {
-        order: true
-      }
+      where: { companyId },
+      include: {
+        order: true,
+      },
     });
   }
 
-  async findManyByBranch({branchId, companyId}: {branchId: number, companyId: string}) {
+  async findManyByBranch({
+    branchId,
+    companyId,
+  }: {
+    branchId: number;
+    companyId: string;
+  }) {
     return this.prisma.workshop.findMany({
       where: { branchId, companyId },
     });
   }
 
   findAllWithVehicles(companyId: string) {
-  return this.prisma.workshop.findMany({
-    where: { companyId },
-    include: {
-      order: {
-        where: { endDate: null },
-        include: {
-          vehicle: true,
+    return this.prisma.workshop.findMany({
+      where: { companyId },
+      include: {
+        order: {
+          where: { endDate: null },
+          include: {
+            vehicle: true,
+          },
         },
       },
-    },
-  });
-}
+    });
+  }
 
-  async findOne(id: string) {
+  async findOne({ id, companyId }: { id: string; companyId: string }) {
     const workshop = await this.prisma.workshop.findUnique({
-      where: { id },
+      where: { id, companyId },
       include: {
         manager: {
           select: { id: true, name: true, email: true, phone: true },
+        },
+        order: {
+          include: {
+            vehicle: true,
+          },
         },
       },
     });
@@ -64,7 +80,7 @@ export class WorkshopService {
     });
 
     if (existingWorkshop) {
-      throw new ConflictException('Oficina já cadastrada com este CNPJ');
+      throw new ConflictException("Oficina já cadastrada com este CNPJ");
     }
 
     const company = companyId
@@ -72,7 +88,9 @@ export class WorkshopService {
       : await this.prisma.company.findFirst();
 
     if (!company) {
-      throw new NotFoundException('Nenhuma empresa encontrada para associar à oficina');
+      throw new NotFoundException(
+        "Nenhuma empresa encontrada para associar à oficina"
+      );
     }
 
     const defaultBranch = await this.prisma.branch.findFirst({
@@ -80,11 +98,13 @@ export class WorkshopService {
     });
 
     if (!defaultBranch) {
-      throw new NotFoundException('Nenhuma filial encontrada para associar à oficina');
+      throw new NotFoundException(
+        "Nenhuma filial encontrada para associar à oficina"
+      );
     }
 
     if (!registerWorkshopDto.password) {
-      throw new Error('A senha é obrigatória para o cadastro de oficinas');
+      throw new Error("A senha é obrigatória para o cadastro de oficinas");
     }
 
     const hashedPassword = await bcrypt.hash(registerWorkshopDto.password, 10);
@@ -109,7 +129,7 @@ export class WorkshopService {
     });
 
     if (existingWorkshop) {
-      throw new ConflictException('Oficina já cadastrada com este CNPJ');
+      throw new ConflictException("Oficina já cadastrada com este CNPJ");
     }
 
     const { companyId, branchId, managerId, ...rest } = createWorkshopDto;
@@ -125,7 +145,7 @@ export class WorkshopService {
   }
 
   async update(id: string, updateWorkshopDto: UpdateWorkshopDto) {
-    await this.findOne(id);
+    await this.findOne({ id, companyId: updateWorkshopDto.companyId });
 
     const { companyId, branchId, managerId, ...rest } = updateWorkshopDto;
 
@@ -140,14 +160,11 @@ export class WorkshopService {
     });
   }
 
-
-  async remove(id: string) {
-    await this.findOne(id);
-
+  async remove({ id, companyId }: { id: string; companyId: string }) {
     await this.prisma.workshop.delete({
-      where: { id },
+      where: { id, companyId },
     });
 
-    return { message: 'Oficina removida com sucesso' };
+    return { message: "Oficina removida com sucesso" };
   }
 }

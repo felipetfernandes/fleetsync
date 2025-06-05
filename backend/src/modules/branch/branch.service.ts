@@ -22,28 +22,32 @@ export class BranchService {
   }
 
   async findAll(query: BranchQueryDto) {
+    const includeItems = query.include || [];
+
     return this.prisma.branch.findMany({
       include: {
-        vehicles: query.vehicles === "true",
-        workshops: query.workshops === "true",
-        users: query.users === "true",
-        company: query.company === "true",
-        Order: query.orders === "true",
+        vehicles: includeItems.includes('vehicle'), 
+        workshops: includeItems.includes('workshops'), 
+        users: includeItems.includes('users'), 
+        company: includeItems.includes('company'), 
+        Order: includeItems.includes('orders'),
       },
     });
   }
 
   async findOne(id: number, query: BranchQueryDto) {
-    const branch = await this.prisma.branch.findFirst({
-      where: { id },
+    const includeItems = query.include || [];
+
+    const branch = this.prisma.branch.findMany({
       include: {
-        vehicles: query.vehicles === "true",
-        workshops: query.workshops === "true",
-        users: query.users === "true",
-        company: query.company === "true",
-        Order: query.orders === "true",
+        vehicles: includeItems.includes('vehicle'), 
+        workshops: includeItems.includes('workshops'), 
+        users: includeItems.includes('users'), 
+        company: includeItems.includes('company'), 
+        Order: includeItems.includes('orders'),
       },
     });
+}
 
     if (!branch) return new NotFoundException("Filial não encontrada");
 

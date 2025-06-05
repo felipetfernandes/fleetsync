@@ -4,6 +4,7 @@ import { UpdateBranchDto } from "./dto/update-branch.dto";
 import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
 import { BranchQueryDto } from "./dto/branch-query.dto";
+import { buildPrismaInclude } from 'src/utils/prisma-include.util';
 import { UserRole } from "@prisma/client";
 
 @Injectable()
@@ -22,30 +23,18 @@ export class BranchService {
   }
 
   async findAll(query: BranchQueryDto) {
-    const includeItems = query.include || [];
+  const include = buildPrismaInclude(query.include || []);
 
     return this.prisma.branch.findMany({
-      include: {
-        vehicles: includeItems.includes('vehicle'), 
-        workshops: includeItems.includes('workshops'), 
-        users: includeItems.includes('users'), 
-        company: includeItems.includes('company'), 
-        Order: includeItems.includes('orders'),
-      },
+      include,
     });
   }
 
   async findOne(id: number, query: BranchQueryDto) {
-    const includeItems = query.include || [];
+    const include = buildPrismaInclude(query.include || []);
 
     const branch = this.prisma.branch.findMany({
-      include: {
-        vehicles: includeItems.includes('vehicle'), 
-        workshops: includeItems.includes('workshops'), 
-        users: includeItems.includes('users'), 
-        company: includeItems.includes('company'), 
-        Order: includeItems.includes('orders'),
-      },
+      include,
     });
 }
 

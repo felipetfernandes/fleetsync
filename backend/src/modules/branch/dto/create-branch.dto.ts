@@ -1,5 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsInt, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
+
+export class CreateBranchBodyDto {
+  @ApiProperty({ example: 'Filial Centro' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiProperty({ example: 'São Paulo' })
+  @IsString()
+  @IsNotEmpty()
+  city: string;
+}
 
 export class CreateBranchDto {
   @ApiProperty({ example: 'Filial Centro' })

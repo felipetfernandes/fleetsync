@@ -478,7 +478,7 @@ export default async function DashboardPage() {
             </div>
           </Link>
 
-          <Link href="/relatorios">
+          <Link href="/reports">
             <div className="bg-gray-900 border border-gray-800 rounded-xl hover:bg-gray-800 transition-colors cursor-pointer h-full">
               <div className="p-6 flex flex-col items-center justify-center text-center h-full">
                 <BarChart3 className="h-10 w-10 text-indigo-400 mb-4" />

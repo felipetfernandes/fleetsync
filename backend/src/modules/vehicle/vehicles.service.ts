@@ -2,15 +2,18 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  Inject,
 } from "@nestjs/common";
 import { CreateVehicleDto } from "./dto/create-vehicle.dto";
 import { UpdateVehicleDto } from "./dto/update-vehicle.dto";
 import { PrismaService } from "src/modules/prisma/prisma.service";
+import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
+import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
 
 @Injectable()
 export class VehiclesService {
-  constructor(private readonly prisma: PrismaService) {}
-
+  constructor(@Inject(TENANT_PRISMA_CLIENT) private readonly prisma: ExtendedTenantClient) {}
+  
   // Método para encontrar todos os veículos
   async findAll() {
     return this.prisma.vehicle.findMany();
@@ -18,7 +21,6 @@ export class VehiclesService {
 
   async findManyByCompany(companyId: string) {
     return this.prisma.vehicle.findMany({
-      where: { companyId },
       include: {
         driver: {
           select: {

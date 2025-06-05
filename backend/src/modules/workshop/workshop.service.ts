@@ -2,16 +2,18 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  Inject,
 } from "@nestjs/common";
-import { PrismaService } from "src/modules/prisma/prisma.service";
 import { CreateWorkshopDto } from "./dto/create-workshop.dto";
 import { UpdateWorkshopDto } from "./dto/update-workshop.dto";
 import { RegisterWorkshopDto } from "./dto/register-workshop.dto";
 import * as bcrypt from "bcrypt";
+import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
+import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
 
 @Injectable()
 export class WorkshopService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(TENANT_PRISMA_CLIENT) private readonly prisma: ExtendedTenantClient) { }
 
   async findAll() {
     return await this.prisma.workshop.findMany();

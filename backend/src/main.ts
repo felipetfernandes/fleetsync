@@ -3,6 +3,7 @@ import { ValidationPipe } from "@nestjs/common"
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger"
 import { AppModule } from "./app.module"
 import * as cookieParser from 'cookie-parser';
+import { ClsService } from "nestjs-cls";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)

@@ -20,10 +20,11 @@ import { VehiclesService } from "./vehicles.service";
 import { CreateVehicleDto } from "./dto/create-vehicle.dto";
 import { UpdateVehicleDto } from "./dto/update-vehicle.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { TenantClsGuard } from "../auth/guards/tenant-cls.guard";
 
 @ApiTags("vehicles")
 @Controller("vehicles")
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, TenantClsGuard)
 @ApiBearerAuth()
 export class VehiclesController {
   constructor(private readonly vehiclesService: VehiclesService) {}

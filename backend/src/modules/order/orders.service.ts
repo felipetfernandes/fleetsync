@@ -1,18 +1,19 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
-import { PrismaService } from "src/modules/prisma/prisma.service";
+import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
+import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly prismaService: PrismaService) {}
+constructor(@Inject(TENANT_PRISMA_CLIENT) private readonly prisma: ExtendedTenantClient) {}
 
   async create(createOrderDto: CreateOrderDto, companyId: string) {
     const { vehicleId, workshopId, branchId, items, ...orderData } =
       createOrderDto;
 
     // Verificar se o veículo existe
-    const vehicle = await this.prismaService.vehicle.findUnique({
+    const vehicle = await this.prisma.vehicle.findUnique({
       where: { id: vehicleId },
     });
     if (!vehicle) {
@@ -20,7 +21,7 @@ export class OrderService {
     }
 
     // Verificar se a oficina existe
-    const workshop = await this.prismaService.workshop.findUnique({
+    const workshop = await this.prisma.workshop.findUnique({
       where: { id: workshopId },
     });
     if (!workshop) {
@@ -30,7 +31,7 @@ export class OrderService {
     }
 
     // Verificar se a empresa existe
-    const enterprise = await this.prismaService.company.findUnique({
+    const enterprise = await this.prisma.company.findUnique({
       where: { id: companyId },
     });
     if (!enterprise) {
@@ -38,7 +39,7 @@ export class OrderService {
     }
 
     // Criar ordem de serviço
-    const order = await this.prismaService.order.create({
+    const order = await this.prisma.order.create({
       data: {
         ...orderData,
         vehicle: { connect: { id: vehicleId } },
@@ -54,7 +55,7 @@ export class OrderService {
       },
     });
 
-    await this.prismaService.orderItem.createMany({
+    await this.prisma.orderItem.createMany({
       data: items.map((item) => ({
         orderId: order.id,
         description: item.description,
@@ -68,7 +69,7 @@ export class OrderService {
   }
 
   async findAll(companyId: string) {
-    return this.prismaService.order.findMany({
+    return this.prisma.order.findMany({
       where: { companyId },
       include: {
         vehicle: {
@@ -86,6 +87,7 @@ export class OrderService {
             },
           },
         },
+        OrderItems: true,
         workshop: true,
         company: true,
         branch: true,
@@ -94,11 +96,11 @@ export class OrderService {
   }
 
   async findAllByPlate(plate: string) {
-    const vehicleData = await this.prismaService.vehicle.findUnique({
+    const vehicleData = await this.prisma.vehicle.findUnique({
       where: { plate },
     });
 
-    return this.prismaService.order.findMany({
+    return this.prisma.order.findMany({
       where: { vehicle: { id: vehicleData.id } },
       include: {
         workshop: {
@@ -119,7 +121,7 @@ export class OrderService {
   }
 
   async findOne(id: string) {
-    const service = await this.prismaService.order.findUnique({
+    const service = await this.prisma.order.findUnique({
       where: { id },
       include: { vehicle: true, workshop: true, company: true },
     });
@@ -141,7 +143,7 @@ export class OrderService {
 
     // Validar e conectar veículo se necessário
     if (vehicleId) {
-      const vehicle = await this.prismaService.vehicle.findUnique({
+      const vehicle = await this.prisma.vehicle.findUnique({
         where: { id: vehicleId },
       });
       if (!vehicle)
@@ -153,7 +155,7 @@ export class OrderService {
 
     // Validar e conectar oficina se necessário
     if (workshopId) {
-      const workshop = await this.prismaService.workshop.findUnique({
+      const workshop = await this.prisma.workshop.findUnique({
         where: { id: workshopId },
       });
       if (!workshop)
@@ -165,7 +167,7 @@ export class OrderService {
 
     // Validar e conectar empresa se necessário
     if (companyId) {
-      const enterprise = await this.prismaService.company.findUnique({
+      const enterprise = await this.prisma.company.findUnique({
         where: { id: companyId },
       });
       if (!enterprise)
@@ -176,7 +178,7 @@ export class OrderService {
     }
 
     // Atualizar ordem
-    return this.prismaService.order.update({
+    return this.prisma.order.update({
       where: { id },
       data,
       include: { vehicle: true, workshop: true, company: true },
@@ -186,7 +188,7 @@ export class OrderService {
   async remove(id: string) {
     await this.findOne(id);
 
-    await this.prismaService.order.delete({
+    await this.prisma.order.delete({
       where: { id },
     });
 

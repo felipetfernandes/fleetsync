@@ -67,16 +67,16 @@ model Branch {
   vehicles  Vehicle[]
   workshops Workshop[]
   users     User[]
+  Order     Order[]
 
   // Timestamps
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  Order     Order[]
 
   @@map("branch")
 }
 
-// Prisma Schema, Interface e DTO para Vehicle
+// Prisma Schema para Vehicle
 model Vehicle {
   id              String        @id @default(uuid())
   plate           String        @unique

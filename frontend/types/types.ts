@@ -17,6 +17,9 @@ type User = {
   branchId: number;
   createdAt: Date;
   updatedAt: Date;
+  Vehicle?: Vehicle;
+  Workshop?: Workshop;
+  Branch?: Branch;
 }
 
 type Vehicle = {
@@ -110,6 +113,9 @@ type Branch = {
   phone: string;
   email: string;
   manager: string;
+  users: User[];
+  vehicles: Vehicle[];
+  workshops: Workshop[];
 };
 
 type Company = {

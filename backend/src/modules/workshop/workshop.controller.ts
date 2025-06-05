@@ -21,6 +21,7 @@ import { CreateWorkshopDto } from "./dto/create-workshop.dto";
 import { UpdateWorkshopDto } from "./dto/update-workshop.dto";
 import { RegisterWorkshopDto } from "./dto/register-workshop.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { TenantClsGuard } from "../auth/guards/tenant-cls.guard";
 
 interface JwtPayload {
   userId: string;
@@ -29,7 +30,7 @@ interface JwtPayload {
 
 @ApiTags("workshops")
 @Controller("workshops")
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, TenantClsGuard)
 @ApiBearerAuth()
 export class WorkshopController {
   constructor(private readonly workshopService: WorkshopService) {}

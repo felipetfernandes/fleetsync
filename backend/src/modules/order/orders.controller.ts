@@ -20,10 +20,11 @@ import { OrderService } from "./orders.service";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { TenantClsGuard } from "../auth/guards/tenant-cls.guard";
 
 @ApiTags("orders")
 @Controller("orders")
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, TenantClsGuard)
 @ApiBearerAuth()
 export class OrderController {
   constructor(private readonly ordersService: OrderService) {}

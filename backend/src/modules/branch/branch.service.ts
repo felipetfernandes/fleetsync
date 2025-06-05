@@ -4,6 +4,7 @@ import { UpdateBranchDto } from "./dto/update-branch.dto";
 import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
 import { BranchQueryDto } from "./dto/branch-query.dto";
+import { buildPrismaInclude } from 'src/utils/prisma-include.util';
 import { UserRole } from "@prisma/client";
 
 @Injectable()
@@ -22,35 +23,35 @@ export class BranchService {
   }
 
   async findAll(query: BranchQueryDto) {
+  const include = buildPrismaInclude(query.include || []);
+
     return this.prisma.branch.findMany({
-      include: {
-        vehicles: query.vehicles === "true",
-        workshops: query.workshops === "true",
-        users: query.users === "true",
-        company: query.company === "true",
-        Order: query.orders === "true",
-      },
+      include,
     });
   }
 
   async findOne(id: number, query: BranchQueryDto) {
-    return this.prisma.branch.findFirst({
-      where: { id },
-      include: {
-        vehicles: query.vehicles === "true",
-        workshops: query.workshops === "true",
-        users: query.users === "true",
-        company: query.company === "true",
-        Order: query.orders === "true",
-      },
+    const include = buildPrismaInclude(query.include || []);
+
+    const branch = this.prisma.branch.findMany({
+      include,
     });
+}
+
+    if (!branch) return new NotFoundException("Filial não encontrada");
+
+    return branch;
   }
 
   update(id: number, updateBranchDto: UpdateBranchDto) {
+    try {
     return this.prisma.branch.update({
       where: { id },
       data: { ...updateBranchDto },
     });
+    } catch (error) {
+      return new NotFoundException("Filial não encontrada");
+    }
   }
 
   async remove(id: number, role: UserRole) {

@@ -46,6 +46,7 @@ export class BranchController {
 
   @ApiOperation({ summary: "Encontrar uma filial pelo id" })
   @ApiResponse({ status: 200, description: "Filial encontrada com sucesso" })
+  @ApiResponse({ status: 404, description: "Filial não encontrada" })
   @Get(":id")
   findOne(@Param("id") id: string, @Query() query: BranchQueryDto) {
     return this.branchService.findOne(+id, query);
@@ -53,6 +54,7 @@ export class BranchController {
 
   @ApiOperation({ summary: "Atualizar uma filial pelo id" })
   @ApiResponse({ status: 200, description: "Filial atualizada com sucesso" })
+  @ApiResponse({ status: 404, description: "Filial não encontrada" })
   @Patch(":id")
   update(@Param("id") id: string, @Body() updateBranchDto: UpdateBranchDto) {
     return this.branchService.update(+id, updateBranchDto);

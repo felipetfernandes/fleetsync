@@ -27,8 +27,6 @@ export function createTenantExtension(cls: ClsService) {
             "update",
             "updateMany",
             "upsert",
-            "delete",
-            "deleteMany",
             "count",
             "aggregate",
             "groupBy",
@@ -51,6 +49,7 @@ export function createTenantExtension(cls: ClsService) {
                 applyFilterToModel = true;
                 break;
               }
+
               tenantFilter.companyId = companyId;
               if (branchId) tenantFilter.id = branchId;
               applyFilterToModel = true;

@@ -34,7 +34,7 @@ export class BranchService {
   }
 
   async findOne(id: number, query: BranchQueryDto) {
-    return this.prisma.branch.findFirst({
+    const branch = await this.prisma.branch.findFirst({
       where: { id },
       include: {
         vehicles: query.vehicles === "true",
@@ -44,13 +44,21 @@ export class BranchService {
         Order: query.orders === "true",
       },
     });
+
+    if (!branch) return new NotFoundException("Filial não encontrada");
+
+    return branch;
   }
 
   update(id: number, updateBranchDto: UpdateBranchDto) {
+    try {
     return this.prisma.branch.update({
       where: { id },
       data: { ...updateBranchDto },
     });
+    } catch (error) {
+      return new NotFoundException("Filial não encontrada");
+    }
   }
 
   async remove(id: number, role: UserRole) {

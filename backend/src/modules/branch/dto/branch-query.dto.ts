@@ -1,29 +1,17 @@
-import { IsBooleanString, IsOptional } from 'class-validator';
+import { IsArray, IsOptional, IsString, IsIn, ArrayNotEmpty } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class BranchQueryDto {
   @IsOptional()
-  @IsBooleanString()
-  @ApiPropertyOptional({ type: String, description: 'Incluir veículos relacionados' })
-  vehicles?: string;
-
-  @IsOptional()
-  @IsBooleanString()
-  @ApiPropertyOptional({ type: String, description: 'Incluir oficinas relacionadas' })
-  workshops?: string;
-
-  @IsOptional()
-  @IsBooleanString()
-  @ApiPropertyOptional({ type: String, description: 'Incluir usuários relacionados' })
-  users?: string;
-
-  @IsOptional()
-  @IsBooleanString()
-  @ApiPropertyOptional({ type: String, description: 'Incluir a empresa relacionada' })
-  company?: string;
-
-  @IsOptional()
-  @IsBooleanString()
-  @ApiPropertyOptional({ type: String, description: 'Incluir ordens relacionadas' })
-  orders?: string;
+  @IsArray()
+  @IsString({ each: true })
+  @IsIn(['vehicle', 'workshops', 'users', 'company', 'orders'], { each: true })
+  @ArrayNotEmpty()
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'List of relationships to include (vehicle, workshops, users, company, orders)',
+  })
+  @Transform(({ value }) => value.split(','), { toClassOnly: true })
+  include?: string[];
 }

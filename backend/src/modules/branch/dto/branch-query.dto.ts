@@ -12,6 +12,6 @@ export class BranchQueryDto {
     type: [String],
     description: 'List of relationships to include (vehicle, workshops, users, company, orders)',
   })
-  @Transform(({ value }) => value.split(','), { toClassOnly: true })
+ @Transform(({ value }) => value.split(',').map((v: string) => v.toLowerCase()), { toClassOnly: true })
   include?: string[];
 }

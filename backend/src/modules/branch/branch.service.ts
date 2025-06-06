@@ -1,11 +1,17 @@
-import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { CreateBranchDto } from "./dto/create-branch.dto";
 import { UpdateBranchDto } from "./dto/update-branch.dto";
 import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
 import { BranchQueryDto } from "./dto/branch-query.dto";
-import { buildPrismaInclude } from 'src/utils/prisma-include.util';
+import { buildPrismaInclude } from "src/utils/includes/prisma-includes.util";
 import { UserRole } from "@prisma/client";
+import { branchAvailableIncludes } from "src/utils/includes/branch.includes";
 
 @Injectable()
 export class BranchService {
@@ -23,7 +29,10 @@ export class BranchService {
   }
 
   async findAll(query: BranchQueryDto) {
-  const include = buildPrismaInclude(query.include || []);
+    const include = buildPrismaInclude(
+      query.include || [],
+      branchAvailableIncludes
+    );
 
     return this.prisma.branch.findMany({
       include,
@@ -31,12 +40,15 @@ export class BranchService {
   }
 
   async findOne(id: number, query: BranchQueryDto) {
-    const include = buildPrismaInclude(query.include || []);
+    const include = buildPrismaInclude(
+      query.include || [],
+      branchAvailableIncludes
+    );
 
-    const branch = this.prisma.branch.findMany({
+    const branch = await this.prisma.branch.findFirst({
+      where: { id },
       include,
     });
-}
 
     if (!branch) return new NotFoundException("Filial não encontrada");
 
@@ -45,10 +57,10 @@ export class BranchService {
 
   update(id: number, updateBranchDto: UpdateBranchDto) {
     try {
-    return this.prisma.branch.update({
-      where: { id },
-      data: { ...updateBranchDto },
-    });
+      return this.prisma.branch.update({
+        where: { id },
+        data: { ...updateBranchDto },
+      });
     } catch (error) {
       return new NotFoundException("Filial não encontrada");
     }

@@ -21,6 +21,7 @@ import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { TenantClsGuard } from "../auth/guards/tenant-cls.guard";
+import { OrderQueryDto } from "./dto/order-query.dto";
 
 @ApiTags("orders")
 @Controller("orders")
@@ -40,34 +41,36 @@ export class OrderController {
 
   @Get()
   @ApiOperation({ summary: "Listar todos os serviços" })
-  findAll(@Req() req, @Query("plate") plate?: string) {
-    if (plate) return this.ordersService.findAllByPlate(plate);
-    const { companyId } = req.user;
-    return this.ordersService.findAll(companyId);
+  findAll(@Query() query: OrderQueryDto) {
+    return this.ordersService.findAll(query);
   }
 
   @Get(":id")
   @ApiOperation({ summary: "Buscar um serviço pelo ID" })
   @ApiResponse({ status: 200, description: "Serviço encontrado" })
   @ApiResponse({ status: 404, description: "Serviço não encontrado" })
-  findOne(@Param("id") id: string) {
-    return this.ordersService.findOne(id);
+  findOne(@Param("id") id: string, @Query() query: OrderQueryDto) {
+    return this.ordersService.findOne({id, query});
   }
 
   @Patch(":id")
   @ApiOperation({ summary: "Atualizar um serviço" })
   @ApiResponse({ status: 200, description: "Serviço atualizado com sucesso" })
   @ApiResponse({ status: 404, description: "Serviço não encontrado" })
-  update(@Param("id") id: string, @Body() updateServiceDto: UpdateOrderDto, @Req() req) {
-    const { companyId } = req.user;
-    return this.ordersService.update(id, updateServiceDto, companyId);
+  update(@Param("id") id: string, @Body() updateServiceDto: UpdateOrderDto) {
+    return this.ordersService.update(id, updateServiceDto);
   }
 
   @Delete(":id")
   @ApiOperation({ summary: "Remover um serviço" })
   @ApiResponse({ status: 200, description: "Serviço removido com sucesso" })
   @ApiResponse({ status: 404, description: "Serviço não encontrado" })
-  remove(@Param("id") id: string) {
-    return this.ordersService.remove(id);
+    @ApiResponse({
+    status: 401,
+    description: "Apenas administradores podem remover ordens de serviço",
+  })
+  remove(@Param("id") id: string, @Req() req) {
+    const { role } = req.user;
+    return this.ordersService.remove(id, role);
   }
 }

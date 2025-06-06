@@ -1,12 +1,23 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
+import { buildPrismaInclude } from "src/utils/includes/prisma-includes.util";
+import { orderAvailableIncludes } from "src/utils/includes/order.includes";
+import { OrderQueryDto } from "./dto/order-query.dto";
+import { UserRole } from "@prisma/client";
 
 @Injectable()
 export class OrderService {
-constructor(@Inject(TENANT_PRISMA_CLIENT) private readonly prisma: ExtendedTenantClient) {}
+  constructor(
+    @Inject(TENANT_PRISMA_CLIENT) private readonly prisma: ExtendedTenantClient
+  ) {}
 
   async create(createOrderDto: CreateOrderDto, companyId: string) {
     const { vehicleId, workshopId, branchId, items, ...orderData } =
@@ -68,130 +79,86 @@ constructor(@Inject(TENANT_PRISMA_CLIENT) private readonly prisma: ExtendedTenan
     return null;
   }
 
-  async findAll(companyId: string) {
-    return this.prisma.order.findMany({
-      where: { companyId },
-      include: {
-        vehicle: {
-          include: {
-            driver: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
-                licenseNumber: true,
-                licenseCategory: true,
-                licenseExpiration: true,
-              },
-            },
-          },
+  async findAll(query: OrderQueryDto) {
+    const include = buildPrismaInclude(
+      query.include || [],
+      orderAvailableIncludes
+    );
+
+    if (query.plate && query.workshopId) {
+      return this.prisma.order.findMany({
+        where: {
+          vehicle: { plate: query.plate },
+          workshop: { id: query.workshopId },
         },
-        OrderItems: true,
-        workshop: true,
-        company: true,
-        branch: true,
-      },
+        include,
+      });
+    }
+
+    if (query.plate) {
+      return this.prisma.order.findMany({
+        where: { vehicle: { plate: query.plate } },
+        include,
+      });
+    }
+
+    if (query.workshopId) {
+      return this.prisma.order.findMany({
+        where: { workshop: { id: query.workshopId } },
+        include,
+      });
+    }
+
+    if (query.branchId) {
+      return this.prisma.order.findMany({
+        where: { branch: { id: Number(query.branchId) } },
+        include,
+      });
+    }
+
+    return this.prisma.order.findMany({
+      include,
     });
   }
 
-  async findAllByPlate(plate: string) {
-    const vehicleData = await this.prisma.vehicle.findUnique({
-      where: { plate },
-    });
+  async findOne({ id, query }: { id: string; query: OrderQueryDto }) {
+    const include = buildPrismaInclude(
+      query.include || [],
+      orderAvailableIncludes
+    );
 
-    return this.prisma.order.findMany({
-      where: { vehicle: { id: vehicleData.id } },
-      include: {
-        workshop: {
-          select: {
-            id: true,
-            name: true,
-            cnpj: true,
-            address: true,
-            phone: true,
-            email: true,
-            manager: true,
-          },
-        },
-        company: true,
-        branch: true,
-      },
-    });
-  }
-
-  async findOne(id: string) {
-    const service = await this.prisma.order.findUnique({
+    const service = await this.prisma.order.findFirst({
       where: { id },
-      include: { vehicle: true, workshop: true, company: true },
+      include,
     });
 
     if (!service) {
-      throw new NotFoundException(`Serviço com ID ${id} não encontrado`);
+      throw new NotFoundException(`Ordem de serviço não encontrada`);
     }
 
     return service;
   }
 
-  async update(id: string, updateDto: UpdateOrderDto, companyId: string) {
-    // Verificar se a ordem existe
-    await this.findOne(id);
-
-    const { vehicleId, workshopId, ...rest } = updateDto;
-
-    const data: any = { ...rest };
-
-    // Validar e conectar veículo se necessário
-    if (vehicleId) {
-      const vehicle = await this.prisma.vehicle.findUnique({
-        where: { id: vehicleId },
+  async update(id: string, updateOrderDto: UpdateOrderDto) {
+    try {
+      return this.prisma.order.update({
+        where: { id },
+        data: { ...updateOrderDto },
       });
-      if (!vehicle)
-        throw new NotFoundException(
-          `Veículo com ID ${vehicleId} não encontrado`
-        );
-      data.vehicle = { connect: { id: vehicleId } };
+    } catch (error) {
+      return new NotFoundException("Ordem de serviço não encontrada");
     }
-
-    // Validar e conectar oficina se necessário
-    if (workshopId) {
-      const workshop = await this.prisma.workshop.findUnique({
-        where: { id: workshopId },
-      });
-      if (!workshop)
-        throw new NotFoundException(
-          `Oficina com ID ${workshopId} não encontrada`
-        );
-      data.workshop = { connect: { id: workshopId } };
-    }
-
-    // Validar e conectar empresa se necessário
-    if (companyId) {
-      const enterprise = await this.prisma.company.findUnique({
-        where: { id: companyId },
-      });
-      if (!enterprise)
-        throw new NotFoundException(
-          `Empresa com ID ${companyId} não encontrada`
-        );
-      data.enterprise = { connect: { id: companyId } };
-    }
-
-    // Atualizar ordem
-    return this.prisma.order.update({
-      where: { id },
-      data,
-      include: { vehicle: true, workshop: true, company: true },
-    });
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(id: string, role: UserRole) {
+    if (role !== UserRole.ADMIN) {
+      return new UnauthorizedException(
+        "Apenas administradores podem remover filiais"
+      );
+    }
 
-    await this.prisma.order.delete({
+    return this.prisma.order.delete({
       where: { id },
     });
-
-    return { message: "Serviço removido com sucesso" };
   }
 }

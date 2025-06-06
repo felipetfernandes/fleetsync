@@ -1,12 +1,6 @@
 export function buildPrismaInclude(
   includes: string[],
-  availableIncludes: Record<string, string> = {
-    vehicle: 'vehicles',
-    workshops: 'workshops',
-    users: 'users',
-    company: 'company',
-    orders: 'Order',
-  },
+  availableIncludes: Record<string, string>
 ) {
   const include: Record<string, boolean> = {};
 

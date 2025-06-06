@@ -40,16 +40,16 @@ export class BranchController {
   @ApiOperation({ summary: "Listar todos as filiais" })
   @ApiResponse({ status: 200, description: "Filiais listadas com sucesso" })
   @Get()
-  findAll(@Query() query: BranchQueryDto) {
-    return this.branchService.findAll(query);
+  findAll(@Query() includes: BranchQueryDto) {
+    return this.branchService.findAll(includes);
   }
 
   @ApiOperation({ summary: "Encontrar uma filial pelo id" })
   @ApiResponse({ status: 200, description: "Filial encontrada com sucesso" })
   @ApiResponse({ status: 404, description: "Filial não encontrada" })
   @Get(":id")
-  findOne(@Param("id") id: string, @Query() query: BranchQueryDto) {
-    return this.branchService.findOne(+id, query);
+  findOne(@Param("id") id: string, @Query() includes: BranchQueryDto) {
+    return this.branchService.findOne(+id, includes);
   }
 
   @ApiOperation({ summary: "Atualizar uma filial pelo id" })

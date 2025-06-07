@@ -119,10 +119,10 @@ model Vehicle {
   driver    User?   @relation(fields: [driverId], references: [id])
   driverId  String? @unique
   order     Order[]
+  MileageHistory MileageHistory[]
 
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
-  MileageHistory MileageHistory[]
 
   @@map("vehicle")
 }

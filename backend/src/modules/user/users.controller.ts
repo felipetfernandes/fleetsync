@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -19,6 +20,7 @@ import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { TenantClsGuard } from "../auth/guards/tenant-cls.guard";
+import { UserQueryDto } from "./dto/user-query.dto";
 
 @ApiTags("users")
 @Controller("users")
@@ -34,25 +36,31 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get()
   @ApiOperation({ summary: "Listar todos os usuários" })
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query() query: UserQueryDto) {
+    return this.usersService.findAll(query);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get(":id")
+  @Get("id/:id")
   @ApiBearerAuth()
   @ApiOperation({ summary: "Buscar um usuário pelo ID" })
   @ApiResponse({ status: 200, description: "Usuário encontrado" })
   @ApiResponse({ status: 404, description: "Usuário não encontrado" })
-  findOne(@Param("id") id: string) {
-    return this.usersService.findOne(id);
+  findOne(@Param("id") id: string, @Query() query: UserQueryDto) {
+    return this.usersService.findOne({id, query});
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Get("email/:email")
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Buscar um usuário pelo ID" })
+  @ApiResponse({ status: 200, description: "Usuário encontrado" })
+  @ApiResponse({ status: 404, description: "Usuário não encontrado" })
+  findOneByEmail(@Param("email") email: string, @Query() query: UserQueryDto) {
+    return this.usersService.findByEmail({email, query});
+  }
+
   @Patch(":id")
   @ApiBearerAuth()
   @ApiOperation({ summary: "Atualizar um usuário" })
@@ -62,7 +70,6 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete(":id")
   @ApiBearerAuth()
   @ApiOperation({ summary: "Remover um usuário" })

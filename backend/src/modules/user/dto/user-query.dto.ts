@@ -7,16 +7,9 @@ import {
 } from "class-validator";
 import { Transform } from "class-transformer";
 import { ApiPropertyOptional } from "@nestjs/swagger";
+import { UserRole } from "@prisma/client";
 
-export class OrderQueryDto {
-  @IsOptional()
-  @IsString()
-  @ApiPropertyOptional({
-    type: String,
-    description: "Placa do veiculo",
-  })
-  plate?: string;
-
+export class UserQueryDto {
   @IsOptional()
   @IsString()
   @ApiPropertyOptional({
@@ -26,22 +19,27 @@ export class OrderQueryDto {
   branchId?: string;
 
   @IsOptional()
-  @IsString()
+  @IsIn(Object.values(UserRole), {
+    each: true,
+  })
   @ApiPropertyOptional({
     type: String,
-    description: "Id da oficina",
+    description:
+      "Função do usuário (DRIVER, ADMIN, WORKSHOP_MANAGER, BRANCH_MANAGER)",
   })
-  workshopId?: string;
+  role?: UserRole;
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  @IsIn(["company", "branch", "vehicle", "workshop", "items"], { each: true })
+  @IsIn(["company", "branch", "vehicle", "workshop"], {
+    each: true,
+  })
   @ArrayNotEmpty()
   @ApiPropertyOptional({
     type: [String],
     description:
-      "Relacionamentos a incluir: company, branch, vehicle, workshop, items",
+      "Relacionamentos a incluir: company, branch, vehicle, workshop",
   })
   @Transform(
     ({ value }) =>

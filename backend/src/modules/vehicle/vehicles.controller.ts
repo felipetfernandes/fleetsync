@@ -21,6 +21,7 @@ import { CreateVehicleDto } from "./dto/create-vehicle.dto";
 import { UpdateVehicleDto } from "./dto/update-vehicle.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { TenantClsGuard } from "../auth/guards/tenant-cls.guard";
+import { VehicleQueryDto } from "./dto/vehicle-query.dto";
 
 @ApiTags("vehicles")
 @Controller("vehicles")
@@ -44,23 +45,16 @@ export class VehiclesController {
 
   @Get()
   @ApiOperation({ summary: "Listar todos os veículos" })
-  findAll(@Req() req, @Query("branchId") branchId?: string) {
-    const { companyId } = req.user;
-
-    if (!branchId) return this.vehiclesService.findManyByCompany(companyId);
-
-    return this.vehiclesService.findManyByBranch({
-      branchId: Number(branchId),
-      companyId,
-    });
+  findAll(@Query() query: VehicleQueryDto) {
+    return this.vehiclesService.findAll(query);
   }
 
   @Get(":plate")
   @ApiOperation({ summary: "Buscar um veículo pela Placa" })
   @ApiResponse({ status: 200, description: "Veículo encontrado" })
   @ApiResponse({ status: 404, description: "Veículo não encontrado" })
-  findOne(@Param("plate") plate: string) {
-    return this.vehiclesService.findOne(plate);
+  findOne(@Param("plate") plate: string, @Query() query: VehicleQueryDto) {
+    return this.vehiclesService.findOne({ plate, query });
   }
 
   @Patch(":id")

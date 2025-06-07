@@ -9,10 +9,18 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import * as bcrypt from "bcrypt";
 import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
+import { SafeSelectUserDto } from "./dto/safe-select-user.dto";
+import { UserQueryDto } from "./dto/user-query.dto";
+import { buildPrismaInclude } from "src/utils/includes/prisma-includes.util";
+import { vehicleAvailableIncludes } from "src/utils/includes/vehicle.includes";
+import { userAvailableIncludes } from "src/utils/includes/user.includes";
+import { w } from "@faker-js/faker/dist/airline-BUL6NtOJ";
 
 @Injectable()
 export class UsersService {
-  constructor(@Inject(TENANT_PRISMA_CLIENT) private readonly prisma: ExtendedTenantClient) { }
+  constructor(
+    @Inject(TENANT_PRISMA_CLIENT) private readonly prisma: ExtendedTenantClient
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     // Verificar se o email já existe
@@ -44,40 +52,62 @@ export class UsersService {
     return null;
   }
 
-  async findAll() {
-    const users = await this.prisma.user.findMany();
-    return users.map(({ password, ...rest }) => rest);
+  async findAll(query: UserQueryDto) {
+    const include = buildPrismaInclude(
+      query.include || [],
+      userAvailableIncludes
+    );
+    const where: any = {};
+
+    if (query.branchId) {
+      where.branch = { id: Number(query.branchId) };
+    }
+
+    if (query.role) {
+      where.role = query.role;
+    }
+
+    return this.prisma.user.findMany({
+      select: { ...SafeSelectUserDto, ...include },
+      where,
+    });
   }
 
-  async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({
+  async findOne({ id, query }: { id: string; query: UserQueryDto }) {
+    const include = buildPrismaInclude(
+      query.include || [],
+      userAvailableIncludes
+    );
+
+    const user = await this.prisma.user.findFirst({
+      select: { ...SafeSelectUserDto, ...include },
       where: { id },
     });
 
     if (!user) {
-      throw new NotFoundException(`Usuário com ID ${id} não encontrado`);
+      throw new NotFoundException(`Usuário não encontrado`);
     }
 
-    const { password, ...result } = user;
-    return result;
+    return user;
   }
 
-  async findByEmail(email: string) {
-    return this.prisma.user.findUnique({
+  async findByEmail({ email, query }: { email: string; query: UserQueryDto }) {
+    const include = buildPrismaInclude(
+      query.include || [],
+      userAvailableIncludes
+    );
+
+    return this.prisma.user.findFirst({
+      select: { ...SafeSelectUserDto, ...include },
       where: { email },
     });
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    // Verificar se o usuário existe
-    await this.findOne(id);
-
-    // Se estiver atualizando a senha, fazer o hash
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
 
-    // Atualizar usuário
     const updatedUser = await this.prisma.user.update({
       where: { id },
       data: updateUserDto,
@@ -88,10 +118,6 @@ export class UsersService {
   }
 
   async remove(id: string) {
-    // Verificar se o usuário existe
-    await this.findOne(id);
-
-    // Remover usuário
     await this.prisma.user.delete({
       where: { id },
     });

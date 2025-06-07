@@ -84,39 +84,22 @@ export class OrderService {
       query.include || [],
       orderAvailableIncludes
     );
-
-    if (query.plate && query.workshopId) {
-      return this.prisma.order.findMany({
-        where: {
-          vehicle: { plate: query.plate },
-          workshop: { id: query.workshopId },
-        },
-        include,
-      });
-    }
+    const where: any = {};
 
     if (query.plate) {
-      return this.prisma.order.findMany({
-        where: { vehicle: { plate: query.plate } },
-        include,
-      });
+      where.vehicle = { plate: query.plate };
     }
 
     if (query.workshopId) {
-      return this.prisma.order.findMany({
-        where: { workshop: { id: query.workshopId } },
-        include,
-      });
+      where.workshop = { id: query.workshopId };
     }
 
     if (query.branchId) {
-      return this.prisma.order.findMany({
-        where: { branch: { id: Number(query.branchId) } },
-        include,
-      });
+      where.branch = { id: Number(query.branchId) };
     }
 
     return this.prisma.order.findMany({
+      where,
       include,
     });
   }

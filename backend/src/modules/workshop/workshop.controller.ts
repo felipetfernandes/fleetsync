@@ -22,6 +22,7 @@ import { UpdateWorkshopDto } from "./dto/update-workshop.dto";
 import { RegisterWorkshopDto } from "./dto/register-workshop.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { TenantClsGuard } from "../auth/guards/tenant-cls.guard";
+import { WorkshopQueryDto } from "./dto/workshop-query.dto";
 
 interface JwtPayload {
   userId: string;
@@ -37,15 +38,8 @@ export class WorkshopController {
 
   @Get()
   @ApiOperation({ summary: "Listar todos as oficinas" })
-  findAll(@Req() req, @Query("branchId") branchId?: string) {
-    const { companyId } = req.user;
-
-    if (!branchId) return this.workshopService.findManyByCompany(companyId);
-
-    return this.workshopService.findManyByBranch({
-      branchId: Number(branchId),
-      companyId,
-    });
+  findAll(@Query() query: WorkshopQueryDto) {
+    return this.workshopService.findAll(query);
   }
 
   @Get("vehicles")

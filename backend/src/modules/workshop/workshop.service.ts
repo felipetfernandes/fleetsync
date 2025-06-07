@@ -10,21 +10,28 @@ import { RegisterWorkshopDto } from "./dto/register-workshop.dto";
 import * as bcrypt from "bcrypt";
 import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
+import { WorkshopQueryDto } from "./dto/workshop-query.dto";
+import { workshopAvailableIncludes } from "src/utils/includes/workshop.includes";
+import { buildPrismaInclude } from "src/utils/includes/prisma-includes.util";
 
 @Injectable()
 export class WorkshopService {
   constructor(@Inject(TENANT_PRISMA_CLIENT) private readonly prisma: ExtendedTenantClient) { }
 
-  async findAll() {
-    return await this.prisma.workshop.findMany();
-  }
+  async findAll(query: WorkshopQueryDto) {
+    const include = buildPrismaInclude(
+          query.include || [],
+          workshopAvailableIncludes
+    );
+    const where: any = {};
 
-  async findManyByCompany(companyId: string) {
-    return this.prisma.workshop.findMany({
-      where: { companyId },
-      include: {
-        order: true,
-      },
+    if (query.branchId) {
+      where.branch = { id: Number(query.branchId) };
+    }
+
+    return await this.prisma.workshop.findMany({
+      include,
+      where,
     });
   }
 

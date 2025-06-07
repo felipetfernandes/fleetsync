@@ -8,16 +8,23 @@ import {
 import { Transform } from "class-transformer";
 import { ApiPropertyOptional } from "@nestjs/swagger";
 
-export class BranchQueryDto {
+export class WorkshopQueryDto {
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({
+    type: String,
+    description: "Id da filial",
+  })
+  branchId?: string;
+
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  @IsIn(["company", "vehicles", "workshops", "users", "orders"], { each: true })
+  @IsIn(["company", "branch", "manager", "orders"], { each: true })
   @ArrayNotEmpty()
   @ApiPropertyOptional({
     type: [String],
-    description:
-      "Relacionamentos a incluir: company, vehicles, workshops, users, orders",
+    description: "Relacionamentos a incluir: company, branch, manager, orders",
   })
   @Transform(
     ({ value }) =>

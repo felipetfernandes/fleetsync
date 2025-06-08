@@ -8,7 +8,7 @@ import {
 import { Transform } from "class-transformer";
 import { ApiPropertyOptional } from "@nestjs/swagger";
 
-export class CompanyIncludesDto {
+export class CompanyQueryDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })

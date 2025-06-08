@@ -79,40 +79,17 @@ export default function BranchDetailPage({
       try {
         setLoading(true);
         // Buscar dados da filial
-        const branchData = await fetchClientSide<Branch>(
+        const data = await fetchClientSide<Branch>(
           "GET",
-          `/branches/${branchId}`
+          `/branches/${branchId}?include=vehicles,orders,workshops,users`
         );
-        setBranch(branchData);
-
-        // Buscar veículos da filial
-        const vehiclesData = await fetchClientSide<Vehicle[]>(
-          "GET",
-          `/branches/${branchId}/vehicles`
-        );
-        setVehicles(vehiclesData);
-
-        // Buscar ordens de serviço relacionadas à filial
-        const ordersData = await fetchClientSide<Order[]>(
-          "GET",
-          `/branches/${branchId}/orders`
-        );
-        setOrders(ordersData);
-
-        // Buscar oficinas parceiras da filial
-        const workshopsData = await fetchClientSide<Workshop[]>(
-          "GET",
-          `/branches/${branchId}/workshops`
-        );
-        setWorkshops(workshopsData);
-
-        // Buscar usuários da filial
-        const usersData = await fetchClientSide<User[]>(
-          "GET",
-          `/branches/${branchId}/users`
-        );
-        setUsers(usersData);
-
+        
+        setBranch(data);
+        setVehicles(data.vehicles);
+        setOrders(data.orders);
+        setWorkshops(data.workshops);
+        setUsers(data.users);
+        
         setLoading(false);
       } catch (error) {
         console.error("Erro ao buscar dados da filial:", error);

@@ -24,7 +24,7 @@ export default function OrderDetailPage({ params }: PageProps) {
       try {
         const data = await fetchClientSide<Order>(
           "GET",
-          `/orders/${params.id}`
+          `/orders/${params.id}?include=vehicle,workshop`
         );
         setOrder(data);
       } catch (err) {

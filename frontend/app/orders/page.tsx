@@ -14,7 +14,7 @@ export default function OrdersPage() {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const data = await fetchClientSide<Order[]>("GET",`/orders`);
+      const data = await fetchClientSide<Order[]>("GET",`/orders?include=vehicles,items,branch,workshop`);
       setOrders(data);
     };
     fetchOrders();

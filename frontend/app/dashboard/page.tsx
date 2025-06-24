@@ -44,8 +44,8 @@ function getStatusInfo(status: string) {
 export default async function DashboardPage() {
   const [vehicles, orders, workshops] = await Promise.all([
     fetchServerSide<Vehicle[]>(`/vehicles`),
-    fetchServerSide<Order[]>(`/orders`),
-    fetchServerSide<Workshop[]>(`/workshops`),
+    fetchServerSide<Order[]>(`/orders?include=vehicle,items,workshop,branch`),
+    fetchServerSide<Workshop[]>(`/workshops?include=orders`),
   ]);
 
   const dashboardData = {
@@ -98,6 +98,7 @@ export default async function DashboardPage() {
       .sort((a: Workshop, b: Workshop) => a.order.length - b.order.length)
       .slice(0, 5),
   };
+  console.log(dashboardData);
 
   // Formatar valores monetários
   const formatCurrency = (value: number) => {

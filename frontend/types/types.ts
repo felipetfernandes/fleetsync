@@ -116,6 +116,7 @@ type Branch = {
   users: User[];
   vehicles: Vehicle[];
   workshops: Workshop[];
+  Order: Order[];
 };
 
 type Company = {

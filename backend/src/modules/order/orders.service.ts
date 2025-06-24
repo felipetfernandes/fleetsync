@@ -8,8 +8,7 @@ import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
-import { buildPrismaInclude } from "src/utils/includes/prisma-includes.util";
-import { orderAvailableIncludes } from "src/utils/includes/order.includes";
+import { getOrderInclude } from "src/utils/includes/order.includes";
 import { OrderQueryDto } from "./dto/order-query.dto";
 import { UserRole } from "@prisma/client";
 
@@ -80,10 +79,7 @@ export class OrderService {
   }
 
   async findAll(query: OrderQueryDto) {
-    const include = buildPrismaInclude(
-      query.include || [],
-      orderAvailableIncludes
-    );
+    const include = getOrderInclude(query);
     const where: any = {};
 
     if (query.plate) {
@@ -105,10 +101,7 @@ export class OrderService {
   }
 
   async findOne({ id, query }: { id: string; query: OrderQueryDto }) {
-    const include = buildPrismaInclude(
-      query.include || [],
-      orderAvailableIncludes
-    );
+    const include = getOrderInclude(query);
 
     const service = await this.prisma.order.findFirst({
       where: { id },

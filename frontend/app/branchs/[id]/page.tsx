@@ -26,8 +26,6 @@ import {
 import { useEffect, useState } from "react";
 import { Branch, Order, User, Vehicle, Workshop } from "@/types/types";
 import {
-  formatCurrency,
-  formatDate,
   formatShortDate,
 } from "@/lib/utils/formatFunctions";
 import { StatusBadge } from "@/components/ui/statusBadge";
@@ -81,12 +79,12 @@ export default function BranchDetailPage({
         // Buscar dados da filial
         const data = await fetchClientSide<Branch>(
           "GET",
-          `/branches/${branchId}?include=vehicles,orders,workshops,users`
+          `/branchs/${branchId}?include=vehicles,orders,workshops,users`
         );
         
         setBranch(data);
         setVehicles(data.vehicles);
-        setOrders(data.orders);
+        setOrders(data.Order);
         setWorkshops(data.workshops);
         setUsers(data.users);
         
@@ -138,7 +136,7 @@ export default function BranchDetailPage({
 
     // Estatísticas de usuários
     const userStats = {
-      total: users.length,
+      total: users.filter(u => u.role !== UserRole.WORKSHOP_MANAGER).length,
       drivers: users.filter(u => u.role === UserRole.DRIVER).length,
       managers: users.filter(u => u.role === UserRole.BRANCH_MANAGER).length,
       admins: users.filter(u => u.role === UserRole.ADMIN).length,
@@ -801,7 +799,7 @@ export default function BranchDetailPage({
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-bold">Oficinas Parceiras</h2>
-              <Link href="/workshop/new">
+              <Link href="/workshops/new">
                 <button className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded text-sm">
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Nova Oficina
@@ -813,7 +811,7 @@ export default function BranchDetailPage({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {workshops.map((workshop) => (
                   <Link
-                    href={`/workshop/${workshop.id}`}
+                    href={`/workshops/${workshop.id}`}
                     key={workshop.id}
                     className="bg-gray-900 border border-gray-800 p-6 rounded-xl hover:border-gray-700 transition-colors block"
                   >

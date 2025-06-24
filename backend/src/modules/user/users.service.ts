@@ -11,10 +11,7 @@ import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
 import { SafeSelectUserDto } from "./dto/safe-select-user.dto";
 import { UserQueryDto } from "./dto/user-query.dto";
-import { buildPrismaInclude } from "src/utils/includes/prisma-includes.util";
-import { vehicleAvailableIncludes } from "src/utils/includes/vehicle.includes";
-import { userAvailableIncludes } from "src/utils/includes/user.includes";
-import { w } from "@faker-js/faker/dist/airline-BUL6NtOJ";
+import { getUserInclude } from "src/utils/includes/user.includes";
 
 @Injectable()
 export class UsersService {
@@ -53,10 +50,7 @@ export class UsersService {
   }
 
   async findAll(query: UserQueryDto) {
-    const include = buildPrismaInclude(
-      query.include || [],
-      userAvailableIncludes
-    );
+    const include = getUserInclude(query);
     const where: any = {};
 
     if (query.branchId) {
@@ -74,10 +68,7 @@ export class UsersService {
   }
 
   async findOne({ id, query }: { id: string; query: UserQueryDto }) {
-    const include = buildPrismaInclude(
-      query.include || [],
-      userAvailableIncludes
-    );
+    const include = getUserInclude(query);
 
     const user = await this.prisma.user.findFirst({
       select: { ...SafeSelectUserDto, ...include },
@@ -92,15 +83,21 @@ export class UsersService {
   }
 
   async findByEmail({ email, query }: { email: string; query: UserQueryDto }) {
-    const include = buildPrismaInclude(
-      query.include || [],
-      userAvailableIncludes
-    );
+    const include = getUserInclude(query);
 
     return this.prisma.user.findFirst({
       select: { ...SafeSelectUserDto, ...include },
       where: { email },
     });
+  }
+
+  async authUser({ email, password }: { email: string; password: string }) {
+    const user = await this.prisma.user.findFirst({ where: { email } });
+    if (user && (await bcrypt.compare(password, user.password))) {
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {

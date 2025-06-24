@@ -39,12 +39,12 @@ export default function VehicleDetailPage({
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        const data = await fetchClientSide<Vehicle>(
+          const data = await fetchClientSide<Vehicle>(
           "GET",
-          `/vehicles/${plate}?include=drive,orders`
+          `/vehicles/${plate}?include=driver,orders`
         );
         setvehicle(data);
-        setOrders(data.orders)
+        setOrders(data.order)
       } catch (error) {
         console.error("Erro ao buscar veículos:", error);
         // redirecionar para login se necessário

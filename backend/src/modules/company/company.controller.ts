@@ -1,8 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CompanyQueryDto } from "./dto/company-query.dto";
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { TenantClsGuard } from '../auth/guards/tenant-cls.guard';
+import { BranchQueryDto } from '../branch/dto/branch-query.dto';
 
 @ApiTags("company")
 @UseGuards(JwtAuthGuard, TenantClsGuard)
@@ -23,8 +27,8 @@ export class CompanyController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Query() includes: BranchQueryDto) {
-    return this.companyService.findOne(+id, includes);
+  findOne(@Param('id') id: string, @Query() query: BranchQueryDto) {
+    return this.companyService.findOne({id, query});
   }
 
   @Patch(':id')

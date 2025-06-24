@@ -9,9 +9,8 @@ import { UpdateBranchDto } from "./dto/update-branch.dto";
 import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
 import { BranchQueryDto } from "./dto/branch-query.dto";
-import { buildPrismaInclude } from "src/utils/includes/prisma-includes.util";
 import { UserRole } from "@prisma/client";
-import { branchAvailableIncludes } from "src/utils/includes/branch.includes";
+import { getBranchInclude } from "src/utils/includes/branch.includes";
 
 @Injectable()
 export class BranchService {
@@ -29,10 +28,7 @@ export class BranchService {
   }
 
   async findAll(query: BranchQueryDto) {
-    const include = buildPrismaInclude(
-      query.include || [],
-      branchAvailableIncludes
-    );
+    const include = getBranchInclude(query)
 
     return this.prisma.branch.findMany({
       include,
@@ -40,10 +36,7 @@ export class BranchService {
   }
 
   async findOne(id: number, query: BranchQueryDto) {
-    const include = buildPrismaInclude(
-      query.include || [],
-      branchAvailableIncludes
-    );
+    const include = getBranchInclude(query)
 
     const branch = await this.prisma.branch.findFirst({
       where: { id },

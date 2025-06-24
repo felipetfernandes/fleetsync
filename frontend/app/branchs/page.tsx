@@ -9,21 +9,21 @@ import { VehicleStatus } from "@/types/enums";
 
 export default function BranchPage() {
   const [showForm, setShowForm] = useState(false);
-  const [branches, setBranches] = useState<Branch[]>([]);
-  const [filteredBranches, setFilteredBranches] = useState<Branch[]>([]);
+  const [branchs, setBranchs] = useState<Branch[]>([]);
+  const [filteredBranchs, setFilteredBranchs] = useState<Branch[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState<string>("ALL");
 
   useEffect(() => {
     (async () => {
-      const data = await fetchClientSide<Branch[]>("GET", `/branches?include=vehicles`);
-      setBranches(data);
-      setFilteredBranches(data);
+      const data = await fetchClientSide<Branch[]>("GET", `/branchs?include=vehicles`);
+      setBranchs(data);
+      setFilteredBranchs(data);
     })();
   }, []);
 
   useEffect(() => {
-    let result = branches;
+    let result = branchs;
     
     // Aplicar filtro de busca
     if (searchTerm) {
@@ -39,8 +39,8 @@ export default function BranchPage() {
       result = result.filter((branch) => branch.city === activeFilter);
     }
     
-    setFilteredBranches(result);
-  }, [searchTerm, activeFilter, branches]);
+    setFilteredBranchs(result);
+  }, [searchTerm, activeFilter, branchs]);
 
   const handleOpenForm = () => {
     setShowForm(true);
@@ -56,7 +56,7 @@ export default function BranchPage() {
 
   // Função para obter cidades únicas para filtro
   const getUniqueCities = () => {
-    const cities = branches.map(branch => branch.city);
+    const cities = branchs.map(branch => branch.city);
     return [...new Set(cities)];
   };
 
@@ -222,13 +222,13 @@ export default function BranchPage() {
 
         {/* Lista de filiais */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBranches.length > 0 ? (
-            filteredBranches.map((branch) => {
+          {filteredBranchs.length > 0 ? (
+            filteredBranchs.map((branch) => {
               const stats = getBranchVehicleStats(branch);
               
               return (
                 <Link
-                  href={`/branch/${branch.id}`}
+                  href={`/branchs/${branch.id}`}
                   key={branch.id}
                   className="bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-gray-700 transition-colors block"
                 >

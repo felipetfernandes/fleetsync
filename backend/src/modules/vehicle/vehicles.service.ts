@@ -9,8 +9,7 @@ import { UpdateVehicleDto } from "./dto/update-vehicle.dto";
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
 import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
 import { VehicleQueryDto } from "./dto/vehicle-query.dto";
-import { buildPrismaInclude } from "src/utils/includes/prisma-includes.util";
-import { vehicleAvailableIncludes } from "src/utils/includes/vehicle.includes";
+import { getVehicleInclude } from "src/utils/includes/vehicle.includes";
 
 @Injectable()
 export class VehiclesService {
@@ -19,10 +18,7 @@ export class VehiclesService {
   ) {}
 
   async findAll(query: VehicleQueryDto) {
-    const include = buildPrismaInclude(
-      query.include || [],
-      vehicleAvailableIncludes
-    );
+    const include = getVehicleInclude(query);
     const where: any = {};
 
     console.log(include)
@@ -43,10 +39,7 @@ export class VehiclesService {
 
   // Método para encontrar um veículo pelo id
   async findOne({ plate, query }: { plate: string; query: VehicleQueryDto }) {
-    const include = buildPrismaInclude(
-      query.include || [],
-      vehicleAvailableIncludes
-    );
+    const include = getVehicleInclude(query);
 
     const vehicle = await this.prisma.vehicle.findFirst({
       where: { plate },

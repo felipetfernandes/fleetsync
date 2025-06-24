@@ -11,18 +11,16 @@ import * as bcrypt from "bcrypt";
 import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
 import { WorkshopQueryDto } from "./dto/workshop-query.dto";
-import { workshopAvailableIncludes } from "src/utils/includes/workshop.includes";
-import { buildPrismaInclude } from "src/utils/includes/prisma-includes.util";
+import { getWorkshopInclude } from "src/utils/includes/workshop.includes";
 
 @Injectable()
 export class WorkshopService {
-  constructor(@Inject(TENANT_PRISMA_CLIENT) private readonly prisma: ExtendedTenantClient) { }
+  constructor(
+    @Inject(TENANT_PRISMA_CLIENT) private readonly prisma: ExtendedTenantClient
+  ) {}
 
   async findAll(query: WorkshopQueryDto) {
-    const include = buildPrismaInclude(
-          query.include || [],
-          workshopAvailableIncludes
-    );
+    const include = getWorkshopInclude(query);
     const where: any = {};
 
     if (query.branchId) {

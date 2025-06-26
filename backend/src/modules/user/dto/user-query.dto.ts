@@ -42,7 +42,7 @@ export class UserQueryDto {
 
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional({ type: String, description: "Incluir relacionamento com Vehicle e seus sub-relacionamentos (ex: 'mileageHistory')" })
+  @ApiPropertyOptional({ type: String, description: "Incluir relacionamento com Vehicle e seus sub-relacionamentos (ex: 'mileageHistory,orders')" })
   vehicle?: string;
 
   @IsOptional()

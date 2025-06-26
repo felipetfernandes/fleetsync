@@ -13,7 +13,7 @@ import {
   ArrowUpRight,
   RotateCcw,
 } from "lucide-react";
-import { Order, Vehicle, Workshop } from "@/types/types";
+import { Branch, Company, Order, Vehicle, Workshop } from "@/types/types";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { fetchServerSide } from "@/lib/utils/fetchServerSide";
 
@@ -42,11 +42,8 @@ function getStatusInfo(status: string) {
 }
 
 export default async function DashboardPage() {
-  const [vehicles, orders, workshops] = await Promise.all([
-    fetchServerSide<Vehicle[]>(`/vehicles`),
-    fetchServerSide<Order[]>(`/orders?include=vehicle,items,workshop,branch`),
-    fetchServerSide<Workshop[]>(`/workshops?include=orders`),
-  ]);
+  const [company] = await fetchServerSide<Company[]>(`/company?orders=vehicle,workshop&vehicles=driver&workshops=orders`);
+  const { vehicles, orders , workshops } = company;
 
   const dashboardData = {
     totalVehicles: vehicles.length,
@@ -95,7 +92,7 @@ export default async function DashboardPage() {
       PERIODIC: orders.filter((o: Order) => o.type === "PERIODIC").length,
     },
     topWorkshops: workshops
-      .sort((a: Workshop, b: Workshop) => a.order.length - b.order.length)
+      .sort((a: Workshop, b: Workshop) => a.orders.length - b.orders.length)
       .slice(0, 5),
   };
   console.log(dashboardData);

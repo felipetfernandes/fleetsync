@@ -11,7 +11,6 @@ import { UserRole } from "@/types/enums";
 export default function TeamPage() {
   const [showForm, setShowForm] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState<UserRole | "ALL">("ALL");
 
@@ -19,16 +18,14 @@ export default function TeamPage() {
     (async () => {
       const data = await fetchClientSide<User[]>("GET", `/users/`);
       setUsers(data);
-      setFilteredUsers(data);
     })();
   }, []);
 
-  useEffect(() => {
+  const filteredUsers = (): User[] => {
     let result = users;
 
-    // Aplicar filtro de busca
     if (searchTerm) {
-      result = result.filter(
+      result = users.filter(
         (user) =>
           user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -36,13 +33,13 @@ export default function TeamPage() {
       );
     }
 
-    // Aplicar filtro de função
+
     if (activeFilter !== "ALL") {
-      result = result.filter((user) => user.role === activeFilter);
+      result = users.filter((user) => user.role === activeFilter);
     }
 
-    setFilteredUsers(result);
-  }, [searchTerm, activeFilter, users]);
+    return result;
+  }
 
   const handleOpenForm = () => {
     setShowForm(true);
@@ -180,8 +177,8 @@ export default function TeamPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredUsers.length > 0 ? (
-              filteredUsers.map((user) => (
+            {filteredUsers().length > 0 ? (
+              filteredUsers().map((user) => (
                 <UserCard key={user.id} user={user} />
               ))
             ) : (

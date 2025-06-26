@@ -4,7 +4,7 @@ export function getOrderInclude(query: any): Prisma.OrderInclude {
   const include: Prisma.OrderInclude = {};
 
   if (query.orderItems) {
-    include.OrderItems = true;
+    include.orderItems = true;
   }
 
   if (query.company) {
@@ -22,7 +22,7 @@ export function getOrderInclude(query: any): Prisma.OrderInclude {
       nestedVehicleInclude.driver = true;
     }
     if (vehicleIncludes.includes('mileageHistory')) {
-      nestedVehicleInclude.MileageHistory = true;
+      nestedVehicleInclude.mileageHistory = true;
     }
     include.vehicle = { include: nestedVehicleInclude };
   }

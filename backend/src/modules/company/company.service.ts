@@ -18,7 +18,7 @@ export class CompanyService {
   findAll(query) {
     const include = getCompanyInclude(query);
 
-    return this.prisma.branch.findMany({
+    return this.prisma.company.findMany({
       include,
     });
   }

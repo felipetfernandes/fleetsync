@@ -21,8 +21,6 @@ export class VehiclesService {
     const include = getVehicleInclude(query);
     const where: any = {};
 
-    console.log(include)
-
     if (query.branchId) {
       where.branch = { id: Number(query.branchId) };
     }

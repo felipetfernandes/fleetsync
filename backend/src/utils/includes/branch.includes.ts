@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from "@prisma/client";
 
 export function getBranchInclude(query: any): Prisma.BranchInclude {
   const include: Prisma.BranchInclude = {};
@@ -8,13 +8,15 @@ export function getBranchInclude(query: any): Prisma.BranchInclude {
   }
 
   if (query.vehicles) {
-    const vehicleIncludes = query.vehicles.split(',').map((s: string) => s.trim());
+    const vehicleIncludes = query.vehicles
+      .split(",")
+      .map((s: string) => s.trim());
     const nestedVehicleInclude: Prisma.VehicleInclude = {};
-    if (vehicleIncludes.includes('driver')) {
+    if (vehicleIncludes.includes("driver")) {
       nestedVehicleInclude.driver = true;
     }
-    if (vehicleIncludes.includes('mileageHistory')) {
-      nestedVehicleInclude.MileageHistory = true;
+    if (vehicleIncludes.includes("mileageHistory")) {
+      nestedVehicleInclude.mileageHistory = true;
     }
     // Adicione outros includes aninhados para Vehicle aqui
 
@@ -22,20 +24,20 @@ export function getBranchInclude(query: any): Prisma.BranchInclude {
   }
 
   if (query.orders) {
-    const orderIncludes = query.orders.split(',').map((s: string) => s.trim());
+    const orderIncludes = query.orders.split(",").map((s: string) => s.trim());
     const nestedOrderInclude: Prisma.OrderInclude = {};
-    if (orderIncludes.includes('orderItems')) {
-      nestedOrderInclude.OrderItems = true;
+    if (orderIncludes.includes("orderItems")) {
+      nestedOrderInclude.orderItems = true;
     }
-    if (orderIncludes.includes('vehicle')) {
+    if (orderIncludes.includes("vehicle")) {
       nestedOrderInclude.vehicle = true;
     }
-    if (orderIncludes.includes('workshop')) {
+    if (orderIncludes.includes("workshop")) {
       nestedOrderInclude.workshop = true;
     }
     // Adicione outros includes aninhados para Order aqui
 
-    include.Order = { include: nestedOrderInclude };
+    include.orders = { include: nestedOrderInclude };
   }
 
   if (query.workshops) {
@@ -48,5 +50,3 @@ export function getBranchInclude(query: any): Prisma.BranchInclude {
 
   return include;
 }
-
-

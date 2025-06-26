@@ -52,13 +52,13 @@ export class VehicleQueryDto {
   driver?: string;
 
   @IsOptional()
-  @IsBoolean()
-  @Transform(({ value }) => value === "true")
+  @IsString()
   @ApiPropertyOptional({
-    type: Boolean,
-    description: "Incluir relacionamento com Orders",
+    type: String,
+    description:
+      "Incluir relacionamento com Orders e seus sub-relacionamentos (ex: 'branch,company,workshop,orderItems')",
   })
-  orders?: boolean;
+  orders?: string;
 
   @IsOptional()
   @IsBoolean()

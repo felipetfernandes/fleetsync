@@ -16,7 +16,7 @@ export default function BranchPage() {
 
   useEffect(() => {
     (async () => {
-      const data = await fetchClientSide<Branch[]>("GET", `/branchs?include=vehicles`);
+      const data = await fetchClientSide<Branch[]>("GET", `/branchs?vehicles=driver`);
       setBranchs(data);
       setFilteredBranchs(data);
     })();

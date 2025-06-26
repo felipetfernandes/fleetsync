@@ -6,7 +6,6 @@ import { CompanyQueryDto } from "./dto/company-query.dto";
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { TenantClsGuard } from '../auth/guards/tenant-cls.guard';
-import { BranchQueryDto } from '../branch/dto/branch-query.dto';
 
 @ApiTags("company")
 @UseGuards(JwtAuthGuard, TenantClsGuard)
@@ -22,12 +21,12 @@ export class CompanyController {
   @ApiOperation({ summary: "Listar todos as companhias" })
   @ApiResponse({ status: 200, description: "Companhias listadas com sucesso" })
   @Get()
-  findAll(@Query() includes: BranchQueryDto) {
+  findAll(@Query() includes: CompanyQueryDto) {
     return this.companyService.findAll(includes);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Query() query: BranchQueryDto) {
+  findOne(@Param('id') id: string, @Query() query: CompanyQueryDto) {
     return this.companyService.findOne({id, query});
   }
 

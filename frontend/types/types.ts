@@ -17,9 +17,9 @@ type User = {
   branchId: number;
   createdAt: Date;
   updatedAt: Date;
-  Vehicle?: Vehicle;
-  Workshop?: Workshop;
-  Branch?: Branch;
+  vehicle?: Vehicle;
+  workshop?: Workshop;
+  branch?: Branch;
 }
 
 type Vehicle = {
@@ -63,6 +63,7 @@ type Vehicle = {
     licenseCategory?: string;
     licenseExpiration?: Date;
   };
+  orders: Order[];
 }
 
 type Workshop = {
@@ -73,7 +74,7 @@ type Workshop = {
   phone: string;
   email: string;
   manager: string | null;
-  order: Order[];
+  orders: Order[];
 };
 
 type OrderItemForm = {
@@ -116,7 +117,7 @@ type Branch = {
   users: User[];
   vehicles: Vehicle[];
   workshops: Workshop[];
-  Order: Order[];
+  orders: Order[];
 };
 
 type Company = {
@@ -126,6 +127,11 @@ type Company = {
   assetCount: number;
   createdAt: string; // ou Date, se estiver parseando
   updatedAt: string;
+  branches: Branch[];
+  users: User[];
+  vehicles: Vehicle[];
+  workshops: Workshop[];
+  orders: Order[];
 };
 
 export type {

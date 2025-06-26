@@ -23,7 +23,7 @@ import {
   formatDate,
   formatShortDate,
 } from "@/lib/utils/formatFunctions";
-import { UserRole} from "@/types/enums";
+import { UserRole } from "@/types/enums";
 import { fetchClientSide } from "@/lib/utils/fetchClientSide";
 import OrderCard from "@/components/Order/orderCard";
 import OrderForm from "@/components/Order/orderForm";
@@ -35,9 +35,9 @@ const getRoleName = (role: UserRole): string => {
     ADMIN: "Administrador",
     DRIVER: "Motorista",
     WORKSHOP_MANAGER: "Gerente de Oficina",
-    BRANCH_MANAGER: "Gerente de Filial"
+    BRANCH_MANAGER: "Gerente de Filial",
   };
-  
+
   return roleNames[role] || role;
 };
 
@@ -47,56 +47,35 @@ const getRoleColor = (role: UserRole): string => {
     ADMIN: "bg-purple-900/30 text-purple-400",
     DRIVER: "bg-blue-900/30 text-blue-400",
     WORKSHOP_MANAGER: "bg-amber-900/30 text-amber-400",
-    BRANCH_MANAGER: "bg-emerald-900/30 text-emerald-400"
+    BRANCH_MANAGER: "bg-emerald-900/30 text-emerald-400",
   };
-  
+
   return roleColors[role] || "bg-gray-900/30 text-gray-400";
 };
 
-export default function UserDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function UserDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const userId = params.id;
   const [tab, setTab] = useState("info");
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [assignedVehicle, setAssignedVehicle] = useState<Vehicle | null>(null);
-  const [vehicleOrders, setVehicleOrders] = useState<Order[]>([]);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const userData = await fetchClientSide<User>("GET", `/users/${userId}`);
+        const userData = await fetchClientSide<User>(
+          "GET",
+          `/users/id/${userId}?vehicle=orders,driver&workshop=true`
+        );
         setUser(userData);
-
-        // Se for motorista, buscar veículo e ordens
-        if (userData.role === "DRIVER" && userData.Vehicle) {
-          setAssignedVehicle(userData.Vehicle);
-          fetchVehicleOrders(userData.Vehicle.plate);
-        }
       } catch (error) {
         console.error("Erro ao buscar usuário:", error);
         // redirecionar para login se necessário
       }
     };
 
-    const fetchVehicleOrders = async (plate: string) => {
-      try {
-        const orderData = await fetchClientSide<Order[]>(
-          "GET",
-          `/orders/?plate=${plate}`
-        );
-        setVehicleOrders(orderData);
-      } catch (error) {
-        console.error("Erro ao buscar ordens de serviço do veículo:", error);
-      }
-    };
-
     fetchUser();
-  }, [userId]);
+  }, []);
 
   const handleDeleteUser = async () => {
     const confirmDelete = window.confirm(
@@ -105,7 +84,7 @@ export default function UserDetailPage({
 
     if (confirmDelete) {
       try {
-        await fetchClientSide<Response>("DELETE", `/users/${userId}`);
+        await fetchClientSide<Response>("DELETE", `/users/id/${userId}`);
         router.push("/team");
       } catch (error: any) {
         console.error("Erro ao deletar usuário:", error);
@@ -118,55 +97,79 @@ export default function UserDetailPage({
 
   // Funções de cálculo de estatísticas (adaptadas de VehicleDetailPage)
   const maintenanceTypeDistribution = () => {
-    const types = vehicleOrders.reduce((acc: Record<string, number>, order) => {
-      acc[order.type] = (acc[order.type] || 0) + 1;
-      return acc;
-    }, {});
+    if (user && user.vehicle) {
+      const types = user.vehicle.orders.reduce(
+        (acc: Record<string, number>, order) => {
+          acc[order.type] = (acc[order.type] || 0) + 1;
+          return acc;
+        },
+        {}
+      );
 
-    return Object.entries(types).map(([type, count]) => ({
-      type,
-      count,
-      percentage: vehicleOrders.length > 0 ? Math.round(((count as number) / vehicleOrders.length) * 100) : 0,
-    }));
+      return Object.entries(types).map(([type, count]) => ({
+        type,
+        count,
+        percentage:
+          user.vehicle!.orders.length > 0
+            ? Math.round(
+                ((count as number) / user.vehicle!.orders.length) * 100
+              )
+            : 0,
+      }));
+    }
+
+    return [];
   };
 
   const maintenancesResume = () => {
     const today = new Date();
-    const totalCost = vehicleOrders.reduce((acc, order) => acc + order.totalCost, 0);
-    const totalOrders = vehicleOrders.length;
-    const averageCost = totalOrders > 0 ? totalCost / totalOrders : 0;
-    const totalDays = vehicleOrders.reduce((acc, order) => {
-      if (!order.endDate) return acc; // Ignorar ordens sem data final
-      const startDate = new Date(order.startDate);
-      const endDate = new Date(order.endDate);
-      const diffInMs = endDate.getTime() - startDate.getTime();
-      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-      return acc + diffInDays;
-    }, 0);
 
-    const mostRecent = vehicleOrders.length > 0
-        ? vehicleOrders.reduce((latest, current) => {
-            const latestDate = latest.endDate ? new Date(latest.endDate) : new Date(0);
-            const currentDate = current.endDate ? new Date(current.endDate) : new Date(0);
-            return currentDate > latestDate ? current : latest;
-          })
-        : { endDate: undefined };
+    if (user && user.vehicle) {
+      const totalCost = user?.vehicle?.orders.reduce(
+        (acc, order) => acc + order.totalCost,
+        0
+      );
+      const totalOrders = user?.vehicle?.orders.length;
+      const averageCost = totalOrders > 0 ? totalCost / totalOrders : 0;
+      const totalDays = user?.vehicle?.orders.reduce((acc, order) => {
+        if (!order.endDate) return acc; // Ignorar ordens sem data final
+        const startDate = new Date(order.startDate);
+        const endDate = new Date(order.endDate);
+        const diffInMs = endDate.getTime() - startDate.getTime();
+        const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+        return acc + diffInDays;
+      }, 0);
 
-    const diffTime = mostRecent.endDate
-      ? Math.abs(today.getTime() - new Date(mostRecent.endDate).getTime())
-      : 0;
-    const daysSinceLast = mostRecent.endDate
-      ? Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-      : 0;
+      const mostRecent =
+        user.vehicle.orders.length > 0
+          ? user?.vehicle?.orders.reduce((latest, current) => {
+              const latestDate = latest.endDate
+                ? new Date(latest.endDate)
+                : new Date(0);
+              const currentDate = current.endDate
+                ? new Date(current.endDate)
+                : new Date(0);
+              return currentDate > latestDate ? current : latest;
+            })
+          : { endDate: undefined };
 
-    return {
-      totalCost,
-      averageCost,
-      totalDays,
-      totalOrders,
-      mostRecent,
-      daysSinceLast,
-    };
+      const diffTime = mostRecent.endDate
+        ? Math.abs(today.getTime() - new Date(mostRecent.endDate).getTime())
+        : 0;
+      const daysSinceLast = mostRecent.endDate
+        ? Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        : 0;
+
+      return {
+        totalCost,
+        averageCost,
+        totalDays,
+        totalOrders,
+        mostRecent,
+        daysSinceLast,
+      };
+    }
+    return null;
   };
 
   if (!user) {
@@ -189,13 +192,17 @@ export default function UserDetailPage({
           <div className="flex-1">
             <div className="flex items-center gap-4">
               <div className="bg-gray-800 rounded-full p-2">
-                 <UserCircle className="h-10 w-10 text-indigo-400" />
+                <UserCircle className="h-10 w-10 text-indigo-400" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-white flex items-center">
                   {user.name}
                 </h1>
-                <div className={`inline-block px-2 py-0.5 rounded-full text-sm mt-1 ${getRoleColor(user.role)}`}>
+                <div
+                  className={`inline-block px-2 py-0.5 rounded-full text-sm mt-1 ${getRoleColor(
+                    user.role
+                  )}`}
+                >
                   {getRoleName(user.role)}
                 </div>
               </div>
@@ -259,26 +266,38 @@ export default function UserDetailPage({
                   </div>
                   <div className="mt-4 space-y-4">
                     <div>
-                      <h3 className="text-sm font-medium text-gray-400 mb-1">Nome Completo</h3>
+                      <h3 className="text-sm font-medium text-gray-400 mb-1">
+                        Nome Completo
+                      </h3>
                       <p className="font-medium">{user.name}</p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-gray-400 mb-1">Email</h3>
+                      <h3 className="text-sm font-medium text-gray-400 mb-1">
+                        Email
+                      </h3>
                       <p className="font-medium flex items-center">
                         <Mail className="h-4 w-4 mr-1 text-gray-400" />
                         {user.email}
                       </p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-gray-400 mb-1">Telefone</h3>
+                      <h3 className="text-sm font-medium text-gray-400 mb-1">
+                        Telefone
+                      </h3>
                       <p className="font-medium flex items-center">
                         <Phone className="h-4 w-4 mr-1 text-gray-400" />
                         {user.phone}
                       </p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-gray-400 mb-1">Função</h3>
-                      <div className={`inline-block px-2 py-0.5 rounded-full text-sm ${getRoleColor(user.role)}`}>
+                      <h3 className="text-sm font-medium text-gray-400 mb-1">
+                        Função
+                      </h3>
+                      <div
+                        className={`inline-block px-2 py-0.5 rounded-full text-sm ${getRoleColor(
+                          user.role
+                        )}`}
+                      >
                         {getRoleName(user.role)}
                       </div>
                     </div>
@@ -288,65 +307,94 @@ export default function UserDetailPage({
                 {/* Card de Informações Adicionais (depende da função) */}
                 <div className="text-gray-100 bg-gray-900 border border-gray-800 p-8 rounded-2xl">
                   <div>
-                    <h2 className="text-xl font-bold">Informações Adicionais</h2>
+                    <h2 className="text-xl font-bold">
+                      Informações Adicionais
+                    </h2>
                   </div>
                   <div className="mt-4 space-y-4">
                     {user.role === "DRIVER" && (
                       <>
                         <div>
-                          <h3 className="text-sm font-medium text-gray-400 mb-1">CNH</h3>
+                          <h3 className="text-sm font-medium text-gray-400 mb-1">
+                            CNH
+                          </h3>
                           <p className="font-medium flex items-center">
                             <Calendar className="h-4 w-4 mr-1 text-gray-400" />
                             {user.licenseNumber} (Cat. {user.licenseCategory})
                           </p>
                         </div>
                         <div>
-                          <h3 className="text-sm font-medium text-gray-400 mb-1">Validade CNH</h3>
+                          <h3 className="text-sm font-medium text-gray-400 mb-1">
+                            Validade CNH
+                          </h3>
                           <p className="font-medium">
-                            {user.licenseExpiration ? formatDate(user.licenseExpiration) : "Não informado"}
+                            {user.licenseExpiration
+                              ? formatDate(user.licenseExpiration)
+                              : "Não informado"}
                           </p>
                         </div>
                         <div>
-                          <h3 className="text-sm font-medium text-gray-400 mb-1">Veículo Atribuído</h3>
-                          {assignedVehicle ? (
-                            <Link href={`/fleet/${assignedVehicle.plate}`} className="font-medium flex items-center text-indigo-400 hover:text-indigo-300">
+                          <h3 className="text-sm font-medium text-gray-400 mb-1">
+                            Veículo Atribuído
+                          </h3>
+                          {user.vehicle ? (
+                            <Link
+                              href={`/fleet/${user.vehicle.plate}`}
+                              className="font-medium flex items-center text-indigo-400 hover:text-indigo-300"
+                            >
                               <Car className="h-4 w-4 mr-1" />
-                              {assignedVehicle.plate} - {assignedVehicle.brand} {assignedVehicle.model}
+                              {user.vehicle.plate} - {user.vehicle.brand}{" "}
+                              {user.vehicle.model}
                             </Link>
                           ) : (
-                            <p className="font-medium text-gray-500">Nenhum veículo atribuído</p>
+                            <p className="font-medium text-gray-500">
+                              Nenhum veículo atribuído
+                            </p>
                           )}
                         </div>
                       </>
                     )}
                     {user.role === "WORKSHOP_MANAGER" && (
                       <div>
-                        <h3 className="text-sm font-medium text-gray-400 mb-1">Oficina Gerenciada</h3>
-                        {user.Workshop ? (
-                          <Link href={`/workshop/${user.Workshop.id}`} className="font-medium flex items-center text-indigo-400 hover:text-indigo-300">
+                        <h3 className="text-sm font-medium text-gray-400 mb-1">
+                          Oficina Gerenciada
+                        </h3>
+                        {user.workshop ? (
+                          <Link
+                            href={`/workshop/${user.workshop.id}`}
+                            className="font-medium flex items-center text-indigo-400 hover:text-indigo-300"
+                          >
                             <Building2 className="h-4 w-4 mr-1" />
-                            {user.Workshop.name}
+                            {user.workshop.name}
                           </Link>
                         ) : (
-                          <p className="font-medium text-gray-500">Nenhuma oficina atribuída</p>
+                          <p className="font-medium text-gray-500">
+                            Nenhuma oficina atribuída
+                          </p>
                         )}
                       </div>
                     )}
                     {user.role === "BRANCH_MANAGER" && (
                       <div>
-                        <h3 className="text-sm font-medium text-gray-400 mb-1">Filial Gerenciada</h3>
+                        <h3 className="text-sm font-medium text-gray-400 mb-1">
+                          Filial Gerenciada
+                        </h3>
                         {user.branch ? (
                           <p className="font-medium flex items-center">
                             <MapPin className="h-4 w-4 mr-1 text-gray-400" />
                             {user.branch.name} - {user.branch.city}
                           </p>
                         ) : (
-                          <p className="font-medium text-gray-500">Nenhuma filial atribuída</p>
+                          <p className="font-medium text-gray-500">
+                            Nenhuma filial atribuída
+                          </p>
                         )}
                       </div>
                     )}
-                    {(user.role === "ADMIN") && (
-                       <p className="font-medium text-gray-500">Acesso total ao sistema.</p>
+                    {user.role === "ADMIN" && (
+                      <p className="font-medium text-gray-500">
+                        Acesso total ao sistema.
+                      </p>
                     )}
                   </div>
                 </div>
@@ -359,9 +407,10 @@ export default function UserDetailPage({
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold">
-                  Histórico de Ordens de Serviço (Veículo: {assignedVehicle?.plate})
+                  Histórico de Ordens de Serviço (Veículo: {user.vehicle?.plate}
+                  )
                 </h2>
-                {assignedVehicle && (
+                {user.vehicle && (
                   <button
                     className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded text-sm"
                     onClick={() => setShowOrderForm(true)}
@@ -380,7 +429,7 @@ export default function UserDetailPage({
               )}
 
               <div className="space-y-4">
-                {vehicleOrders.length === 0 ? (
+                {user?.vehicle?.orders.length === 0 ? (
                   <div className="bg-gray-900 border-gray-800">
                     <div className="p-8 text-center">
                       <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-800">
@@ -390,13 +439,18 @@ export default function UserDetailPage({
                         Nenhuma ordem de serviço
                       </h3>
                       <p className="mt-2 text-sm text-gray-400">
-                        Nenhuma ordem de serviço encontrada para o veículo atribuído a este motorista.
+                        Nenhuma ordem de serviço encontrada para o veículo
+                        atribuído a este motorista.
                       </p>
                     </div>
                   </div>
                 ) : (
-                  vehicleOrders.map((order) => (
-                    <OrderCard key={order.id} order={order} vehicle={order.vehicle} />
+                  user?.vehicle?.orders.map((order) => (
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      vehicle={user.vehicle}
+                    />
                   ))
                 )}
               </div>
@@ -406,9 +460,11 @@ export default function UserDetailPage({
           {/* Aba de Estatísticas (Motorista) */}
           {tab === "stats" && user.role === "DRIVER" && (
             <div className="space-y-6">
-              <h2 className="text-xl font-bold">Estatísticas de Manutenção (Veículo: {assignedVehicle?.plate})</h2>
+              <h2 className="text-xl font-bold">
+                Estatísticas de Manutenção (Veículo: {user.vehicle?.plate})
+              </h2>
 
-              {vehicleOrders.length > 0 ? (
+              {user && user.vehicle && user.vehicle.orders.length > 0 && resume ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Card de Resumo de Custos */}
                   <div className="text-gray-100 bg-gray-900 border border-gray-800 p-8 rounded-2xl">
@@ -436,9 +492,7 @@ export default function UserDetailPage({
                         <h3 className="text-sm font-medium text-gray-400 mb-1">
                           Total de Ordens de Serviço
                         </h3>
-                        <p className="font-medium">
-                          {resume.totalOrders}
-                        </p>
+                        <p className="font-medium">{resume.totalOrders}</p>
                       </div>
                     </div>
                   </div>
@@ -463,7 +517,9 @@ export default function UserDetailPage({
                         </h3>
                         <div className="flex items-center">
                           <p className="font-medium mr-2">
-                            {resume.mostRecent.endDate ? formatShortDate(resume.mostRecent.endDate) : "N/A"}
+                            {resume.mostRecent.endDate
+                              ? formatShortDate(resume.mostRecent.endDate)
+                              : "N/A"}
                           </p>
                           {resume.mostRecent.endDate && (
                             <p className="text-xs">
@@ -478,7 +534,9 @@ export default function UserDetailPage({
                   {/* Card de Distribuição de Serviços */}
                   <div className="text-gray-100 bg-gray-900 border border-gray-800 p-8 rounded-2xl col-span-1 md:col-span-2">
                     <div>
-                      <h2 className="text-xl font-bold">Distribuição por Tipo de Serviço</h2>
+                      <h2 className="text-xl font-bold">
+                        Distribuição por Tipo de Serviço
+                      </h2>
                     </div>
                     <div className="mt-4">
                       <div className="space-y-4">
@@ -486,7 +544,9 @@ export default function UserDetailPage({
                           <div key={item.type} className="space-y-2">
                             <div className="flex justify-between items-center">
                               <span className="text-sm">{item.type}</span>
-                              <span className="text-sm">{item.count} ({item.percentage}%)</span>
+                              <span className="text-sm">
+                                {item.count} ({item.percentage}%)
+                              </span>
                             </div>
                             <div className="h-2 bg-gray-800 rounded-full">
                               <div
@@ -510,7 +570,8 @@ export default function UserDetailPage({
                       Sem dados para estatísticas
                     </h3>
                     <p className="mt-2 text-sm text-gray-400">
-                      Não há ordens de serviço suficientes para gerar estatísticas para o veículo deste motorista.
+                      Não há ordens de serviço suficientes para gerar
+                      estatísticas para o veículo deste motorista.
                     </p>
                   </div>
                 </div>

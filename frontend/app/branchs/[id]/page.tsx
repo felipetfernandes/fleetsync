@@ -7,7 +7,6 @@ import {
   Car,
   Wrench,
   ClipboardList,
-  BarChart3,
   TrendingUp,
   Calendar,
   ArrowRight,
@@ -79,12 +78,12 @@ export default function BranchDetailPage({
         // Buscar dados da filial
         const data = await fetchClientSide<Branch>(
           "GET",
-          `/branchs/${branchId}?include=vehicles,orders,workshops,users`
+          `/branchs/${branchId}?vehicles=true&orders=true&workshops=true&users=true`
         );
         
         setBranch(data);
         setVehicles(data.vehicles);
-        setOrders(data.Order);
+        setOrders(data.orders);
         setWorkshops(data.workshops);
         setUsers(data.users);
         
@@ -826,9 +825,9 @@ export default function BranchDetailPage({
                           {workshop.address}
                         </p>
                       </div>
-                      {workshop.order?.length > 0 && (
+                      {workshop.orders?.length > 0 && (
                         <div className="bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-3 py-0.5">
-                          {workshop.order.length} veículo(s)
+                          {workshop.orders.length} veículo(s)
                         </div>
                       )}
                     </div>

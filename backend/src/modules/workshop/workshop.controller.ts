@@ -50,9 +50,8 @@ export class WorkshopController {
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string, @Req() req) {
-    const { companyId } = req.user;
-    return this.workshopService.findOne({ id, companyId });
+  findOne(@Param("id") id: string, @Query() query: WorkshopQueryDto) {
+    return this.workshopService.findOne({ id, query });
   }
 
   @Post()
@@ -88,8 +87,7 @@ export class WorkshopController {
     @Body() updateWorkshopDto: UpdateWorkshopDto,
     @Req() req: { user: JwtPayload }
   ) {
-    const { companyId } = req.user;
-    return this.workshopService.update(id, { ...updateWorkshopDto, companyId });
+    return this.workshopService.update({ id, updateWorkshopDto });
   }
 
   @Delete(":id")

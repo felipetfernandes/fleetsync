@@ -8,7 +8,17 @@ export function getCompanyInclude(query: any): Prisma.CompanyInclude {
   }
 
   if (query.vehicles) {
-    include.vehicles = true;
+    const vehicleIncludes = query.vehicles.split(',').map((s: string) => s.trim());
+    const nestedVehicleInclude: Prisma.VehicleInclude = {};
+    if (vehicleIncludes.includes('driver')) {
+      nestedVehicleInclude.driver = true;
+    }
+    if (vehicleIncludes.includes('mileageHistory')) {
+      nestedVehicleInclude.mileageHistory = true;
+    }
+    // Adicione outros includes aninhados para Vehicle aqui
+
+    include.vehicles = { include: nestedVehicleInclude };
   }
 
   if (query.users) {
@@ -16,11 +26,30 @@ export function getCompanyInclude(query: any): Prisma.CompanyInclude {
   }
 
   if (query.orders) {
-    include.order = true;
+    const orderIncludes = query.orders.split(',').map((s: string) => s.trim());
+    const nestedOrderInclude: Prisma.OrderInclude = {};
+    if (orderIncludes.includes('orderItems')) {
+      nestedOrderInclude.orderItems = true;
+    }
+    if (orderIncludes.includes('vehicle')) {
+      nestedOrderInclude.vehicle = true;
+    }
+    if (orderIncludes.includes('workshop')) {
+      nestedOrderInclude.workshop = true;
+    }
+    // Adicione outros includes aninhados para Order aqui
+
+    include.orders = { include: nestedOrderInclude };
   }
 
   if (query.workshops) {
-    include.Workshop = true;
+    const workshopsIncludes = query.workshops.split(',').map((s: string) => s.trim());
+    const nestedOrderInclude: Prisma.WorkshopInclude = {};
+    if (workshopsIncludes.includes('orders')) {
+      nestedOrderInclude.orders = true;
+    }
+
+    include.workshops = { include: nestedOrderInclude };
   }
 
   return include;

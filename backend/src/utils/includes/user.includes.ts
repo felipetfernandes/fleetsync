@@ -8,16 +8,22 @@ export function getUserInclude(query: any): Prisma.UserInclude {
   }
 
   if (query.company) {
-    include.Company = true;
+    include.company = true;
   }
 
   if (query.vehicle) {
     const vehicleIncludes = query.vehicle.split(",").map((s: string) => s.trim());
     const nestedVehicleInclude: Prisma.VehicleInclude = {};
     if (vehicleIncludes.includes("mileageHistory")) {
-      nestedVehicleInclude.MileageHistory = true;
+      nestedVehicleInclude.mileageHistory = true;
     }
-    include.Vehicle = { include: nestedVehicleInclude };
+    if (vehicleIncludes.includes("orders")) {
+      nestedVehicleInclude.orders = true;
+    }
+    if (vehicleIncludes.includes("driver")) {
+      nestedVehicleInclude.driver = true;
+    }
+    include.vehicle = { include: nestedVehicleInclude };
   }
 
   if (query.workshop) {
@@ -26,7 +32,7 @@ export function getUserInclude(query: any): Prisma.UserInclude {
     if (workshopIncludes.includes("manager")) {
       nestedWorkshopInclude.manager = true;
     }
-    include.Workshop = { include: nestedWorkshopInclude };
+    include.workshop = { include: nestedWorkshopInclude };
   }
 
   return include;

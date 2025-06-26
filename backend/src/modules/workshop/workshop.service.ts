@@ -33,15 +33,17 @@ export class WorkshopService {
     });
   }
 
-  async findManyByBranch({
-    branchId,
-    companyId,
-  }: {
-    branchId: number;
-    companyId: string;
-  }) {
+  async findManyByBranch(query: WorkshopQueryDto) {
+    const include = getWorkshopInclude(query);
+    const where: any = {};
+
+    if (query.branchId) {
+      where.branch = { id: Number(query.branchId) };
+    }
+
     return this.prisma.workshop.findMany({
-      where: { branchId, companyId },
+      where,
+      include,
     });
   }
 
@@ -49,7 +51,7 @@ export class WorkshopService {
     return this.prisma.workshop.findMany({
       where: { companyId },
       include: {
-        order: {
+        orders: {
           where: { endDate: null },
           include: {
             vehicle: true,
@@ -59,19 +61,12 @@ export class WorkshopService {
     });
   }
 
-  async findOne({ id, companyId }: { id: string; companyId: string }) {
-    const workshop = await this.prisma.workshop.findUnique({
-      where: { id, companyId },
-      include: {
-        manager: {
-          select: { id: true, name: true, email: true, phone: true },
-        },
-        order: {
-          include: {
-            vehicle: true,
-          },
-        },
-      },
+  async findOne({ id, query }: { id: string; query: WorkshopQueryDto }) {
+    const include = getWorkshopInclude(query);
+
+    const workshop = await this.prisma.workshop.findFirst({
+      where: { id },
+      include,
     });
 
     if (!workshop) {
@@ -151,8 +146,8 @@ export class WorkshopService {
     });
   }
 
-  async update(id: string, updateWorkshopDto: UpdateWorkshopDto) {
-    await this.findOne({ id, companyId: updateWorkshopDto.companyId });
+  async update({ id, updateWorkshopDto }: {id: string, updateWorkshopDto: UpdateWorkshopDto}) {
+    await this.prisma.workshop.findFirst({ where: { id } });
 
     const { companyId, branchId, managerId, ...rest } = updateWorkshopDto;
 

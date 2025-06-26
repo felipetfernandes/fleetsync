@@ -41,10 +41,11 @@ export default function VehicleDetailPage({
       try {
           const data = await fetchClientSide<Vehicle>(
           "GET",
-          `/vehicles/${plate}?include=driver,orders`
+          `/vehicles/${plate}?driver=true&orders=branch,workshop`
         );
         setvehicle(data);
-        setOrders(data.order)
+        setOrders(data.orders)
+        console.log(data);
       } catch (error) {
         console.error("Erro ao buscar veículos:", error);
         // redirecionar para login se necessário

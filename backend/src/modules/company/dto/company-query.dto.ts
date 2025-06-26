@@ -1,4 +1,4 @@
-import { IsOptional, IsBoolean } from "class-validator";
+import { IsOptional, IsBoolean, IsString } from "class-validator";
 import { Transform } from "class-transformer";
 import { ApiPropertyOptional } from "@nestjs/swagger";
 
@@ -13,13 +13,13 @@ export class CompanyQueryDto {
   branches?: boolean;
 
   @IsOptional()
-  @IsBoolean()
-  @Transform(({ value }) => value === "true")
+  @IsString()
   @ApiPropertyOptional({
-    type: Boolean,
-    description: "Incluir relacionamentos com Vehicles",
+    type: String,
+    description:
+      "Incluir relacionamento com Vehicles e seus sub-relacionamentos (ex: 'driver,mileageHistory')",
   })
-  vehicles?: boolean;
+  vehicles?: string;
 
   @IsOptional()
   @IsBoolean()
@@ -31,20 +31,12 @@ export class CompanyQueryDto {
   users?: boolean;
 
   @IsOptional()
-  @IsBoolean()
-  @Transform(({ value }) => value === "true")
-  @ApiPropertyOptional({
-    type: Boolean,
-    description: "Incluir relacionamentos com Orders",
-  })
-  orders?: boolean;
+  @IsString()
+  @ApiPropertyOptional({ type: String, description: "Incluir relacionamento com Orders e seus sub-relacionamentos (ex: 'orderItems,vehicle')" })
+  orders?: string;
 
   @IsOptional()
-  @IsBoolean()
-  @Transform(({ value }) => value === "true")
-  @ApiPropertyOptional({
-    type: Boolean,
-    description: "Incluir relacionamentos com Workshops",
-  })
-  workshops?: boolean;
+  @IsString()
+  @ApiPropertyOptional({ type: String, description: "Incluir relacionamento com Workshops e seus sub-relacionamentos (ex: 'orders')" })
+  workshops?: string;
 }

@@ -18,13 +18,13 @@ export function getWorkshopInclude(query: any): Prisma.WorkshopInclude {
       nestedManagerInclude.branch = true;
     }
     if (managerIncludes.includes('company')) {
-      nestedManagerInclude.Company = true;
+      nestedManagerInclude.company = true;
     }
     include.manager = { include: nestedManagerInclude };
   }
 
   if (query.orders) {
-    include.order = true;
+    include.orders = true;
   }
 
   return include;

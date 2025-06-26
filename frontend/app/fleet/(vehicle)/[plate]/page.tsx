@@ -39,31 +39,20 @@ export default function VehicleDetailPage({
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        const data = await fetchClientSide<Vehicle>(
+          const data = await fetchClientSide<Vehicle>(
           "GET",
-          `/vehicles/${plate}`
+          `/vehicles/${plate}?driver=true&orders=branch,workshop`
         );
         setvehicle(data);
+        setOrders(data.orders)
+        console.log(data);
       } catch (error) {
         console.error("Erro ao buscar veículos:", error);
         // redirecionar para login se necessário
       }
     };
 
-    const fetchOrders = async () => {
-      try {
-        const data = await fetchClientSide<Order[]>(
-          "GET",
-          `/orders/?plate=${plate}`
-        );
-        if (data.length > 0) setOrders(data);
-      } catch (error) {
-        console.error("Erro ao buscar veículos:", error);
-      }
-    };
-
     fetchVehicle();
-    fetchOrders();
   }, []);
 
   const handleDeleteVehicle = async () => {

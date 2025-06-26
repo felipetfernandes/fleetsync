@@ -13,7 +13,7 @@ export default function WorkshopsPage() {
 
   useEffect(() => {
     (async () => {
-      const data = await fetchClientSide<Workshop[]>("GET",`/workshops/vehicles/`);
+      const data = await fetchClientSide<Workshop[]>("GET",`/workshops`);
       setWorkshops(data);
     })();
   }, []);

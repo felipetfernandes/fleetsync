@@ -38,11 +38,11 @@ function OrderCard({
                     </div>
                     <div className="flex items-center">
                       <Building className="h-4 w-4 mr-1 text-indigo-400" />
-                      <span>{order.branch.name}</span>
+                      <span>{order.branch?.name}</span>
                     </div>
                     <div className="flex items-center">
                       <Wrench className="h-4 w-4 mr-1 text-indigo-400" />
-                      <span>{order.workshop.name}</span>
+                      <span>{order?.workshop?.name}</span>
                     </div>
                   </div>
                 </div>

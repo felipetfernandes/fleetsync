@@ -13,7 +13,7 @@ import {
   ArrowUpRight,
   RotateCcw,
 } from "lucide-react";
-import { Order, Vehicle, Workshop } from "@/types/types";
+import { Branch, Company, Order, Vehicle, Workshop } from "@/types/types";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { fetchServerSide } from "@/lib/utils/fetchServerSide";
 
@@ -42,11 +42,8 @@ function getStatusInfo(status: string) {
 }
 
 export default async function DashboardPage() {
-  const [vehicles, orders, workshops] = await Promise.all([
-    fetchServerSide<Vehicle[]>(`/vehicles`),
-    fetchServerSide<Order[]>(`/orders`),
-    fetchServerSide<Workshop[]>(`/workshops`),
-  ]);
+  const [company] = await fetchServerSide<Company[]>(`/company?orders=vehicle,workshop&vehicles=driver&workshops=orders`);
+  const { vehicles, orders , workshops } = company;
 
   const dashboardData = {
     totalVehicles: vehicles.length,
@@ -95,9 +92,10 @@ export default async function DashboardPage() {
       PERIODIC: orders.filter((o: Order) => o.type === "PERIODIC").length,
     },
     topWorkshops: workshops
-      .sort((a: Workshop, b: Workshop) => a.order.length - b.order.length)
+      .sort((a: Workshop, b: Workshop) => a.orders.length - b.orders.length)
       .slice(0, 5),
   };
+  console.log(dashboardData);
 
   // Formatar valores monetários
   const formatCurrency = (value: number) => {
@@ -478,7 +476,7 @@ export default async function DashboardPage() {
             </div>
           </Link>
 
-          <Link href="/relatorios">
+          <Link href="/reports">
             <div className="bg-gray-900 border border-gray-800 rounded-xl hover:bg-gray-800 transition-colors cursor-pointer h-full">
               <div className="p-6 flex flex-col items-center justify-center text-center h-full">
                 <BarChart3 className="h-10 w-10 text-indigo-400 mb-4" />

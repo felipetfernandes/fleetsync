@@ -43,11 +43,11 @@ model Company {
   assetCount Int    @default(0) @map("asset_count")
 
   // Relationships
-  branches Branch[]
-  vehicles Vehicle[]
-  users    User[]
-  order    Order[]
-  Workshop Workshop[]
+  branches  Branch[]
+  vehicles  Vehicle[]
+  users     User[]
+  orders    Order[]
+  workshops Workshop[]
 
   // Timestamps
   createdAt DateTime @default(now()) @map("created_at")
@@ -67,16 +67,16 @@ model Branch {
   vehicles  Vehicle[]
   workshops Workshop[]
   users     User[]
+  orders    Order[]
 
   // Timestamps
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  Order     Order[]
 
   @@map("branch")
 }
 
-// Prisma Schema, Interface e DTO para Vehicle
+// Prisma Schema para Vehicle
 model Vehicle {
   id              String        @id @default(uuid())
   plate           String        @unique
@@ -112,17 +112,17 @@ model Vehicle {
   licenseDueDate DateTime? @map("license_due_date")
 
   // Relationships
-  company   Company @relation(fields: [companyId], references: [id])
-  companyId String
-  branch    Branch  @relation(fields: [branchId], references: [id])
-  branchId  Int
-  driver    User?   @relation(fields: [driverId], references: [id])
-  driverId  String? @unique
-  order     Order[]
+  company        Company          @relation(fields: [companyId], references: [id])
+  companyId      String
+  branch         Branch           @relation(fields: [branchId], references: [id])
+  branchId       Int
+  driver         User?            @relation(fields: [driverId], references: [id])
+  driverId       String?          @unique
+  orders         Order[]
+  mileageHistory MileageHistory[]
 
-  createdAt      DateTime         @default(now()) @map("created_at")
-  updatedAt      DateTime         @updatedAt @map("updated_at")
-  MileageHistory MileageHistory[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("vehicle")
 }
@@ -157,7 +157,7 @@ model Workshop {
   branchId  Int
   manager   User?   @relation(fields: [managerId], references: [id])
   managerId String? @unique
-  order     Order[]
+  orders    Order[]
 
   // Timestamps
   createdAt DateTime @default(now()) @map("created_at")
@@ -174,17 +174,17 @@ model Order {
   startDate   DateTime    @map("start_date")
   endDate     DateTime?   @map("end_date")
   totalCost   Float       @map("total_cost")
-  OrderItems  OrderItem[]
 
   // Relationships
-  company    Company  @relation(fields: [companyId], references: [id])
+  company    Company     @relation(fields: [companyId], references: [id])
   companyId  String
-  branch     Branch   @relation(fields: [branchId], references: [id])
+  branch     Branch      @relation(fields: [branchId], references: [id])
   branchId   Int
-  vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
+  vehicle    Vehicle     @relation(fields: [vehicleId], references: [id])
   vehicleId  String
-  workshop   Workshop @relation(fields: [workshopId], references: [id])
+  workshop   Workshop    @relation(fields: [workshopId], references: [id])
   workshopId String
+  orderItems OrderItem[]
 
   // Timestamps
   createdAt DateTime @default(now()) @map("created_at")
@@ -230,10 +230,10 @@ model User {
   // Relationships
   branchId  Int?
   branch    Branch?   @relation(fields: [branchId], references: [id])
-  Company   Company?  @relation(fields: [companyId], references: [id])
+  company   Company?  @relation(fields: [companyId], references: [id])
   companyId String?
-  Vehicle   Vehicle?
-  Workshop  Workshop?
+  vehicle   Vehicle?
+  workshop  Workshop?
 
   // Timestamps
   createdAt DateTime @default(now()) @map("created_at")

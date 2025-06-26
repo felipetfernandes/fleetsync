@@ -2,9 +2,9 @@
 FROM node:18-slim AS base
 WORKDIR /app
 
-# Instala OpenSSL e outras dependências essenciais
+# Instala OpenSSL e procps
 RUN apt-get update && \
-    apt-get install -y openssl && \
+    apt-get install -y openssl procps && \
     rm -rf /var/lib/apt/lists/*
 
 # Copia arquivos de dependências

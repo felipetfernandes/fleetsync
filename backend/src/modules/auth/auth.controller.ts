@@ -51,4 +51,22 @@ export class AuthController {
   async me(@Req() req): Promise<any> {
     return req.user;
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post("logout")
+  @HttpCode(200)
+  @ApiOperation({ summary: "Logout do sistema" })
+  @ApiResponse({
+    status: 200,
+    description: "Usuário deslogado com sucesso",
+  })
+  async logout(@Res({ passthrough: true }) res): Promise<any> {
+    res.clearCookie('access_token', {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+  });
+
+  return { message: 'Logout realizado com sucesso' };
+  }
 }

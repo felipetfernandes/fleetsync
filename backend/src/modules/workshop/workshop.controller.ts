@@ -21,6 +21,8 @@ import { CreateWorkshopDto } from "./dto/create-workshop.dto";
 import { UpdateWorkshopDto } from "./dto/update-workshop.dto";
 import { RegisterWorkshopDto } from "./dto/register-workshop.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { TenantClsGuard } from "../auth/guards/tenant-cls.guard";
+import { WorkshopQueryDto } from "./dto/workshop-query.dto";
 
 interface JwtPayload {
   userId: string;
@@ -29,22 +31,15 @@ interface JwtPayload {
 
 @ApiTags("workshops")
 @Controller("workshops")
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, TenantClsGuard)
 @ApiBearerAuth()
 export class WorkshopController {
   constructor(private readonly workshopService: WorkshopService) {}
 
   @Get()
   @ApiOperation({ summary: "Listar todos as oficinas" })
-  findAll(@Req() req, @Query("branchId") branchId?: string) {
-    const { companyId } = req.user;
-
-    if (!branchId) return this.workshopService.findManyByCompany(companyId);
-
-    return this.workshopService.findManyByBranch({
-      branchId: Number(branchId),
-      companyId,
-    });
+  findAll(@Query() query: WorkshopQueryDto) {
+    return this.workshopService.findAll(query);
   }
 
   @Get("vehicles")
@@ -55,9 +50,8 @@ export class WorkshopController {
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string, @Req() req) {
-    const { companyId } = req.user;
-    return this.workshopService.findOne({ id, companyId });
+  findOne(@Param("id") id: string, @Query() query: WorkshopQueryDto) {
+    return this.workshopService.findOne({ id, query });
   }
 
   @Post()
@@ -93,8 +87,7 @@ export class WorkshopController {
     @Body() updateWorkshopDto: UpdateWorkshopDto,
     @Req() req: { user: JwtPayload }
   ) {
-    const { companyId } = req.user;
-    return this.workshopService.update(id, { ...updateWorkshopDto, companyId });
+    return this.workshopService.update({ id, updateWorkshopDto });
   }
 
   @Delete(":id")

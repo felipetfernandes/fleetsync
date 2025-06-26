@@ -3,6 +3,7 @@ import { ValidationPipe } from "@nestjs/common"
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger"
 import { AppModule } from "./app.module"
 import * as cookieParser from 'cookie-parser';
+import { ClsService } from "nestjs-cls";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -29,7 +30,7 @@ async function bootstrap() {
     .addBearerAuth()
     .build()
   const document = SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup("api", app, document)
+  SwaggerModule.setup("", app, document)
 
   const port = process.env.PORT || 3001
   await app.listen(port)

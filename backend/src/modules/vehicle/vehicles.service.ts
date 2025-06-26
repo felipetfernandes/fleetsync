@@ -2,66 +2,50 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  Inject,
 } from "@nestjs/common";
 import { CreateVehicleDto } from "./dto/create-vehicle.dto";
 import { UpdateVehicleDto } from "./dto/update-vehicle.dto";
-import { PrismaService } from "src/modules/prisma/prisma.service";
+import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
+import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
+import { VehicleQueryDto } from "./dto/vehicle-query.dto";
+import { getVehicleInclude } from "src/utils/includes/vehicle.includes";
 
 @Injectable()
 export class VehiclesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(TENANT_PRISMA_CLIENT) private readonly prisma: ExtendedTenantClient
+  ) {}
 
-  // Método para encontrar todos os veículos
-  async findAll() {
-    return this.prisma.vehicle.findMany();
-  }
+  async findAll(query: VehicleQueryDto) {
+    const include = getVehicleInclude(query);
+    const where: any = {};
 
-  async findManyByCompany(companyId: string) {
+    if (query.branchId) {
+      where.branch = { id: Number(query.branchId) };
+    }
+
+    if (query.status) {
+      where.status = query.status;
+    }
+
     return this.prisma.vehicle.findMany({
-      where: { companyId },
-      include: {
-        driver: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-            licenseNumber: true,
-            licenseCategory: true,
-            licenseExpiration: true,
-          },
-        },
-      },
-    });
-  }
-
-  async findManyByBranch({branchId, companyId}: {branchId: number, companyId: string}) {
-    return this.prisma.vehicle.findMany({
-      where: { branchId, companyId },
+      where,
+      include,
     });
   }
 
   // Método para encontrar um veículo pelo id
-  async findOne(plate: string) {
-    const vehicle = await this.prisma.vehicle.findUnique({
+  async findOne({ plate, query }: { plate: string; query: VehicleQueryDto }) {
+    const include = getVehicleInclude(query);
+
+    const vehicle = await this.prisma.vehicle.findFirst({
       where: { plate },
-      include: {
-        driver: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-            licenseNumber: true,
-            licenseCategory: true,
-            licenseExpiration: true,
-          },
-        },
-      },
+      include,
     });
 
     if (!vehicle) {
-      throw new NotFoundException(`Veículo com ID ${plate} não encontrado`);
+      throw new NotFoundException(`Veículo não encontrado`);
     }
 
     return vehicle;
@@ -100,7 +84,9 @@ export class VehiclesService {
 
   // Método para atualizar um veículo
   async update(id: string, updateVehicleDto: UpdateVehicleDto) {
-    await this.findOne(id);
+    await this.prisma.vehicle.findUnique({
+      where: { id },
+    });
 
     const { companyId, branchId, driverId, ...rest } = updateVehicleDto;
 
@@ -132,7 +118,9 @@ export class VehiclesService {
 
   // Método para remover um veículo
   async remove(plate: string) {
-    await this.findOne(plate);
+    await this.prisma.vehicle.findUnique({
+      where: { plate },
+    });
 
     await this.prisma.vehicle.delete({
       where: { plate },

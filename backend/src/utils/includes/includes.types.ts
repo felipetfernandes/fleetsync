@@ -1,0 +1,1 @@
+export type IncludeConfig = string | { include: Record<string, IncludeConfig> };

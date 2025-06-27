@@ -77,7 +77,7 @@ export class WorkshopService {
   }
 
   async register(registerWorkshopDto: RegisterWorkshopDto, companyId?: string) {
-    const existingWorkshop = await this.prisma.workshop.findUnique({
+    const existingWorkshop = await this.prisma.workshop.findFirst({
       where: { cnpj: registerWorkshopDto.cnpj },
     });
 
@@ -86,7 +86,7 @@ export class WorkshopService {
     }
 
     const company = companyId
-      ? await this.prisma.company.findUnique({ where: { id: companyId } })
+      ? await this.prisma.company.findFirst({ where: { id: companyId } })
       : await this.prisma.company.findFirst();
 
     if (!company) {
@@ -126,7 +126,7 @@ export class WorkshopService {
   }
 
   async create(createWorkshopDto: CreateWorkshopDto) {
-    const existingWorkshop = await this.prisma.workshop.findUnique({
+    const existingWorkshop = await this.prisma.workshop.findFirst({
       where: { cnpj: createWorkshopDto.cnpj },
     });
 

@@ -29,9 +29,9 @@ export default function WorkshopCard({ workshop }: { workshop: Workshop }) {
             <Wrench className="mr-2 h-5 w-5 text-indigo-400" />
             {workshop.name}
           </h1>
-          {workshop.order?.length > 0 && (
+          {workshop.orders?.length > 0 && (
             <div className="bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-3 py-0.5">
-              {workshop.order.length} veículo(s)
+              {workshop.orders.length} veículo(s)
             </div>
           )}
         </div>
@@ -71,7 +71,7 @@ export default function WorkshopCard({ workshop }: { workshop: Workshop }) {
             </div>
           </Link>
 
-          {workshop.order?.length > 0 && (
+          {workshop.orders?.length > 0 && (
             <div className="w-full">
               <div className="border-gray-800">
                 <button
@@ -84,7 +84,7 @@ export default function WorkshopCard({ workshop }: { workshop: Workshop }) {
                 <div>
                   <div className="space-y-3 pt-2">
                     {isOpen &&
-                      workshop.order.map((order) => (
+                      workshop.orders.map((order) => (
                         <div
                           key={order.vehicle!.id}
                           className="bg-gray-800 rounded-md p-3"

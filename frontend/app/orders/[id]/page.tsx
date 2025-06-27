@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, ClipboardList, CheckCircle2, Phone } from "lucide-react";
 import VehicleCard from "@/components/Vehicle/vehicleCard";
-import WorkshopCard from "@/components/ui/workshopCard";
+import WorkshopCard from "@/components/Workshops/workshopCard";
 import OrderFullCard from "@/components/Order/orderFullCard";
 import { PageProps } from "@/.next/types/app/layout";
 import { Order } from "@/types/types";
@@ -14,7 +14,7 @@ export default function OrderDetailPage({ params }: PageProps) {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const router = useRouter();
 
   useEffect(() => {
@@ -65,8 +65,8 @@ export default function OrderDetailPage({ params }: PageProps) {
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
       <div className="max-w-5xl mx-auto">
         <header className="flex items-center mb-8">
-          <button 
-            onClick={() => router.back()} 
+          <button
+            onClick={() => router.back()}
             aria-label="Voltar"
             className="mr-4 p-2 hover:bg-gray-800 rounded-md"
           >
@@ -98,7 +98,7 @@ export default function OrderDetailPage({ params }: PageProps) {
                 <h2 className="text-xl font-bold">Ações</h2>
               </div>
               <div className="space-y-3">
-                <button 
+                <button
                   onClick={() => console.log("Atualizar Status")}
                   className="flex items-center justify-center p-2 w-full rounded-md bg-indigo-600 hover:bg-indigo-700"
                   aria-label="Atualizar Status"
@@ -107,7 +107,7 @@ export default function OrderDetailPage({ params }: PageProps) {
                   Atualizar Status
                 </button>
 
-                <button 
+                <button
                   onClick={() => console.log("Gerar Relatório")}
                   className="flex items-center justify-center p-2 w-full bg-gray-950 border rounded-md border-gray-700 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
                   aria-label="Gerar Relatório"
@@ -116,7 +116,7 @@ export default function OrderDetailPage({ params }: PageProps) {
                   Gerar Relatório
                 </button>
 
-                <button 
+                <button
                   onClick={() => console.log("Contatar Oficina")}
                   className="flex items-center justify-center p-2 w-full bg-gray-950 border rounded-md border-gray-700 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
                   aria-label="Contatar Oficina"

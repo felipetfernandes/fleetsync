@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { PlusCircle, X } from "lucide-react";
 import WorkshopForm from "@/components/Workshops/workshopForm";
-import WorkshopCard from "@/components/ui/workshopCard";
+import WorkshopCard from "@/components/Workshops/workshopCard";
 import { Workshop } from "@/types/types";
 import { fetchClientSide } from "@/lib/utils/fetchClientSide";
 
@@ -13,7 +13,7 @@ export default function WorkshopsPage() {
 
   useEffect(() => {
     (async () => {
-      const data = await fetchClientSide<Workshop[]>("GET",`/workshops`);
+      const data = await fetchClientSide<Workshop[]>("GET", `/workshops`);
       setWorkshops(data);
     })();
   }, []);

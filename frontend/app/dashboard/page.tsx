@@ -13,7 +13,7 @@ import {
   ArrowUpRight,
   RotateCcw,
 } from "lucide-react";
-import { Branch, Company, Order, Vehicle, Workshop } from "@/types/types";
+import { Company, Order, Vehicle, Workshop } from "@/types/types";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { fetchServerSide } from "@/lib/utils/fetchServerSide";
 
@@ -42,8 +42,10 @@ function getStatusInfo(status: string) {
 }
 
 export default async function DashboardPage() {
-  const [company] = await fetchServerSide<Company[]>(`/company?orders=vehicle,workshop&vehicles=driver&workshops=orders`);
-  const { vehicles, orders , workshops } = company;
+  const [company] = await fetchServerSide<Company[]>(
+    `/company?orders=vehicle,workshop&vehicles=driver&workshops=orders`
+  );
+  const { vehicles, orders, workshops } = company;
 
   const dashboardData = {
     totalVehicles: vehicles.length,
@@ -95,7 +97,6 @@ export default async function DashboardPage() {
       .sort((a: Workshop, b: Workshop) => a.orders.length - b.orders.length)
       .slice(0, 5),
   };
-  console.log(dashboardData);
 
   // Formatar valores monetários
   const formatCurrency = (value: number) => {

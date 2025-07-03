@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from "@prisma/client";
 
 export function getCompanyInclude(query: any): Prisma.CompanyInclude {
   const include: Prisma.CompanyInclude = {};
@@ -8,12 +8,14 @@ export function getCompanyInclude(query: any): Prisma.CompanyInclude {
   }
 
   if (query.vehicles) {
-    const vehicleIncludes = query.vehicles.split(',').map((s: string) => s.trim());
+    const vehicleIncludes = query.vehicles
+      .split(",")
+      .map((s: string) => s.trim());
     const nestedVehicleInclude: Prisma.VehicleInclude = {};
-    if (vehicleIncludes.includes('driver')) {
+    if (vehicleIncludes.includes("driver")) {
       nestedVehicleInclude.driver = true;
     }
-    if (vehicleIncludes.includes('mileageHistory')) {
+    if (vehicleIncludes.includes("mileageHistory")) {
       nestedVehicleInclude.mileageHistory = true;
     }
     // Adicione outros includes aninhados para Vehicle aqui
@@ -26,16 +28,19 @@ export function getCompanyInclude(query: any): Prisma.CompanyInclude {
   }
 
   if (query.orders) {
-    const orderIncludes = query.orders.split(',').map((s: string) => s.trim());
+    const orderIncludes = query.orders.split(",").map((s: string) => s.trim());
     const nestedOrderInclude: Prisma.OrderInclude = {};
-    if (orderIncludes.includes('orderItems')) {
+    if (orderIncludes.includes("orderItems")) {
       nestedOrderInclude.orderItems = true;
     }
-    if (orderIncludes.includes('vehicle')) {
+    if (orderIncludes.includes("vehicle")) {
       nestedOrderInclude.vehicle = true;
     }
-    if (orderIncludes.includes('workshop')) {
+    if (orderIncludes.includes("workshop")) {
       nestedOrderInclude.workshop = true;
+    }
+    if (orderIncludes.includes("branch")) {
+      nestedOrderInclude.branch = true;
     }
     // Adicione outros includes aninhados para Order aqui
 
@@ -43,9 +48,11 @@ export function getCompanyInclude(query: any): Prisma.CompanyInclude {
   }
 
   if (query.workshops) {
-    const workshopsIncludes = query.workshops.split(',').map((s: string) => s.trim());
+    const workshopsIncludes = query.workshops
+      .split(",")
+      .map((s: string) => s.trim());
     const nestedOrderInclude: Prisma.WorkshopInclude = {};
-    if (workshopsIncludes.includes('orders')) {
+    if (workshopsIncludes.includes("orders")) {
       nestedOrderInclude.orders = true;
     }
 
@@ -54,5 +61,3 @@ export function getCompanyInclude(query: any): Prisma.CompanyInclude {
 
   return include;
 }
-
-

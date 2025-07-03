@@ -13,9 +13,16 @@ import {
   ArrowUpRight,
   RotateCcw,
 } from "lucide-react";
+import * as dfd from "danfojs";
 import { Company, Order, Vehicle, Workshop } from "@/types/types";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { fetchServerSide } from "@/lib/utils/fetchServerSide";
+import MonthlyMaintenance from "@/components/charts/monthlyMaintenance";
+import MaintenanceByType from "@/components/charts/maintenanceByType";
+import CostByMaintenancyStatus from "@/components/charts/costByMaintenancyStatus";
+import { CostByBranch } from "@/components/charts/costByBranch";
+import { DataTable } from "@/components/ui/dataTable";
+import { ordersInProgress } from "@/components/columns/ordersInProgress";
 
 function getStatusInfo(status: string) {
   switch (status) {
@@ -43,9 +50,22 @@ function getStatusInfo(status: string) {
 
 export default async function DashboardPage() {
   const [company] = await fetchServerSide<Company[]>(
-    `/company?orders=vehicle,workshop&vehicles=driver&workshops=orders`
+    `/company?orders=vehicle,workshop,branch&vehicles=driver&workshops=orders`
   );
   const { vehicles, orders, workshops } = company;
+
+  const df = new dfd.DataFrame(
+    orders.map((item) => {
+      const date = new Date(item.startDate);
+      const month = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}`;
+      const vehiclePlate = item.vehicle.plate;
+      const branchName = item.branch.name;
+      const workshopName = item.workshop.name;
+      return { ...item, month, branchName, vehiclePlate, workshopName };
+    })
+  );
 
   const dashboardData = {
     totalVehicles: vehicles.length,
@@ -96,7 +116,59 @@ export default async function DashboardPage() {
     topWorkshops: workshops
       .sort((a: Workshop, b: Workshop) => a.orders.length - b.orders.length)
       .slice(0, 5),
+    _orderGroupedByYearMonth: df
+      .groupby(["month"])
+      .agg({
+        totalCost: "sum", // custo_total
+        id: "count", // quantidade_manutencoes
+      })
+      .rename({
+        totalCost_sum: "cost",
+        id_count: "services",
+      })
+      .sortValues("month"),
+    _orderGroupedByType: df.groupby(["type"]).agg({
+      totalCost: "sum", // custo_total,
+      id: "count", // quantidade_manutencoes
+    }),
+    _costByStatus: df
+      .groupby(["status"])
+      .agg({
+        totalCost: "sum",
+        id: "count",
+      })
+      .rename({
+        totalCost_sum: "cost",
+        id_count: "services",
+      }),
+    _costByBranch: df
+      .groupby(["branchName", "branchId"])
+      .agg({
+        totalCost: "sum",
+        id: "count",
+      })
+      .rename({
+        totalCost_sum: "totalCost",
+        id_count: "services",
+      })
+      .sortValues("totalCost", { ascending: false }),
+    _inProgress: df.loc({
+      rows: df["status"].eq("IN_PROGRESS"),
+      columns: [
+        "vehiclePlate",
+        "description",
+        "startDate",
+        "totalCost",
+        "workshopName",
+      ],
+    }).sortValues("startDate", { ascending: true }),
   };
+
+  console.log(
+    dfd.toJSON(dashboardData._inProgress, {
+      format: "column",
+    })
+  );
 
   // Formatar valores monetários
   const formatCurrency = (value: number) => {
@@ -186,9 +258,37 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Gráfico de tipos de manutenção */}
+          <MaintenanceByType
+            data={dfd.toJSON(dashboardData._orderGroupedByType, {
+              format: "column",
+            })}
+          />
+
+          {/* Gráfico de gastos mensais */}
+          <MonthlyMaintenance
+            chartData={dfd.toJSON(dashboardData._orderGroupedByYearMonth, {
+              format: "column",
+            })}
+          />
+
+          {/* Gráfico de custo de manutenção por status */}
+          <CostByMaintenancyStatus
+            chartData={dfd.toJSON(dashboardData._costByStatus, {
+              format: "column",
+            })}
+          />
+
+          {/* Gráfico de custo de manutenção por filial */}
+          <CostByBranch
+            chartData={dfd.toJSON(dashboardData._costByBranch, {
+              format: "column",
+            })}
+          />
+
           {/* Gráfico de status dos veículos */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5  max-h-min">
             <div>
               <h2 className="text-lg font-bold">Status da Frota</h2>
               <div className="text-gray-400">
@@ -240,89 +340,6 @@ export default async function DashboardPage() {
               </div>
             </div>
           </div>
-
-          {/* Gráfico de tipos de manutenção */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-            <div>
-              <h2 className="text-lg font-bold">Tipos de Manutenção</h2>
-              <div className="text-gray-400">
-                Distribuição por tipo de serviço
-              </div>
-            </div>
-            <div>
-              <div className="space-y-4">
-                {Object.keys(dashboardData.orderTypes).map(
-                  (item: any, index: number) => {
-                    const colors = [
-                      "bg-indigo-500",
-                      "bg-emerald-500",
-                      "bg-amber-500",
-                      "bg-rose-500",
-                    ];
-                    return (
-                      <div key={item.type} className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <div
-                              className={`w-3 h-3 rounded-full ${
-                                colors[index % colors.length]
-                              } mr-2`}
-                            ></div>
-                            <span className="text-sm">{item.type}</span>
-                          </div>
-                          <span className="text-sm font-medium">
-                            {item.percentage}%
-                          </span>
-                        </div>
-                        <div className="h-2 bg-gray-800">
-                          <div
-                            className={`h-full ${
-                              colors[index % colors.length]
-                            } rounded-full`}
-                          ></div>
-                        </div>
-                      </div>
-                    );
-                  }
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Gráfico de gastos mensais */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-            <div className="mb-4">
-              <h2 className="text-lg font-bold">Gastos Mensais</h2>
-              <div className="text-gray-400">Custos de manutenção por mês</div>
-            </div>
-
-            <div className="h-[220px] flex items-end justify-between gap-2">
-              {(() => {
-                const maxValue = Math.max(
-                  ...dashboardData.monthlyExpenses.map((i: any) => i.value)
-                );
-
-                return dashboardData.monthlyExpenses.map((item: any) => {
-                  const height = (item.value / maxValue) * 100;
-
-                  return (
-                    <div
-                      key={item.month}
-                      className="flex flex-col items-center gap-2 w-12"
-                    >
-                      <div
-                        className="w-full bg-indigo-600 hover:bg-indigo-500 rounded-t-md transition-all duration-200"
-                        style={{ height: `${height}%` }}
-                      />
-                      <span className="text-xs font-medium text-center">
-                        {item.month}
-                      </span>
-                    </div>
-                  );
-                });
-              })()}
-            </div>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -341,7 +358,7 @@ export default async function DashboardPage() {
             </div>
             <div>
               <div className="space-y-4">
-                {dashboardData.recentOrders.map((order: any) => {
+                {dashboardData.recentOrders.map((order: Order) => {
                   const statusInfo = getStatusInfo(order.status);
                   return (
                     <Link href={`/orders/${order.id}`} key={order.id}>
@@ -378,6 +395,14 @@ export default async function DashboardPage() {
               </div>
             </div>
           </div>
+
+          {/* Ordens recentes */}
+          <DataTable
+            columns={ordersInProgress}
+            data={dfd.toJSON(dashboardData._inProgress, {
+              format: "column",
+            })}
+          />
 
           {/* Oficinas principais */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">

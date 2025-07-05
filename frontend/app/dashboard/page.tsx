@@ -3,19 +3,15 @@ import {
   Car,
   Wrench,
   ClipboardList,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
   TrendingUp,
   BarChart3,
-  Calendar,
   ArrowRight,
   ArrowUpRight,
-  RotateCcw,
+  KeyRound,
+  AlertTriangle,
 } from "lucide-react";
 import * as dfd from "danfojs";
 import { Company, Order, Vehicle, Workshop } from "@/types/types";
-import { StatusBadge } from "@/components/ui/statusBadge";
 import { fetchServerSide } from "@/lib/utils/fetchServerSide";
 import MonthlyMaintenance from "@/components/charts/monthlyMaintenance";
 import MaintenanceByType from "@/components/charts/maintenanceByType";
@@ -23,30 +19,6 @@ import CostByMaintenancyStatus from "@/components/charts/costByMaintenancyStatus
 import { CostByBranch } from "@/components/charts/costByBranch";
 import { DataTable } from "@/components/ui/dataTable";
 import { ordersInProgress } from "@/components/columns/ordersInProgress";
-
-function getStatusInfo(status: string) {
-  switch (status) {
-    case "Agendado":
-      return { icon: <Calendar className="h-4 w-4" />, color: "bg-blue-600" };
-    case "Em Andamento":
-      return {
-        icon: <RotateCcw className="h-4 w-4" />,
-        color: "bg-amber-600",
-      };
-    case "Concluído":
-      return {
-        icon: <CheckCircle2 className="h-4 w-4" />,
-        color: "bg-emerald-600",
-      };
-    case "Cancelado":
-      return {
-        icon: <AlertCircle className="h-4 w-4" />,
-        color: "bg-rose-600",
-      };
-    default:
-      return { icon: <Clock className="h-4 w-4" />, color: "bg-gray-600" };
-  }
-}
 
 export default async function DashboardPage() {
   const [company] = await fetchServerSide<Company[]>(
@@ -63,7 +35,22 @@ export default async function DashboardPage() {
       const vehiclePlate = item.vehicle.plate;
       const branchName = item.branch.name;
       const workshopName = item.workshop.name;
-      return { ...item, month, branchName, vehiclePlate, workshopName };
+      const durationDiff =
+        item.endDate != null
+          ? Math.floor(
+              (new Date(item.endDate).getTime() - date.getTime()) /
+                (1000 * 60 * 60 * 24)
+            )
+          : null;
+
+      return {
+        ...item,
+        month,
+        branchName,
+        vehiclePlate,
+        workshopName,
+        durationDiff,
+      };
     })
   );
 
@@ -127,10 +114,18 @@ export default async function DashboardPage() {
         id_count: "services",
       })
       .sortValues("month"),
-    _orderGroupedByType: df.groupby(["type"]).agg({
-      totalCost: "sum", // custo_total,
-      id: "count", // quantidade_manutencoes
-    }),
+    _orderGroupedByType: df
+      .groupby(["type"])
+      .agg({
+        totalCost: "sum",
+        id: "count",
+        durationDiff: "mean",
+      })
+      .rename({
+        totalCost_sum: "totalCost",
+        id_count: "quantity",
+        durationDiff_mean: "avgDuration",
+      }),
     _costByStatus: df
       .groupby(["status"])
       .agg({
@@ -140,6 +135,7 @@ export default async function DashboardPage() {
       .rename({
         totalCost_sum: "cost",
         id_count: "services",
+        durationDiff_mean: "avgDuration",
       }),
     _costByBranch: df
       .groupby(["branchName", "branchId"])
@@ -152,23 +148,19 @@ export default async function DashboardPage() {
         id_count: "services",
       })
       .sortValues("totalCost", { ascending: false }),
-    _inProgress: df.loc({
-      rows: df["status"].eq("IN_PROGRESS"),
-      columns: [
-        "vehiclePlate",
-        "description",
-        "startDate",
-        "totalCost",
-        "workshopName",
-      ],
-    }).sortValues("startDate", { ascending: true }),
+    _inProgress: df
+      .loc({
+        rows: df["status"].eq("IN_PROGRESS"),
+        columns: [
+          "vehiclePlate",
+          "description",
+          "startDate",
+          "totalCost",
+          "workshopName",
+        ],
+      })
+      .sortValues("startDate", { ascending: true }),
   };
-
-  console.log(
-    dfd.toJSON(dashboardData._inProgress, {
-      format: "column",
-    })
-  );
 
   // Formatar valores monetários
   const formatCurrency = (value: number) => {
@@ -189,7 +181,7 @@ export default async function DashboardPage() {
         </header>
 
         {/* Cards de estatísticas */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
             <div className="pb-2 flex flex-row items-center justify-between space-y-0">
               <h2 className="text-sm font-medium text-gray-400">
@@ -206,15 +198,59 @@ export default async function DashboardPage() {
 
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
             <div className="pb-2 flex flex-row items-center justify-between space-y-0">
+              <h2 className="text-sm font-medium text-gray-400">Diponíveis</h2>
+              <KeyRound className="h-4 w-4 text-emerald-500" />
+            </div>
+            <div className="flex flex-row justify-between">
+              <span className="text-2xl font-bold">
+                {dashboardData.fleetStatus.AVAILABLE}
+              </span>
+              <span className="text-2xl font-thin text-gray-400">
+                {(dashboardData.fleetStatus.AVAILABLE /
+                  dashboardData.totalVehicles) *
+                  100}
+                %
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+            <div className="pb-2 flex flex-row items-center justify-between space-y-0">
               <h2 className="text-sm font-medium text-gray-400">
                 Em Manutenção
               </h2>
               <Wrench className="h-4 w-4 text-amber-400" />
             </div>
-            <div>
-              <div className="text-2xl font-bold">
-                {dashboardData.vehiclesInMaintenance}
-              </div>
+            <div className="flex flex-row justify-between">
+              <span className="text-2xl font-bold">
+                {dashboardData.fleetStatus.MAINTENANCE}
+              </span>
+              <span className="text-2xl font-thin text-gray-400">
+                {(dashboardData.fleetStatus.MAINTENANCE /
+                  dashboardData.totalVehicles) *
+                  100}
+                %
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+            <div className="pb-2 flex flex-row items-center justify-between space-y-0">
+              <h2 className="text-sm font-medium text-gray-400">
+                Indisponíveis
+              </h2>
+              <AlertTriangle className="h-4 w-4 text-rose-500" />
+            </div>
+            <div className="flex flex-row justify-between">
+              <span className="text-2xl font-bold">
+                {dashboardData.fleetStatus.UNAVAILABLE}
+              </span>
+              <span className="text-2xl font-thin text-gray-400">
+                {(dashboardData.fleetStatus.UNAVAILABLE /
+                  dashboardData.totalVehicles) *
+                  100}
+                %
+              </span>
             </div>
           </div>
 
@@ -286,116 +322,9 @@ export default async function DashboardPage() {
               format: "column",
             })}
           />
-
-          {/* Gráfico de status dos veículos */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5  max-h-min">
-            <div>
-              <h2 className="text-lg font-bold">Status da Frota</h2>
-              <div className="text-gray-400">
-                Distribuição dos veículos por status
-              </div>
-            </div>
-            <div>
-              <div className="space-y-4">
-                {Object.entries(dashboardData.fleetStatus).map(
-                  ([status, count]) => {
-                    const color =
-                      status === "AVAILABLE"
-                        ? "bg-emerald-500"
-                        : status === "UNAVAILABLE"
-                        ? "bg-rose-500"
-                        : "bg-amber-500";
-
-                    return (
-                      <div key={status} className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <div
-                              className={`w-3 h-3 rounded-full ${color} mr-2`}
-                            ></div>
-                            <span className="text-sm">{status}</span>
-                          </div>
-                          <span className="text-sm font-medium">
-                            {count} (
-                            {Math.round(
-                              (count / dashboardData.totalVehicles) * 100
-                            )}
-                            %)
-                          </span>
-                        </div>
-                        <div className="h-2 bg-gray-800">
-                          <div
-                            className={`h-full ${color} rounded-full`}
-                            style={{
-                              width: `${
-                                (count / dashboardData.totalVehicles) * 100
-                              }%`,
-                            }}
-                          ></div>
-                        </div>
-                      </div>
-                    );
-                  }
-                )}
-              </div>
-            </div>
-          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Ordens recentes */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-            <div className="pb-2">
-              <div className="flex justify-between items-center">
-                <h2 className="text-lg font-bold">Ordens Recentes</h2>
-                <Link href="/orders">
-                  <button className="text-indigo-400 hover:text-indigo-300 p-0 h-auto">
-                    Ver todas
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </button>
-                </Link>
-              </div>
-            </div>
-            <div>
-              <div className="space-y-4">
-                {dashboardData.recentOrders.map((order: Order) => {
-                  const statusInfo = getStatusInfo(order.status);
-                  return (
-                    <Link href={`/orders/${order.id}`} key={order.id}>
-                      <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition-colors">
-                        <div className="flex items-start space-x-4">
-                          <div className={`p-2 rounded-md ${statusInfo.color}`}>
-                            {statusInfo.icon}
-                          </div>
-                          <div>
-                            <h3 className="font-medium">
-                              {order.vehicle.plate} - {order.vehicle.model}
-                            </h3>
-                            <p className="text-sm text-gray-400">
-                              {order.type}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {order.workshop.name} • {order.startDate}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <StatusBadge
-                            status={order.status}
-                            type="orderStatus"
-                          />
-                          <p className="text-sm font-medium mt-1">
-                            {formatCurrency(order.totalCost)}
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
           {/* Ordens recentes */}
           <DataTable
             columns={ordersInProgress}

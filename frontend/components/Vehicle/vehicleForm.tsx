@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useEffect, useState } from "react";
-import Input from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Branch } from "@/types/types";
 import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants";
 

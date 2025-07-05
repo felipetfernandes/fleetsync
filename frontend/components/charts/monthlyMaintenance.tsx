@@ -1,7 +1,14 @@
 "use client";
 
 import { TrendingUp, TrendingDown } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
+import {
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  LineChart,
+  Line,
+} from "recharts";
 
 import {
   Card,
@@ -26,11 +33,11 @@ interface MonthlyMaintenanceProps {
 const chartConfig = {
   cost: {
     label: "Cost",
-    color: "#ee663a",
+    color: "#ff2056",
   },
   services: {
     label: "Services",
-    color: "#ffdc96",
+    color: "#00a6f4",
   },
 } satisfies ChartConfig;
 
@@ -60,39 +67,51 @@ export default function MonthlyMaintenance({
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <BarChart accessibilityLayer data={chartData}>
+          <LineChart
+            accessibilityLayer
+            data={chartData}
+            margin={{
+              left: 12,
+              right: 12,
+            }}
+          >
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="month"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              tickFormatter={(value) => value.slice(-2)}
             />
             <YAxis
+              visibility={"hidden"}
               yAxisId="left"
               orientation="left"
               stroke="var(--color-cost)"
             />
             <YAxis
+              visibility={"hidden"}
               yAxisId="right"
               orientation="right"
               stroke="var(--color-services)"
             />
             <Tooltip />
-            <Bar
+            <Line
               dataKey="cost"
               yAxisId="left"
-              fill="var(--color-cost)"
+              type="monotone"
+              stroke="var(--color-cost)"
+              strokeWidth={2}
               radius={2}
             />
-            <Bar
+            <Line
               dataKey="services"
               yAxisId="right"
-              fill="var(--color-services)"
+              type="monotone"
+              stroke="var(--color-services)"
+              strokeWidth={2}
               radius={2}
             />
-          </BarChart>
+          </LineChart>
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm text-gray-200">

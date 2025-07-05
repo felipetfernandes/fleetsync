@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
-import Button from "../ui/button";
+import { Button } from "../ui/button";
 
 export type OrderColumns = {
   vehiclePlate: string;
@@ -17,6 +17,9 @@ export const ordersInProgress: ColumnDef<OrderColumns>[] = [
     accessorKey: "vehiclePlate",
     header: "Placa",
     cell: ({ row }) => row.getValue<string>("vehiclePlate"),
+    meta: {
+      className: "w-[120px]",
+    },
   },
   {
     accessorKey: "description",
@@ -26,6 +29,9 @@ export const ordersInProgress: ColumnDef<OrderColumns>[] = [
         {row.getValue<string>("description")}
       </span>
     ),
+    meta: {
+      className: "w-[300px]",
+    },
   },
   {
     accessorKey: "startDate",
@@ -39,6 +45,9 @@ export const ordersInProgress: ColumnDef<OrderColumns>[] = [
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
+    },
+    meta: {
+      className: "w-[100px] text-center",
     },
     cell: ({ row }) => {
       const date = new Date(row.getValue<string>("startDate"));
@@ -62,6 +71,9 @@ export const ordersInProgress: ColumnDef<OrderColumns>[] = [
         </Button>
       );
     },
+    meta: {
+      className: "w-[100px] text-center",
+    },
     cell: ({ row }) => {
       const value = row.getValue<number>("totalCost");
       return value.toLocaleString("pt-BR", {
@@ -69,11 +81,13 @@ export const ordersInProgress: ColumnDef<OrderColumns>[] = [
         currency: "BRL",
       });
     },
-    meta: { className: "text-right" },
   },
   {
     accessorKey: "workshopName",
     header: "Oficina",
+    meta: {
+      className: "w-[200px]",
+    },
     cell: ({ row }) => row.getValue<string>("workshopName"),
   },
 ];

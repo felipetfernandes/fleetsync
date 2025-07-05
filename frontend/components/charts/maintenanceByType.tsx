@@ -1,6 +1,6 @@
 "use client";
 
-import { PieChart, Pie, Cell, Label, Sector, Legend } from "recharts";
+import { PieChart, Pie, Cell, Label, Sector } from "recharts";
 import {
   Card,
   CardHeader,
@@ -23,12 +23,14 @@ type ChartDataItem = {
   totalCost: number;
   averageCost: number;
   quantity: number;
+  avgDuration: number;
 };
 
 type DataType = {
   type: MaintenanceType;
-  totalCost_sum: number;
-  id_count: number;
+  totalCost: number;
+  quantity: number;
+  avgDuration: number;
 };
 
 interface MaintenanceByTypeProps {
@@ -65,8 +67,6 @@ const chartConfig = {
     color: "#4f46e5",
   },
 } satisfies ChartConfig;
-
-const COLORS = ["#10b981", "#f59e0b", "#4f46e5"];
 
 const renderActiveShape = (props: unknown) => {
   const RADIAN = Math.PI / 180;
@@ -116,32 +116,40 @@ const renderActiveShape = (props: unknown) => {
         dy={-18}
         textAnchor={textAnchor}
         fill="oklch(55.1% 0.027 264.364)"
-      >{`Média R$ ${payload.averageCost}`}</text>
+      >{`Média: R$ ${payload.averageCost.toFixed(0)}`}</text>
       <text
         x={ex + (cos >= 0 ? 1 : -1) * 12}
         y={ey}
         textAnchor={textAnchor}
         fill="oklch(96.7% 0.003 264.542)"
-      >{`Total R$ ${value}`}</text>
+      >{`Total: R$ ${value.toFixed(0)}`}</text>
       <text
-        x={ex + (cos >= 0 ? 1 : -1) * 12}
+        x={ex + (cos >= 0 ? 1 : -1) * 12} 
         y={ey}
         dy={18}
         textAnchor={textAnchor}
         fill="oklch(44.6% 0.03 256.802)"
+      >{`Duração média: ${payload.avgDuration.toFixed(0)} dias`}</text>
+      <text
+        x={ex + (cos >= 0 ? 1 : -1) * 12}
+        y={ey}
+        dy={36}
+        textAnchor={textAnchor}
+        fill="oklch(44.6% 0.03 256.802)"
       >
-        {`(${(percent * 100).toFixed(0)}%)`}
+        {`(${(percent * 100).toFixed(0)}% das ordens)`}
       </text>
     </g>
   );
 };
 
 export default function MaintenanceByType({ data }: MaintenanceByTypeProps) {
+  console.log(data);
+  
+
   const chartData = data.map((item) => ({
     ...item,
-    totalCost: Number(item.totalCost_sum.toFixed(0)),
-    quantity: Number(item.id_count),
-    averageCost: Number((item.totalCost_sum / item.id_count).toFixed(0)),
+    averageCost: Number((item.totalCost / item.quantity).toFixed(0)),
   }));
 
   const [activeType, setActiveType] = useState(chartData[0].type);

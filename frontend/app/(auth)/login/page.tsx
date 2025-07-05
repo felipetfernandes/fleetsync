@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Input from "@/components/ui/input";
-import Button from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import SupportButton from "@/components/ui/supportButton";
 import Image from "next/image";
 import { fetchClientSide } from "@/lib/utils/fetchClientSide";

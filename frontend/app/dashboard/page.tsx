@@ -19,6 +19,8 @@ import CostByMaintenancyStatus from "@/components/charts/costByMaintenancyStatus
 import { CostByBranch } from "@/components/charts/costByBranch";
 import { DataTable } from "@/components/ui/dataTable";
 import { ordersInProgress } from "@/components/columns/ordersInProgress";
+import { groupedOrdersByVehicle } from "@/components/columns/groupedOrdersByVehicle";
+import groupOrdersByVehicle from "@/lib/utils/groupedFunctions";
 
 export default async function DashboardPage() {
   const [company] = await fetchServerSide<Company[]>(
@@ -26,33 +28,41 @@ export default async function DashboardPage() {
   );
   const { vehicles, orders, workshops } = company;
 
-  const df = new dfd.DataFrame(
-    orders.map((item) => {
-      const date = new Date(item.startDate);
-      const month = `${date.getFullYear()}-${String(
-        date.getMonth() + 1
-      ).padStart(2, "0")}`;
-      const vehiclePlate = item.vehicle.plate;
-      const branchName = item.branch.name;
-      const workshopName = item.workshop.name;
-      const durationDiff =
-        item.endDate != null
-          ? Math.floor(
-              (new Date(item.endDate).getTime() - date.getTime()) /
-                (1000 * 60 * 60 * 24)
-            )
-          : null;
+  const enrichedOrders = orders.map((item) => {
+    const date = new Date(item.startDate);
+    const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}`;
+    const vehiclePlate = item.vehicle.plate;
+    const branchName = item.branch.name;
+    const workshopName = item.workshop.name;
+    const vehicleBrand = item.vehicle.brand;
+    const vehicleModel = item.vehicle.model;
+    const driverName = vehicles.find((v: Vehicle) => v.id == item.vehicleId)
+      ?.driver.name;
+    const durationDiff =
+      item.endDate != null
+        ? Math.floor(
+            (new Date(item.endDate).getTime() - date.getTime()) /
+              (1000 * 60 * 60 * 24)
+          )
+        : null;
 
-      return {
-        ...item,
-        month,
-        branchName,
-        vehiclePlate,
-        workshopName,
-        durationDiff,
-      };
-    })
-  );
+    return {
+      ...item,
+      month,
+      branchName,
+      workshopName,
+      driverName,
+      vehiclePlate,
+      vehicleBrand,
+      vehicleModel,
+      durationDiff,
+    };
+  });
+
+  const df = new dfd.DataFrame(enrichedOrders);
 
   const dashboardData = {
     totalVehicles: vehicles.length,
@@ -160,7 +170,10 @@ export default async function DashboardPage() {
         ],
       })
       .sortValues("startDate", { ascending: true }),
+    _ordersByVehicle: groupOrdersByVehicle(enrichedOrders),
   };
+
+  console.log(dashboardData._ordersByVehicle);
 
   // Formatar valores monetários
   const formatCurrency = (value: number) => {
@@ -325,12 +338,21 @@ export default async function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
-          {/* Ordens recentes */}
+          {/* Ordens em Andamento */}
           <DataTable
             columns={ordersInProgress}
             data={dfd.toJSON(dashboardData._inProgress, {
               format: "column",
             })}
+            header="Ordens em Andamento"
+          />
+
+          {/* Ordens por Veículo */}
+          <DataTable
+            columns={groupedOrdersByVehicle}
+            data={dashboardData._ordersByVehicle}
+            header="Ordens por Veículo"
+            grouped
           />
 
           {/* Oficinas principais */}

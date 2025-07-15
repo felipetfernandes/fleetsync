@@ -56,7 +56,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <Button type="submit" className="mt-4">
+          <Button type="submit" className="mt-4" onSubmit={handleLogin}>
             Entrar
           </Button>
           <SupportButton>Contatar Suporte</SupportButton>

@@ -7,6 +7,8 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  getExpandedRowModel,
+  getGroupedRowModel,
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
@@ -19,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { DataTablePagination } from "./dataTablePagination";
@@ -26,35 +29,52 @@ import { DataTablePagination } from "./dataTablePagination";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  header: string;
+  grouped?: boolean;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  header,
+  grouped = false,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = useState<any>([]);
+  const [globalFilter, setGlobalFilter] = useState<string>("");
+  const [grouping, setGrouping] = useState<string[]>([]);
+  const [expanded, setExpanded] = useState({});
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    globalFilterFn: "includesString",
+    ...(grouped && {
+      getGroupedRowModel: getGroupedRowModel(),
+      getExpandedRowModel: getExpandedRowModel(),
+    }),
     state: {
       sorting,
       globalFilter,
+      ...(grouped && { grouping, expanded }),
     },
+    onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
+    ...(grouped && {
+      onGroupingChange: setGrouping,
+      onExpandedChange: setExpanded,
+      groupedColumnMode: false,
+    }),
+    globalFilterFn: "includesString",
   });
 
   const pageSize = table.getState().pagination.pageSize;
 
   return (
-    <div className="bg-gray-900 p-4 rounded-md border border-gray-800">
+    <div className="bg-gray-900 p-4 rounded-md border border-gray-800 text-gray-200">
+      <h1 className="text-xl mb-2">{header}</h1>
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter..."
@@ -63,6 +83,7 @@ export function DataTable<TData, TValue>({
           className="max-w-sm"
         />
       </div>
+
       <div
         className={`h-[${pageSize * 48 + 120}px] flex flex-col justify-between`}
       >
@@ -70,21 +91,19 @@ export function DataTable<TData, TValue>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className={header.column.columnDef.meta?.className}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    className={header.column.columnDef.meta?.className}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -94,15 +113,35 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={
+                    grouped && row.getCanExpand()
+                      ? row.getToggleExpandedHandler()
+                      : undefined
+                  }
+                  className={
+                    grouped && row.getIsGrouped()
+                      ? "cursor-pointer bg-gray-800"
+                      : ""
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
                       className={`${cell.column.columnDef.meta?.className} h-12`}
                     >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
+                      {grouped &&
+                      row.getIsGrouped() &&
+                      grouping.includes(cell.column.id) ? (
+                        <div className="flex items-center gap-2">
+                          <span>
+                            {cell.getValue()} ({row.subRows.length})
+                          </span>
+                        </div>
+                      ) : (
+                        flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )
                       )}
                     </TableCell>
                   ))}

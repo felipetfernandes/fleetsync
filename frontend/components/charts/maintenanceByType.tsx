@@ -144,9 +144,6 @@ const renderActiveShape = (props: unknown) => {
 };
 
 export default function MaintenanceByType({ data }: MaintenanceByTypeProps) {
-  console.log(data);
-  
-
   const chartData = data.map((item) => ({
     ...item,
     averageCost: Number((item.totalCost / item.quantity).toFixed(0)),

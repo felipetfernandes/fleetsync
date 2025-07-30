@@ -12,6 +12,7 @@ import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
 import { WorkshopQueryDto } from "./dto/workshop-query.dto";
 import { getWorkshopInclude } from "src/utils/includes/workshop.includes";
+import { UsersService } from "../user/users.service";
 
 @Injectable()
 export class WorkshopService {

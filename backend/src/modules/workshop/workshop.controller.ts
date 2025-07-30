@@ -23,6 +23,7 @@ import { RegisterWorkshopDto } from "./dto/register-workshop.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { TenantClsGuard } from "../auth/guards/tenant-cls.guard";
 import { WorkshopQueryDto } from "./dto/workshop-query.dto";
+import { UsersService } from "../user/users.service";
 
 interface JwtPayload {
   userId: string;

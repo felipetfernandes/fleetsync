@@ -45,7 +45,6 @@ export default function VehicleDetailPage({
         );
         setvehicle(data);
         setOrders(data.orders)
-        console.log(data);
       } catch (error) {
         console.error("Erro ao buscar veículos:", error);
         // redirecionar para login se necessário

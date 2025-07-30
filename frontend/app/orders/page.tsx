@@ -1,7 +1,7 @@
 "use client";
 
 import { Search, PlusCircle } from "lucide-react";
-import Input from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import OrderCard from "@/components/Order/orderCard";
 import OrderForm from "@/components/Order/orderForm";
 import { useEffect, useState } from "react";
@@ -14,7 +14,10 @@ export default function OrdersPage() {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const data = await fetchClientSide<Order[]>("GET",`/orders?vehicle=driver&branch=true&workshop=true`);
+      const data = await fetchClientSide<Order[]>(
+        "GET",
+        `/orders?vehicle=driver&branch=true&workshop=true`
+      );
       setOrders(data);
     };
     fetchOrders();

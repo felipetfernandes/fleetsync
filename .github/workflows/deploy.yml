@@ -52,8 +52,9 @@ jobs:
             # O --build reconstruirá as imagens se os Dockerfiles ou código mudarem
             # O -d roda em background
             # O --remove-orphans remove containers de serviços que não existem mais no compose
-            docker-compose -f docker-compose.prod.yml up --build -d --remove-orphans
             docker-compose -f docker-compose.prod.yml pull # Tenta puxar imagens base atualizadas
+            docker-compose -f docker-compose.prod.yml down -v --remove-orphans
+            docker-compose -f docker-compose.prod.yml up -d --build 
             
             # Opcional: Limpa imagens Docker não utilizadas (dangling images)
             docker image prune -f

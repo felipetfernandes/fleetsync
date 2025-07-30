@@ -3,107 +3,35 @@ import {
   Car,
   Wrench,
   ClipboardList,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
   TrendingUp,
   BarChart3,
-  Calendar,
-  ArrowRight,
   ArrowUpRight,
-  RotateCcw,
+  KeyRound,
+  AlertTriangle,
 } from "lucide-react";
-import { Branch, Company, Order, Vehicle, Workshop } from "@/types/types";
-import { StatusBadge } from "@/components/ui/statusBadge";
+import { Company } from "@/types/types";
 import { fetchServerSide } from "@/lib/utils/fetchServerSide";
-
-function getStatusInfo(status: string) {
-  switch (status) {
-    case "Agendado":
-      return { icon: <Calendar className="h-4 w-4" />, color: "bg-blue-600" };
-    case "Em Andamento":
-      return {
-        icon: <RotateCcw className="h-4 w-4" />,
-        color: "bg-amber-600",
-      };
-    case "Concluído":
-      return {
-        icon: <CheckCircle2 className="h-4 w-4" />,
-        color: "bg-emerald-600",
-      };
-    case "Cancelado":
-      return {
-        icon: <AlertCircle className="h-4 w-4" />,
-        color: "bg-rose-600",
-      };
-    default:
-      return { icon: <Clock className="h-4 w-4" />, color: "bg-gray-600" };
-  }
-}
+import MonthlyMaintenance from "@/components/charts/monthlyMaintenance";
+import MaintenanceByType from "@/components/charts/maintenanceByType";
+import CostByMaintenancyStatus from "@/components/charts/costByMaintenancyStatus";
+import { CostByBranch } from "@/components/charts/costByBranch";
+import { DataTable } from "@/components/ui/dataTable";
+import { ordersInProgress } from "@/components/columns/ordersInProgress";
+import { groupedOrdersByVehicle } from "@/components/columns/groupedOrdersByVehicle";
+import { formatCurrency } from "@/lib/utils/formatFunctions";
+import { buildDashboardData } from "@/lib/utils/buildDashboardData";
 
 export default async function DashboardPage() {
-  const [company] = await fetchServerSide<Company[]>(`/company?orders=vehicle,workshop&vehicles=driver&workshops=orders`);
-  const { vehicles, orders , workshops } = company;
+  const [company] = await fetchServerSide<Company[]>(
+    `/company?orders=vehicle,workshop,branch&vehicles=driver&workshops=orders`
+  );
+  const { vehicles, orders, workshops } = company;
 
-  const dashboardData = {
-    totalVehicles: vehicles.length,
-    vehiclesInMaintenance: vehicles.filter(
-      (v: Vehicle) => v.status === "MAINTENANCE"
-    ).length,
-    pendingOrders: orders.filter((o: Order) => !o.endDate).length,
-    recentOrders: orders
-      .filter((o) => !!o.startDate)
-      .sort((o1, o2) => {
-        const date1 = new Date(o1.startDate).getTime();
-        const date2 = new Date(o2.startDate).getTime();
-        return date2 - date1;
-      })
-      .slice(0, 5),
-    monthlyExpenses: Array.from({ length: 5 }).map((_, index) => {
-      const now = new Date();
-      const targetDate = new Date(now.getFullYear(), now.getMonth() - index, 1);
-
-      const total = orders
-        .filter((order: Order) => {
-          const orderDate = new Date(order.startDate);
-          return (
-            orderDate.getMonth() === targetDate.getMonth() &&
-            orderDate.getFullYear() === targetDate.getFullYear()
-          );
-        })
-        .reduce((acc: number, order: Order) => acc + order.totalCost, 0);
-
-      return {
-        month: targetDate.toLocaleString("pt-BR", { month: "short" }),
-        value: total,
-      };
-    }),
-    fleetStatus: {
-      AVAILABLE: vehicles.filter((v: Vehicle) => v.status === "AVAILABLE")
-        .length,
-      UNAVAILABLE: vehicles.filter((v: Vehicle) => v.status === "UNAVAILABLE")
-        .length,
-      MAINTENANCE: vehicles.filter((v: Vehicle) => v.status === "MAINTENANCE")
-        .length,
-    },
-    orderTypes: {
-      PREVENTIVE: orders.filter((o: Order) => o.type === "PREVENTIVE").length,
-      CORRECTIVE: orders.filter((o: Order) => o.type === "CORRECTIVE").length,
-      PERIODIC: orders.filter((o: Order) => o.type === "PERIODIC").length,
-    },
-    topWorkshops: workshops
-      .sort((a: Workshop, b: Workshop) => a.orders.length - b.orders.length)
-      .slice(0, 5),
-  };
-  console.log(dashboardData);
-
-  // Formatar valores monetários
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
-  };
+  const dashboardData = buildDashboardData({
+    vehicles,
+    orders,
+    workshops,
+  });
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
@@ -116,7 +44,7 @@ export default async function DashboardPage() {
         </header>
 
         {/* Cards de estatísticas */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
             <div className="pb-2 flex flex-row items-center justify-between space-y-0">
               <h2 className="text-sm font-medium text-gray-400">
@@ -133,15 +61,59 @@ export default async function DashboardPage() {
 
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
             <div className="pb-2 flex flex-row items-center justify-between space-y-0">
+              <h2 className="text-sm font-medium text-gray-400">Diponíveis</h2>
+              <KeyRound className="h-4 w-4 text-emerald-500" />
+            </div>
+            <div className="flex flex-row justify-between">
+              <span className="text-2xl font-bold">
+                {dashboardData.fleetStatus.AVAILABLE}
+              </span>
+              <span className="text-2xl font-thin text-gray-400">
+                {(dashboardData.fleetStatus.AVAILABLE /
+                  dashboardData.totalVehicles) *
+                  100}
+                %
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+            <div className="pb-2 flex flex-row items-center justify-between space-y-0">
               <h2 className="text-sm font-medium text-gray-400">
                 Em Manutenção
               </h2>
               <Wrench className="h-4 w-4 text-amber-400" />
             </div>
-            <div>
-              <div className="text-2xl font-bold">
-                {dashboardData.vehiclesInMaintenance}
-              </div>
+            <div className="flex flex-row justify-between">
+              <span className="text-2xl font-bold">
+                {dashboardData.fleetStatus.MAINTENANCE}
+              </span>
+              <span className="text-2xl font-thin text-gray-400">
+                {(dashboardData.fleetStatus.MAINTENANCE /
+                  dashboardData.totalVehicles) *
+                  100}
+                %
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+            <div className="pb-2 flex flex-row items-center justify-between space-y-0">
+              <h2 className="text-sm font-medium text-gray-400">
+                Indisponíveis
+              </h2>
+              <AlertTriangle className="h-4 w-4 text-rose-500" />
+            </div>
+            <div className="flex flex-row justify-between">
+              <span className="text-2xl font-bold">
+                {dashboardData.fleetStatus.UNAVAILABLE}
+              </span>
+              <span className="text-2xl font-thin text-gray-400">
+                {(dashboardData.fleetStatus.UNAVAILABLE /
+                  dashboardData.totalVehicles) *
+                  100}
+                %
+              </span>
             </div>
           </div>
 
@@ -185,257 +157,43 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Gráfico de status dos veículos */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-            <div>
-              <h2 className="text-lg font-bold">Status da Frota</h2>
-              <div className="text-gray-400">
-                Distribuição dos veículos por status
-              </div>
-            </div>
-            <div>
-              <div className="space-y-4">
-                {Object.entries(dashboardData.fleetStatus).map(
-                  ([status, count]) => {
-                    const color =
-                      status === "AVAILABLE"
-                        ? "bg-emerald-500"
-                        : status === "UNAVAILABLE"
-                        ? "bg-rose-500"
-                        : "bg-amber-500";
-
-                    return (
-                      <div key={status} className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <div
-                              className={`w-3 h-3 rounded-full ${color} mr-2`}
-                            ></div>
-                            <span className="text-sm">{status}</span>
-                          </div>
-                          <span className="text-sm font-medium">
-                            {count} (
-                            {Math.round(
-                              (count / dashboardData.totalVehicles) * 100
-                            )}
-                            %)
-                          </span>
-                        </div>
-                        <div className="h-2 bg-gray-800">
-                          <div
-                            className={`h-full ${color} rounded-full`}
-                            style={{
-                              width: `${
-                                (count / dashboardData.totalVehicles) * 100
-                              }%`,
-                            }}
-                          ></div>
-                        </div>
-                      </div>
-                    );
-                  }
-                )}
-              </div>
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Gráfico de tipos de manutenção */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-            <div>
-              <h2 className="text-lg font-bold">Tipos de Manutenção</h2>
-              <div className="text-gray-400">
-                Distribuição por tipo de serviço
-              </div>
-            </div>
-            <div>
-              <div className="space-y-4">
-                {Object.keys(dashboardData.orderTypes).map(
-                  (item: any, index: number) => {
-                    const colors = [
-                      "bg-indigo-500",
-                      "bg-emerald-500",
-                      "bg-amber-500",
-                      "bg-rose-500",
-                    ];
-                    return (
-                      <div key={item.type} className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <div
-                              className={`w-3 h-3 rounded-full ${
-                                colors[index % colors.length]
-                              } mr-2`}
-                            ></div>
-                            <span className="text-sm">{item.type}</span>
-                          </div>
-                          <span className="text-sm font-medium">
-                            {item.percentage}%
-                          </span>
-                        </div>
-                        <div className="h-2 bg-gray-800">
-                          <div
-                            className={`h-full ${
-                              colors[index % colors.length]
-                            } rounded-full`}
-                          ></div>
-                        </div>
-                      </div>
-                    );
-                  }
-                )}
-              </div>
-            </div>
-          </div>
+          <MaintenanceByType
+            data={dashboardData._orderGroupedByType}
+          />
 
           {/* Gráfico de gastos mensais */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-            <div className="mb-4">
-              <h2 className="text-lg font-bold">Gastos Mensais</h2>
-              <div className="text-gray-400">Custos de manutenção por mês</div>
-            </div>
+          <MonthlyMaintenance
+            chartData={dashboardData._orderGroupedByYearMonth}
+          />
 
-            <div className="h-[220px] flex items-end justify-between gap-2">
-              {(() => {
-                const maxValue = Math.max(
-                  ...dashboardData.monthlyExpenses.map((i: any) => i.value)
-                );
+          {/* Gráfico de custo de manutenção por status */}
+          <CostByMaintenancyStatus
+            chartData={dashboardData._costByStatus}
+          />
 
-                return dashboardData.monthlyExpenses.map((item: any) => {
-                  const height = (item.value / maxValue) * 100;
-
-                  return (
-                    <div
-                      key={item.month}
-                      className="flex flex-col items-center gap-2 w-12"
-                    >
-                      <div
-                        className="w-full bg-indigo-600 hover:bg-indigo-500 rounded-t-md transition-all duration-200"
-                        style={{ height: `${height}%` }}
-                      />
-                      <span className="text-xs font-medium text-center">
-                        {item.month}
-                      </span>
-                    </div>
-                  );
-                });
-              })()}
-            </div>
-          </div>
+          {/* Gráfico de custo de manutenção por filial */}
+          <CostByBranch
+            chartData={dashboardData._costByBranch}
+          />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Ordens recentes */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-            <div className="pb-2">
-              <div className="flex justify-between items-center">
-                <h2 className="text-lg font-bold">Ordens Recentes</h2>
-                <Link href="/orders">
-                  <button className="text-indigo-400 hover:text-indigo-300 p-0 h-auto">
-                    Ver todas
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </button>
-                </Link>
-              </div>
-            </div>
-            <div>
-              <div className="space-y-4">
-                {dashboardData.recentOrders.map((order: any) => {
-                  const statusInfo = getStatusInfo(order.status);
-                  return (
-                    <Link href={`/orders/${order.id}`} key={order.id}>
-                      <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition-colors">
-                        <div className="flex items-start space-x-4">
-                          <div className={`p-2 rounded-md ${statusInfo.color}`}>
-                            {statusInfo.icon}
-                          </div>
-                          <div>
-                            <h3 className="font-medium">
-                              {order.vehicle.plate} - {order.vehicle.model}
-                            </h3>
-                            <p className="text-sm text-gray-400">
-                              {order.type}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {order.workshop.name} • {order.startDate}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <StatusBadge
-                            status={order.status}
-                            type="orderStatus"
-                          />
-                          <p className="text-sm font-medium mt-1">
-                            {formatCurrency(order.totalCost)}
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+          {/* Ordens em Andamento */}
+          <DataTable
+            columns={ordersInProgress}
+            data={dashboardData._inProgress}
+            header="Ordens em Andamento"
+          />
 
-          {/* Oficinas principais */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-            <div className="pb-2">
-              <div className="flex justify-between items-center">
-                <h2 className="text-lg font-bold">Oficinas Principais</h2>
-                <Link href="/workshops">
-                  <button className="text-indigo-400 hover:text-indigo-300 p-0 h-auto">
-                    Ver todas
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </button>
-                </Link>
-              </div>
-            </div>
-            <div>
-              <div className="space-y-4">
-                {dashboardData.topWorkshops?.map(
-                  (workshop: any, index: number) => (
-                    <Link
-                      href={`/workshops/${workshop.id}`}
-                      key={workshop.name}
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition-colors"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white font-medium">
-                          {index + 1}
-                        </div>
-                        <div>
-                          <h3 className="font-medium">{workshop.name}</h3>
-                          <div className="flex items-center mt-1">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <svg
-                                key={i}
-                                className={`w-3 h-3 ${
-                                  i < Math.floor(workshop.rating)
-                                    ? "text-yellow-400"
-                                    : "text-gray-600"
-                                }`}
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                              </svg>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium">
-                          {workshop.ordersCount} ordens
-                        </p>
-                      </div>
-                    </Link>
-                  )
-                )}
-              </div>
-            </div>
-          </div>
+          {/* Ordens por Veículo */}
+          <DataTable
+            columns={groupedOrdersByVehicle}
+            data={dashboardData._ordersByVehicle}
+            header="Ordens por Veículo"
+            grouped
+          />
         </div>
 
         {/* Links rápidos */}

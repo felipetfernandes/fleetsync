@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Input from "@/components/ui/input";
-import Button from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import SupportButton from "@/components/ui/supportButton";
 import Image from "next/image";
 import { fetchClientSide } from "@/lib/utils/fetchClientSide";
@@ -23,7 +23,7 @@ export default function LoginPage() {
         password,
       });
 
-      router.push("/dashboard");
+      router.push("/");
     } catch (error) {
       alert("Login inválido");
     }
@@ -56,7 +56,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <Button type="submit" className="mt-4">
+          <Button type="submit" className="mt-4" onSubmit={handleLogin}>
             Entrar
           </Button>
           <SupportButton>Contatar Suporte</SupportButton>

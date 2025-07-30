@@ -1,46 +1,22 @@
-"use client";
+import * as React from "react"
 
-import Image from "next/image";
+import { cn } from "@/lib/utils"
 
-type InputProps = {
-  className?: string;
-  placeholder?: string;
-  type?: "password" | "email" | "text";
-  image?: string;
-  alt?: string;
-  width?: number;
-  height?: number;
-  id?: string;
-  name?: string;
-  value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  required?: boolean;
-};
-
-const Input = (props: InputProps) => {
-  return (
-    <div className="relative flex items-center">
-      {props.image && props.alt && (
-        <Image
-          src={props.image}
-          alt={props.alt}
-          width={props.width || 20}
-          height={props.height || 20}
-          className="absolute left-2"
-        />
-      )}
+const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
+  ({ className, type, ...props }, ref) => {
+    return (
       <input
-        className={`bg-gray-800 text-white p-2 pl-10 rounded focus:ring-0 focus:outline-none placeholder:text-gray-400 placeholder:text-sm placeholder:font-light placeholder:font-sans border border-gray-600 ${props.className}`}
-        type={props.type}
-        placeholder={props.placeholder}
-        id={props.id}
-        name={props.name}
-        value={props.value}
-        onChange={props.onChange}
-        required={props.required}
+        type={type}
+        className={cn(
+          "flex h-9 w-full rounded-md border border-gray-800 bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          className
+        )}
+        ref={ref}
+        {...props}
       />
-    </div>
-  );
-};
+    )
+  }
+)
+Input.displayName = "Input"
 
-export default Input;
+export { Input }

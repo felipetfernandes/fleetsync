@@ -3,7 +3,7 @@
 
 import type React from "react";
 import { useState } from "react";
-import Input from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants";
 
 interface WorkshopFormProps {
@@ -33,38 +33,41 @@ export default function WorkshopForm({
 
   // Função para formatar CNPJ
   const handleCNPJChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '');
+    let value = e.target.value.replace(/\D/g, "");
     if (value.length > 14) value = value.slice(0, 14);
 
     // Formata CNPJ: XX.XXX.XXX/XXXX-XX
     if (value.length > 12) {
-      value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2}).*/, '$1.$2.$3/$4-$5');
+      value = value.replace(
+        /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2}).*/,
+        "$1.$2.$3/$4-$5"
+      );
     } else if (value.length > 8) {
-      value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d*).*/, '$1.$2.$3/$4');
+      value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d*).*/, "$1.$2.$3/$4");
     } else if (value.length > 5) {
-      value = value.replace(/^(\d{2})(\d{3})(\d*).*/, '$1.$2.$3');
+      value = value.replace(/^(\d{2})(\d{3})(\d*).*/, "$1.$2.$3");
     } else if (value.length > 2) {
-      value = value.replace(/^(\d{2})(\d*).*/, '$1.$2');
+      value = value.replace(/^(\d{2})(\d*).*/, "$1.$2");
     }
 
-    setFormData(prev => ({ ...prev, cnpj: value }));
+    setFormData((prev) => ({ ...prev, cnpj: value }));
   };
 
   // Função para formatar telefone
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '');
+    let value = e.target.value.replace(/\D/g, "");
     if (value.length > 11) value = value.slice(0, 11);
 
     // Formata telefone: (XX) XXXXX-XXXX ou (XX) XXXX-XXXX
     if (value.length > 10) {
-      value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+      value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
     } else if (value.length > 6) {
-      value = value.replace(/^(\d{2})(\d{4})(\d*).*/, '($1) $2-$3');
+      value = value.replace(/^(\d{2})(\d{4})(\d*).*/, "($1) $2-$3");
     } else if (value.length > 2) {
-      value = value.replace(/^(\d{2})(\d*).*/, '($1) $2');
+      value = value.replace(/^(\d{2})(\d*).*/, "($1) $2");
     }
 
-    setFormData(prev => ({ ...prev, phone: value }));
+    setFormData((prev) => ({ ...prev, phone: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,14 +83,17 @@ export default function WorkshopForm({
     }
 
     try {
-      const response = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/workshops/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `${NEXT_PUBLIC_LOCAL_URL}/workshops/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (response.ok) {
         // Oficina registrada com sucesso
@@ -114,7 +120,9 @@ export default function WorkshopForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2 flex flex-col">
-          <label className="-mb-2" htmlFor="name">Nome da Oficina</label>
+          <label className="-mb-2" htmlFor="name">
+            Nome da Oficina
+          </label>
           <Input
             id="name"
             name="name"
@@ -126,7 +134,9 @@ export default function WorkshopForm({
         </div>
 
         <div className="space-y-2 flex flex-col">
-          <label className="-mb-2" htmlFor="cnpj">CNPJ</label>
+          <label className="-mb-2" htmlFor="cnpj">
+            CNPJ
+          </label>
           <Input
             id="cnpj"
             name="cnpj"
@@ -138,7 +148,9 @@ export default function WorkshopForm({
         </div>
 
         <div className="space-y-2 flex flex-col">
-          <label className="-mb-2" htmlFor="email">Email</label>
+          <label className="-mb-2" htmlFor="email">
+            Email
+          </label>
           <Input
             id="email"
             name="email"
@@ -151,7 +163,9 @@ export default function WorkshopForm({
         </div>
 
         <div className="space-y-2 flex flex-col">
-          <label className="-mb-2" htmlFor="password">Senha</label>
+          <label className="-mb-2" htmlFor="password">
+            Senha
+          </label>
           <Input
             id="password"
             name="password"
@@ -164,7 +178,9 @@ export default function WorkshopForm({
         </div>
 
         <div className="space-y-2 flex flex-col">
-          <label className="-mb-2" htmlFor="phone">Telefone</label>
+          <label className="-mb-2" htmlFor="phone">
+            Telefone
+          </label>
           <Input
             id="phone"
             name="phone"
@@ -176,7 +192,9 @@ export default function WorkshopForm({
         </div>
 
         <div className="space-y-2 flex flex-col md:col-span-2">
-          <label className="-mb-2" htmlFor="address">Endereço</label>
+          <label className="-mb-2" htmlFor="address">
+            Endereço
+          </label>
           <Input
             id="address"
             name="address"

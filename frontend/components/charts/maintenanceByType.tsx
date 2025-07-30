@@ -93,6 +93,9 @@ const renderActiveShape = (props: unknown) => {
   const ey = my;
   const textAnchor = cos >= 0 ? "start" : "end";
 
+  console.log(payload);
+  
+
   return (
     <g>
       <Sector

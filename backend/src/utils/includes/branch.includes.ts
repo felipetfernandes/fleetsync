@@ -35,6 +35,9 @@ export function getBranchInclude(query: any): Prisma.BranchInclude {
     if (orderIncludes.includes("workshop")) {
       nestedOrderInclude.workshop = true;
     }
+    if (orderIncludes.includes("branch")) {
+      nestedOrderInclude.branch = true;
+    }
     // Adicione outros includes aninhados para Order aqui
 
     include.orders = { include: nestedOrderInclude };

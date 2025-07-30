@@ -23,7 +23,7 @@ export default function LoginPage() {
         password,
       });
 
-      router.push("/dashboard");
+      router.push("/");
     } catch (error) {
       alert("Login inválido");
     }

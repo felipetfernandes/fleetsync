@@ -173,8 +173,6 @@ export default async function DashboardPage() {
     _ordersByVehicle: groupOrdersByVehicle(enrichedOrders),
   };
 
-  console.log(dashboardData._ordersByVehicle);
-
   // Formatar valores monetários
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {

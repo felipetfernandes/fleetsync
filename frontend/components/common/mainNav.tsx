@@ -44,7 +44,7 @@ const navLinks = [
     title: "Oficinas",
     href: "/workshops",
     icon: Wrench,
-    roles: [UserRole.ADMIN, UserRole.WORKSHOP_MANAGER, UserRole.BRANCH_MANAGER],
+    roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER],
   },
   {
     title: "Ordens de Serviço",

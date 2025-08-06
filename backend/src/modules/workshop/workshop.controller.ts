@@ -32,18 +32,20 @@ interface JwtPayload {
 
 @ApiTags("workshops")
 @Controller("workshops")
-@UseGuards(JwtAuthGuard, TenantClsGuard)
-@ApiBearerAuth()
 export class WorkshopController {
   constructor(private readonly workshopService: WorkshopService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard, TenantClsGuard) // ✅ Guards específicos por endpoint
+  @ApiBearerAuth()
   @ApiOperation({ summary: "Listar todos as oficinas" })
   findAll(@Query() query: WorkshopQueryDto) {
     return this.workshopService.findAll(query);
   }
 
   @Get("vehicles")
+  @UseGuards(JwtAuthGuard, TenantClsGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: "Listar todos as oficinas com veículos" })
   findAllWithVehicles(@Req() req) {
     const { companyId } = req.user;
@@ -51,11 +53,15 @@ export class WorkshopController {
   }
 
   @Get(":id")
+  @UseGuards(JwtAuthGuard, TenantClsGuard)
+  @ApiBearerAuth()
   findOne(@Param("id") id: string, @Query() query: WorkshopQueryDto) {
     return this.workshopService.findOne({ id, query });
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard, TenantClsGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: "Criar uma nova oficina com todos os detalhes" })
   @ApiResponse({ status: 201, description: "Oficina criada com sucesso" })
   @ApiResponse({ status: 409, description: "CNPJ já cadastrado" })
@@ -67,19 +73,38 @@ export class WorkshopController {
     return this.workshopService.create({ ...createWorkshopDto, companyId });
   }
 
+  // ✅ ENDPOINT PÚBLICO PARA REGISTRO
   @Post("register")
   @ApiOperation({ summary: "Registrar uma nova oficina de forma simplificada" })
-  @ApiResponse({ status: 201, description: "Oficina registrada com sucesso" })
-  @ApiResponse({ status: 409, description: "CNPJ já cadastrado" })
-  register(
-    @Body() registerWorkshopDto: RegisterWorkshopDto,
-    @Req() req: { user: JwtPayload }
-  ) {
-    const { companyId } = req.user;
-    return this.workshopService.register(registerWorkshopDto, companyId);
+  @ApiResponse({ 
+    status: 201, 
+    description: "Oficina registrada com sucesso. Usuário e oficina criados." 
+  })
+  @ApiResponse({ status: 409, description: "CNPJ ou email já cadastrado" })
+  async register(@Body() registerWorkshopDto: RegisterWorkshopDto) {
+    const result = await this.workshopService.register(registerWorkshopDto);
+    
+    // ✅ Retorna resposta mais limpa (sem dados sensíveis do usuário)
+    return {
+      message: "Oficina registrada com sucesso",
+      workshop: {
+        id: result.workshop.id,
+        name: result.workshop.name,
+        cnpj: result.workshop.cnpj,
+        email: result.workshop.email,
+      },
+      user: {
+        id: result.user.id,
+        name: result.user.name,
+        email: result.user.email,
+        role: result.user.role,
+      }
+    };
   }
 
   @Put(":id")
+  @UseGuards(JwtAuthGuard, TenantClsGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: "Atualizar uma oficina" })
   @ApiResponse({ status: 200, description: "Oficina atualizada com sucesso" })
   @ApiResponse({ status: 404, description: "Oficina não encontrada" })
@@ -92,6 +117,8 @@ export class WorkshopController {
   }
 
   @Delete(":id")
+  @UseGuards(JwtAuthGuard, TenantClsGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: "Remover uma oficina" })
   @ApiResponse({ status: 200, description: "Oficina removida com sucesso" })
   @ApiResponse({ status: 404, description: "Oficina não encontrada" })

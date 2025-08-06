@@ -20,6 +20,7 @@ export default function WorkshopForm({
     cnpj: "",
     email: "",
     password: "",
+    confirmPassword: "", // ✅ Novo campo adicionado
     phone: "",
     address: "",
   });
@@ -75,14 +76,29 @@ export default function WorkshopForm({
     setIsLoading(true);
     setError("");
 
-    // Validação básica
+    // ✅ Validações atualizadas
     if (!formData.password) {
       setError("A senha é obrigatória");
       setIsLoading(false);
       return;
     }
 
+    if (!formData.confirmPassword) {
+      setError("A confirmação de senha é obrigatória");
+      setIsLoading(false);
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("As senhas não são iguais");
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      // ✅ Remove confirmPassword antes de enviar para o backend
+      const { confirmPassword, ...dataToSend } = formData;
+      
       const response = await fetch(
         `${NEXT_PUBLIC_LOCAL_URL}/workshops/register`,
         {
@@ -91,7 +107,7 @@ export default function WorkshopForm({
             "Content-Type": "application/json",
           },
           credentials: "include",
-          body: JSON.stringify(formData),
+          body: JSON.stringify(dataToSend),
         }
       );
 
@@ -171,6 +187,22 @@ export default function WorkshopForm({
             name="password"
             type="password"
             value={formData.password}
+            onChange={handleChange}
+            placeholder="••••••••"
+            required
+          />
+        </div>
+
+        {/* ✅ Novo campo de confirmação de senha */}
+        <div className="space-y-2 flex flex-col">
+          <label className="-mb-2" htmlFor="confirmPassword">
+            Confirmar Senha
+          </label>
+          <Input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            value={formData.confirmPassword}
             onChange={handleChange}
             placeholder="••••••••"
             required

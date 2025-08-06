@@ -77,13 +77,24 @@ export class WorkshopService {
     return workshop;
   }
 
+  // ✅ MÉTODO MODIFICADO
   async register(registerWorkshopDto: RegisterWorkshopDto, companyId?: string) {
+    // Verifica se já existe oficina com este CNPJ
     const existingWorkshop = await this.prisma.workshop.findFirst({
       where: { cnpj: registerWorkshopDto.cnpj },
     });
 
     if (existingWorkshop) {
       throw new ConflictException("Oficina já cadastrada com este CNPJ");
+    }
+
+    // ✅ Verifica se já existe usuário com este email
+    const existingUser = await this.prisma.user.findFirst({
+      where: { email: registerWorkshopDto.email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException("Já existe um usuário com este email");
     }
 
     const company = companyId
@@ -112,18 +123,36 @@ export class WorkshopService {
 
     const hashedPassword = await bcrypt.hash(registerWorkshopDto.password, 10);
 
-    return this.prisma.workshop.create({
+    // ✅ 1. Criar o usuário primeiro
+    const user = await this.prisma.user.create({
+      data: {
+        name: registerWorkshopDto.name,
+        email: registerWorkshopDto.email,
+        phone: registerWorkshopDto.phone,
+        password: hashedPassword,
+        role: 'WORKSHOP_MANAGER',              // ← Role correta!
+        company: { connect: { id: company.id } },
+        branch: { connect: { id: defaultBranch.id } },
+        emailVerified: true, // Ou false, dependendo do seu fluxo
+      },
+    });
+
+    // ✅ 2. Criar a oficina linkada ao usuário
+    const workshop = await this.prisma.workshop.create({
       data: {
         name: registerWorkshopDto.name,
         cnpj: registerWorkshopDto.cnpj,
         email: registerWorkshopDto.email,
         phone: registerWorkshopDto.phone,
         address: registerWorkshopDto.address,
-        password: hashedPassword,
+        password: hashedPassword, // Mantendo por compatibilidade
         company: { connect: { id: company.id } },
         branch: { connect: { id: defaultBranch.id } },
+        manager: { connect: { id: user.id } },  // ← Link com o usuário!
       },
     });
+
+    return { user, workshop }; // ✅ Retorna ambos
   }
 
   async create(createWorkshopDto: CreateWorkshopDto) {

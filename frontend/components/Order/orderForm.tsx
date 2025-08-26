@@ -27,6 +27,7 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
     vehicleId: "",
     workshopId: "",
     branchId: "",
+    status: "IN_PROGRESS",
   });
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -236,6 +237,23 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
                 {workshop.name}
               </option>
             ))}
+          </select>
+        </div>
+
+        <div className="space-y-2 flex flex-col">
+          <label htmlFor="status" className="-mb-2">
+            Status
+          </label>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="bg-gray-800 border-gray-700 p-2 rounded border"
+          >
+            <option value="PENDING">Pendente</option>
+            <option value="IN_PROGRESS">Em Progresso</option>
+            <option value="COMPLETED">Concluido</option>
+            <option value="CANCELED">Cancelado</option>
           </select>
         </div>
       </div>

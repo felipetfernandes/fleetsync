@@ -23,7 +23,7 @@ export class OrderService {
       createOrderDto;
 
     // Verificar se o veículo existe
-    const vehicle = await this.prisma.vehicle.findUnique({
+    const vehicle = await this.prisma.vehicle.findFirst({
       where: { id: vehicleId },
     });
     if (!vehicle) {
@@ -31,7 +31,7 @@ export class OrderService {
     }
 
     // Verificar se a oficina existe
-    const workshop = await this.prisma.workshop.findUnique({
+    const workshop = await this.prisma.workshop.findFirst({
       where: { id: workshopId },
     });
     if (!workshop) {
@@ -41,7 +41,7 @@ export class OrderService {
     }
 
     // Verificar se a empresa existe
-    const enterprise = await this.prisma.company.findUnique({
+    const enterprise = await this.prisma.company.findFirst({
       where: { id: companyId },
     });
     if (!enterprise) {

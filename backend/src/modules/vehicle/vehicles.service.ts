@@ -84,7 +84,7 @@ export class VehiclesService {
 
   // Método para atualizar um veículo
   async update(id: string, updateVehicleDto: UpdateVehicleDto) {
-    await this.prisma.vehicle.findUnique({
+    await this.prisma.vehicle.findFirst({
       where: { id },
     });
 
@@ -118,7 +118,7 @@ export class VehiclesService {
 
   // Método para remover um veículo
   async remove(plate: string) {
-    await this.prisma.vehicle.findUnique({
+    await this.prisma.vehicle.findFirst({
       where: { plate },
     });
 

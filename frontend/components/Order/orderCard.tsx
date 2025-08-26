@@ -5,13 +5,7 @@ import React from "react";
 import { StatusBadge } from "../ui/statusBadge";
 import { formatCurrency, formatDate } from "@/lib/utils/formatFunctions";
 
-function OrderCard({
-  order,
-  vehicle,
-}: {
-  order: Order;
-  vehicle: Vehicle;
-}) {
+function OrderCard({ order, vehicle }: { order: Order; vehicle: Vehicle }) {
   return (
     <Link href={`/orders/${order.id}`} key={order.id}>
       <div className="bg-gray-900 border-gray-800 hover:bg-gray-800 transition-colors border rounded-2xl mb-1">
@@ -31,10 +25,6 @@ function OrderCard({
                       <span>
                         {vehicle.plate} - {vehicle.brand} {vehicle.model}
                       </span>
-                    </div>
-                    <div className="flex items-center">
-                      <User className="h-4 w-4 mr-1 text-indigo-400" />
-                      <span>{vehicle.driver.name}</span>
                     </div>
                     <div className="flex items-center">
                       <Building className="h-4 w-4 mr-1 text-indigo-400" />

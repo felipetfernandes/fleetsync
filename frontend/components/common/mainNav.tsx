@@ -80,7 +80,7 @@ export function MainNav() {
     if (pathname !== "/login") {
       fetchUser();
     }
-  }, [user, pathname]);
+  }, []);
 
   return (
     <>

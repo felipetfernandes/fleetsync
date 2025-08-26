@@ -54,7 +54,7 @@ export class VehiclesService {
   // Método para criar um veículo
   async create(createVehicleDto: CreateVehicleDto) {
     // Verificar se a placa já existe
-    const existingVehicle = await this.prisma.vehicle.findUnique({
+    const existingVehicle = await this.prisma.vehicle.findFirst({
       where: { plate: createVehicleDto.plate },
     });
 

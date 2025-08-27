@@ -1,55 +1,45 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { PlusCircle, X } from "lucide-react";
-import WorkshopForm from "@/components/Workshops/workshopForm";
-import WorkshopCard from "@/components/Workshops/workshopCard";
-import { Workshop } from "@/types/types";
-import { fetchClientSide } from "@/lib/utils/fetchClientSide";
+import { useEffect, useState } from "react"
+import { PlusCircle, X } from "lucide-react"
+import WorkshopForm from "@/components/Workshops/workshopForm"
+import WorkshopCard from "@/components/Workshops/workshopCard"
+import type { Workshop } from "@/types/types"
+import { fetchClientSide } from "@/lib/utils/fetchClientSide"
 
 export default function WorkshopsPage() {
-  const [showForm, setShowForm] = useState(false);
-  const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [showForm, setShowForm] = useState(false)
+  const [workshops, setWorkshops] = useState<Workshop[]>([])
+
+  const loadWorkshops = async () => {
+    const data = await fetchClientSide<Workshop[]>("GET", `/workshops`)
+    setWorkshops(data)
+  }
 
   useEffect(() => {
-    (async () => {
-      const data = await fetchClientSide<Workshop[]>("GET", `/workshops`);
-      setWorkshops(data);
-    })();
-  }, []);
+    loadWorkshops()
+  }, [])
 
   const handleOpenForm = () => {
-    setShowForm(true);
-  };
+    setShowForm(true)
+  }
 
   const handleCloseForm = () => {
-    setShowForm(false);
-  };
+    setShowForm(false)
+  }
 
-  const handleAddWorkshop = (workshop: any) => {
-    // Simular adição de uma nova oficina
-    setWorkshops([
-      ...workshops,
-      {
-        ...workshop,
-        id: Date.now().toString(),
-        vehiclesInMaintenance: [],
-      },
-    ]);
-    setShowForm(false);
-  };
+  const handleAddWorkshop = async () => {
+    setShowForm(false)
+    await loadWorkshops() // Recarrega a lista de oficinas
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
         <header className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">
-              Oficinas Cadastradas
-            </h1>
-            <p className="text-gray-400 mt-1">
-              Gerencie as oficinas parceiras e acompanhe as manutenções
-            </p>
+            <h1 className="text-3xl font-bold text-white">Oficinas Cadastradas</h1>
+            <p className="text-gray-400 mt-1">Gerencie as oficinas parceiras e acompanhe as manutenções</p>
           </div>
           <button
             onClick={handleOpenForm}
@@ -65,20 +55,12 @@ export default function WorkshopsPage() {
             <div className="bg-gray-900 rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-white">
-                    Adicionar Nova Oficina
-                  </h2>
-                  <button
-                    onClick={handleCloseForm}
-                    className="text-gray-400 hover:text-white"
-                  >
+                  <h2 className="text-2xl font-bold text-white">Adicionar Nova Oficina</h2>
+                  <button onClick={handleCloseForm} className="text-gray-400 hover:text-white">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
-                <WorkshopForm
-                  onSubmit={handleAddWorkshop}
-                  onCancel={handleCloseForm}
-                />
+                <WorkshopForm onSubmit={handleAddWorkshop} onCancel={handleCloseForm} />
               </div>
             </div>
           </div>
@@ -91,5 +73,5 @@ export default function WorkshopsPage() {
         )}
       </div>
     </div>
-  );
+  )
 }

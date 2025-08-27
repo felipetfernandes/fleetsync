@@ -1,33 +1,50 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import verifyJwt from "@/lib/utils/jwt";
+import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
+import { fetchServerSide } from "@/lib/utils/fetchServerSide"
 
-export default function Home() {
-  const token = cookies().get("access_token")?.value;
+export default async function Home() {
+  const token = cookies().get("access_token")?.value
 
   if (!token) {
-    return redirect("/login");
+    return redirect("/login")
   }
 
-  const payload = verifyJwt(token); // decodifica JWT e valida expiração, etc.
+  try {
+    console.log("[v0] Verificando autenticação via /auth/me...")
+    const user = await fetchServerSide("GET", "/auth/me")
 
-  console.log(payload);
+    if (!user || !user.role) {
+      console.log("[v0] Redirecionando para login - usuário inválido")
+      return redirect("/login")
+    }
 
-  if (!payload) {
-    return redirect("/login"); // token inválido
+    // Direcionamento por papel (multi-role)
+    const roleRedirectMap: Record<string, string> = {
+      ADMIN: "/dashboard",
+      BRANCH_MANAGER: `/branchs/${user.branchId}`,
+      WORKSHOP_MANAGER: `/workshops/`,
+      DRIVER: `/fleet/`,
+    }
+
+    const redirectTo = roleRedirectMap[user.role] || "/login"
+
+    if (redirectTo === "/login") {
+
+    }
+
+    return redirect(redirectTo)
+  } catch (error) {
+    if (
+      error &&
+      typeof error === "object" &&
+      "digest" in error &&
+      typeof error.digest === "string" &&
+      error.digest.startsWith("NEXT_REDIRECT")
+    ) {
+      
+      throw error // Re-lança o erro de redirecionamento para que o Next.js possa processá-lo
+    }
+
+    return redirect("/login")
   }
-
-  // Direcionamento por papel (multi-role)
-  const roleRedirectMap: Record<string, string> = {
-    ADMIN: "/dashboard",
-    BRANCH_MANAGER: `/branchs/${payload.branchId}`,
-    WORKSHOP_MANAGER: `/workshops/`,
-    DRIVER: `/fleet/}`,
-  };
-
-  const redirectTo = roleRedirectMap[payload.role] || "/login";
-
-  console.log("Redirecting to:", redirectTo);
-
-  return redirect(redirectTo);
 }

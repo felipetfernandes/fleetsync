@@ -1,20 +1,18 @@
-"use client";
+"use client"
 
-import type React from "react";
-
-import { useEffect, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Branch } from "@/types/types";
-import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants";
+import type React from "react"
+import { useEffect, useState } from "react"
+import { Input } from "@/components/ui/input"
+import type { Branch } from "@/types/types"
+import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants"
+import { Loader2 } from "lucide-react"
 
 interface VehicleFormProps {
-  onSubmit: (data: any) => void;
-  onCancel: () => void;
+  onSubmit: () => void
+  onCancel: () => void
 }
 
 export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
-  const [error, setError] = useState("");
-
   const [formData, setFormData] = useState({
     plate: "",
     branchId: "",
@@ -27,56 +25,112 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
     chassis: "",
     status: "AVAILABLE",
     mileageStart: "",
-  });
-  const [branchs, setBranchs] = useState<Branch[]>([]);
+  })
+
+  const [branchs, setBranchs] = useState<Branch[]>([])
+  const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const fetchBranchs = async () => {
-      const response = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/branchs`, {
-        method: "GET",
-        credentials: "include",
-      });
-      const data = await response.json();
-      setBranchs(data);
-      setFormData((prev) => ({ ...prev, branchId: String(data[0].id) }));
-    };
-    fetchBranchs();
-  }, []);
+      try {
+        const response = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/branchs`, {
+          method: "GET",
+          credentials: "include",
+        })
+        const data = await response.json()
+        setBranchs(data)
+        if (data.length > 0) {
+          setFormData((prev) => ({ ...prev, branchId: String(data[0].id) }))
+        }
+      } catch (err) {
+        console.error("Erro ao carregar filiais:", err)
+      }
+    }
+    fetchBranchs()
+  }, [])
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+
+    let processedValue = value
+
+    if (name === "plate") {
+      processedValue = value.toUpperCase()
+    } else if (name === "modelYear" || name === "manufactureYear" || name === "mileageStart") {
+      processedValue = value.replace(/\D/g, "")
+    } else if (name === "renavam") {
+      processedValue = value.replace(/\D/g, "") // apenas números
+    } else if (name === "chassis") {
+      processedValue = value.toUpperCase() // letras maiúsculas
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: processedValue }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
+    setIsLoading(true)
+    setError("")
+
     const preparedFormData = {
       ...formData,
-      branchId: parseInt(formData.branchId),
-      modelYear: parseInt(formData.modelYear),
-      manufactureYear: parseInt(formData.manufactureYear),
-      mileageStart: parseInt(formData.mileageStart),
-    };
+      branchId: Number.parseInt(formData.branchId),
+      modelYear: Number.parseInt(formData.modelYear),
+      manufactureYear: Number.parseInt(formData.manufactureYear),
+      mileageStart: Number.parseInt(formData.mileageStart),
+    }
 
-    const res = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/vehicles`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(preparedFormData),
-    }).then((res) => res.json());
-    if (res.ok) onSubmit(formData);
-    else setError(res.message);
-  };
+    try {
+      const response = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/vehicles`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(preparedFormData),
+      })
+
+      if (response.ok) {
+        setTimeout(() => {
+          onSubmit()
+        }, 500)
+      } else {
+        const errorData = await response.json()
+        setError(errorData.message || "Erro ao salvar veículo")
+        setIsLoading(false)
+      }
+    } catch (err) {
+      console.error(err)
+      setError("Erro de conexão com o servidor")
+      setIsLoading(false)
+    }
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-700"
+    >
+      {error && (
+        <div className="bg-red-800/40 border border-red-600 text-red-200 p-3 rounded-lg font-medium text-sm">
+          {error}
+        </div>
+      )}
+
+      {isLoading && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-gray-800 p-6 rounded-lg flex items-center space-x-3 shadow-xl">
+            <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+            <span className="text-white font-medium">Salvando veículo...</span>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2 flex flex-col ">
-          <label htmlFor="plate" className="text-gray-100 -mb-2">
+        {/* PLACA */}
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="plate" className="text-sm font-semibold text-gray-200">
             Placa
           </label>
           <Input
@@ -86,31 +140,33 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             onChange={handleChange}
             placeholder="ABC1234"
             required
+            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
+            maxLength={7}
           />
         </div>
 
-        <div className="space-y-2 flex flex-col">
-          <label htmlFor="branchId" className="text-gray-100 -mb-2">
-            Filial (ID)
+        {/* FILIAL */}
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="branchId" className="text-sm font-semibold text-gray-200">
+            Filial
           </label>
           <select
             name="branchId"
-            className="bg-gray-800 p-2 rounded focus:ring-0 focus:outline-none text-gray-100 border border-gray-600"
+            className="bg-gray-800 border border-gray-700 p-2 rounded-md text-gray-100 focus:ring-2 focus:ring-indigo-500"
+            value={formData.branchId}
             onChange={handleChange}
           >
-            {branchs.map((branch) => {
-              return (
-                <option
-                  value={branch.id}
-                  key={branch.id}
-                >{`${branch.name} ${branch.city}`}</option>
-              );
-            })}
+            {branchs.map((branch) => (
+              <option key={branch.id} value={branch.id}>
+                {branch.name} - {branch.city}
+              </option>
+            ))}
           </select>
         </div>
 
-        <div className="space-y-2 flex flex-col">
-          <label htmlFor="brand" className="text-gray-100 -mb-2">
+        {/* MARCA */}
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="brand" className="text-sm font-semibold text-gray-200">
             Marca
           </label>
           <Input
@@ -120,11 +176,13 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             onChange={handleChange}
             placeholder="Toyota"
             required
+            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
           />
         </div>
 
-        <div className="space-y-2 flex flex-col">
-          <label htmlFor="model" className="text-gray-100 -mb-2">
+        {/* MODELO */}
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="model" className="text-sm font-semibold text-gray-200">
             Modelo
           </label>
           <Input
@@ -134,11 +192,13 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             onChange={handleChange}
             placeholder="Corolla"
             required
+            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
           />
         </div>
 
-        <div className="space-y-2 flex flex-col">
-          <label htmlFor="modelYear" className="text-gray-100 -mb-2">
+        {/* ANO MODELO */}
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="modelYear" className="text-sm font-semibold text-gray-200">
             Ano Modelo
           </label>
           <Input
@@ -148,11 +208,14 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             onChange={handleChange}
             placeholder="2022"
             required
+            maxLength={4}
+            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
           />
         </div>
 
-        <div className="space-y-2 flex flex-col">
-          <label htmlFor="manufactureYear" className="text-gray-100 -mb-2">
+        {/* ANO FABRICAÇÃO */}
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="manufactureYear" className="text-sm font-semibold text-gray-200">
             Ano Fabricação
           </label>
           <Input
@@ -162,11 +225,14 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             onChange={handleChange}
             placeholder="2021"
             required
+            maxLength={4}
+            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
           />
         </div>
 
-        <div className="space-y-2 flex flex-col">
-          <label htmlFor="color" className="text-gray-100 -mb-2">
+        {/* COR */}
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="color" className="text-sm font-semibold text-gray-200">
             Cor
           </label>
           <Input
@@ -176,16 +242,19 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             onChange={handleChange}
             placeholder="Preto"
             required
+            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
           />
         </div>
 
-        <div className="space-y-2 flex flex-col">
-          <label htmlFor="status" className="text-gray-100 -mb-2">
+        {/* STATUS */}
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="status" className="text-sm font-semibold text-gray-200">
             Status
           </label>
           <select
             name="status"
-            className="bg-gray-800 p-2 rounded focus:ring-0 focus:outline-none text-gray-100 border border-gray-600"
+            className="bg-gray-800 border border-gray-700 p-2 rounded-md text-gray-100 focus:ring-2 focus:ring-indigo-500"
+            value={formData.status}
             onChange={handleChange}
           >
             <option value="AVAILABLE">Ativo</option>
@@ -194,8 +263,9 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
           </select>
         </div>
 
-        <div className="space-y-2 flex flex-col">
-          <label htmlFor="renavam" className="text-gray-100 -mb-2">
+        {/* RENAVAM */}
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="renavam" className="text-sm font-semibold text-gray-200">
             Renavam
           </label>
           <Input
@@ -203,14 +273,17 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             name="renavam"
             value={formData.renavam}
             onChange={handleChange}
-            placeholder="12345678901"
+            placeholder="Apenas números"
             required
+            maxLength={11}
+            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
           />
         </div>
 
-        <div className="space-y-2 flex flex-col">
-          <label htmlFor="chassis" className="text-gray-100 -mb-2">
-            Chassis
+        {/* CHASSI */}
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="chassis" className="text-sm font-semibold text-gray-200">
+            Chassi
           </label>
           <Input
             id="chassis"
@@ -219,11 +292,13 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             onChange={handleChange}
             placeholder="9BRBL9BF1K0123456"
             required
+            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
           />
         </div>
 
-        <div className="space-y-2 flex flex-col">
-          <label htmlFor="mileageStart " className="text-gray-100 -mb-2">
+        {/* ODOMETRO */}
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="mileageStart" className="text-sm font-semibold text-gray-200">
             Odômetro
           </label>
           <Input
@@ -231,31 +306,33 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             name="mileageStart"
             value={formData.mileageStart}
             onChange={handleChange}
-            placeholder="12345678901"
+            placeholder="10000"
             required
+            maxLength={9}
+            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
           />
         </div>
       </div>
 
-      <div className="flex flex-col w-full items-center justify-center">
-        {error && <p className="text-red-500">{error}</p>}
-      </div>
-
-      <div className="flex justify-end space-x-4">
+      {/* BOTÕES */}
+      <div className="flex justify-end space-x-4 pt-6 border-t border-gray-700">
         <button
           type="button"
           onClick={onCancel}
-          className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white p-2 rounded mt-10"
+          disabled={isLoading}
+          className="px-4 py-2 rounded-md border border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white transition disabled:opacity-50"
         >
-          Cancelar
+          CANCELAR
         </button>
         <button
           type="submit"
-          className="bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded mt-10"
+          disabled={isLoading}
+          className="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow transition flex items-center space-x-2 disabled:opacity-50"
         >
-          Salvar Veículo
+          {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+          <span>{isLoading ? "Salvando..." : "SALVAR"}</span>
         </button>
       </div>
     </form>
-  );
+  )
 }

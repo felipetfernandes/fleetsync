@@ -31,6 +31,12 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
+  // 🔧 Modelos por marca
+  const modelsByBrand: Record<string, string[]> = {
+    HONDA: ["CG 160 Start", "CG 160 Fan", "CG 160 Titan", "CG 160 Cargo", "NXR 160 Bros"],
+    YAMAHA: ["Factor 125", "Fazer 150", "YS 250", "Neo 125", "XJ6"],
+  }
+
   useEffect(() => {
     const fetchBranchs = async () => {
       try {
@@ -60,9 +66,9 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
     } else if (name === "modelYear" || name === "manufactureYear" || name === "mileageStart") {
       processedValue = value.replace(/\D/g, "")
     } else if (name === "renavam") {
-      processedValue = value.replace(/\D/g, "") // apenas números
+      processedValue = value.replace(/\D/g, "")
     } else if (name === "chassis") {
-      processedValue = value.toUpperCase() // letras maiúsculas
+      processedValue = value.toUpperCase()
     }
 
     setFormData((prev) => ({ ...prev, [name]: processedValue }))
@@ -140,7 +146,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             onChange={handleChange}
             placeholder="ABC1234"
             required
-            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
+            className="bg-gray-800 border-gray-700 text-gray-100 rounded-md"
             maxLength={7}
           />
         </div>
@@ -152,7 +158,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
           </label>
           <select
             name="branchId"
-            className="bg-gray-800 border border-gray-700 p-2 rounded-md text-gray-100 focus:ring-2 focus:ring-indigo-500"
+            className="bg-gray-800 border border-gray-700 p-2 rounded-md text-gray-100"
             value={formData.branchId}
             onChange={handleChange}
           >
@@ -169,15 +175,21 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
           <label htmlFor="brand" className="text-sm font-semibold text-gray-200">
             Marca
           </label>
-          <Input
+          <select
             id="brand"
             name="brand"
             value={formData.brand}
-            onChange={handleChange}
-            placeholder="Toyota"
+            onChange={(e) => {
+              handleChange(e)
+              setFormData((prev) => ({ ...prev, model: "" })) // reseta modelo
+            }}
             required
-            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
-          />
+            className="bg-gray-800 border border-gray-700 p-2 rounded-md text-gray-100"
+          >
+            <option value="" disabled>Selecione a marca</option>
+            <option value="HONDA">HONDA</option>
+            <option value="YAMAHA">YAMAHA</option>
+          </select>
         </div>
 
         {/* MODELO */}
@@ -185,15 +197,25 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
           <label htmlFor="model" className="text-sm font-semibold text-gray-200">
             Modelo
           </label>
-          <Input
+          <select
             id="model"
             name="model"
             value={formData.model}
             onChange={handleChange}
-            placeholder="Corolla"
             required
-            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
-          />
+            disabled={!formData.brand}
+            className="bg-gray-800 border border-gray-700 p-2 rounded-md text-gray-100"
+          >
+            <option value="" disabled>
+              {formData.brand ? "Selecione um modelo" : "Escolha a marca primeiro"}
+            </option>
+            {formData.brand &&
+              modelsByBrand[formData.brand].map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+          </select>
         </div>
 
         {/* ANO MODELO */}
@@ -209,7 +231,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             placeholder="2022"
             required
             maxLength={4}
-            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
+            className="bg-gray-800 border-gray-700 text-gray-100 rounded-md"
           />
         </div>
 
@@ -226,24 +248,32 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             placeholder="2021"
             required
             maxLength={4}
-            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
+            className="bg-gray-800 border-gray-700 text-gray-100 rounded-md"
           />
         </div>
 
-        {/* COR */}
+        {/* COR (agora como SELECT fixo) */}
         <div className="flex flex-col space-y-2">
           <label htmlFor="color" className="text-sm font-semibold text-gray-200">
             Cor
           </label>
-          <Input
+          <select
             id="color"
             name="color"
             value={formData.color}
             onChange={handleChange}
-            placeholder="Preto"
             required
-            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
-          />
+            className="bg-gray-800 border border-gray-700 p-2 rounded-md text-gray-100"
+          >
+            <option value="" disabled>Selecione a cor</option>
+            <option value="AZUL">AZUL</option>
+            <option value="AMARELO">AMARELO</option>
+            <option value="BRANCO">BRANCO</option>
+            <option value="PRETO">PRETO</option>
+            <option value="PRATA">PRATA</option>
+            <option value="VERMELHO">VERMELHO</option>
+            <option value="VERDE">VERDE</option>
+          </select>
         </div>
 
         {/* STATUS */}
@@ -253,7 +283,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
           </label>
           <select
             name="status"
-            className="bg-gray-800 border border-gray-700 p-2 rounded-md text-gray-100 focus:ring-2 focus:ring-indigo-500"
+            className="bg-gray-800 border border-gray-700 p-2 rounded-md text-gray-100"
             value={formData.status}
             onChange={handleChange}
           >
@@ -276,7 +306,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             placeholder="Apenas números"
             required
             maxLength={11}
-            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
+            className="bg-gray-800 border-gray-700 text-gray-100 rounded-md"
           />
         </div>
 
@@ -292,7 +322,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             onChange={handleChange}
             placeholder="9BRBL9BF1K0123456"
             required
-            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
+            className="bg-gray-800 border-gray-700 text-gray-100 rounded-md"
           />
         </div>
 
@@ -309,7 +339,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             placeholder="10000"
             required
             maxLength={9}
-            className="bg-gray-800 border-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-100 rounded-md"
+            className="bg-gray-800 border-gray-700 text-gray-100 rounded-md"
           />
         </div>
       </div>

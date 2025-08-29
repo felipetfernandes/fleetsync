@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"
 import {
   ArrowLeft,
   Building2,
@@ -21,212 +21,205 @@ import {
   Edit,
   Trash2,
   PlusCircle,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { Branch, Order, User, Vehicle, Workshop } from "@/types/types";
-import {
-  formatShortDate,
-} from "@/lib/utils/formatFunctions";
-import { StatusBadge } from "@/components/ui/statusBadge";
-import { OrderStatus, UserRole, VehicleStatus } from "@/types/enums";
-import { fetchClientSide } from "@/lib/utils/fetchClientSide";
-import Link from "next/link";
+} from "lucide-react"
+import { useEffect, useState } from "react"
+import type { Branch, Order, User, Vehicle, Workshop } from "@/types/types"
+import { formatShortDate } from "@/lib/utils/formatFunctions"
+import { StatusBadge } from "@/components/ui/statusBadge"
+import { OrderStatus, UserRole, VehicleStatus } from "@/types/enums"
+import { fetchClientSide } from "@/lib/utils/fetchClientSide"
+import Link from "next/link"
 
 function getStatusInfo(status: string) {
   switch (status) {
     case "Agendado":
-      return { icon: <Calendar className="h-4 w-4" />, color: "bg-blue-600" };
+      return { icon: <Calendar className="h-4 w-4" />, color: "bg-blue-600" }
     case "Em Andamento":
       return {
         icon: <RotateCcw className="h-4 w-4" />,
         color: "bg-amber-600",
-      };
+      }
     case "Concluído":
       return {
         icon: <CheckCircle2 className="h-4 w-4" />,
         color: "bg-emerald-600",
-      };
+      }
     case "Cancelado":
       return {
         icon: <AlertCircle className="h-4 w-4" />,
         color: "bg-rose-600",
-      };
+      }
     default:
-      return { icon: <Clock className="h-4 w-4" />, color: "bg-gray-600" };
+      return { icon: <Clock className="h-4 w-4" />, color: "bg-gray-600" }
   }
 }
 
 export default function BranchDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: { id: string }
 }) {
-  const router = useRouter();
-  const branchId = params.id;
-  const [branch, setBranch] = useState<Branch | null>(null);
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [workshops, setWorkshops] = useState<Workshop[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [tab, setTab] = useState("overview");
-  const [loading, setLoading] = useState(true);
+  const router = useRouter()
+  const branchId = params.id
+  const [branch, setBranch] = useState<Branch | null>(null)
+  const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
+  const [workshops, setWorkshops] = useState<Workshop[]>([])
+  const [users, setUsers] = useState<User[]>([])
+  const [tab, setTab] = useState("overview")
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchBranchData = async () => {
       try {
-        setLoading(true);
+        setLoading(true)
         // Buscar dados da filial
         const data = await fetchClientSide<Branch>(
           "GET",
-          `/branchs/${branchId}?vehicles=true&orders=true&workshops=true&users=true`
-        );
-        
-        setBranch(data);
-        setVehicles(data.vehicles);
-        setOrders(data.orders);
-        setWorkshops(data.workshops);
-        setUsers(data.users);
-        
-        setLoading(false);
-      } catch (error) {
-        console.error("Erro ao buscar dados da filial:", error);
-        setLoading(false);
-      }
-    };
+          `/branchs/${branchId}?vehicles=true&orders=true&workshops=true&users=true`,
+        )
 
-    fetchBranchData();
-  }, [branchId]);
+        setBranch(data)
+        setVehicles(data.vehicles)
+        setOrders(data.orders)
+        setWorkshops(data.workshops)
+        setUsers(data.users)
+
+        setLoading(false)
+      } catch (error) {
+        console.error("Erro ao buscar dados da filial:", error)
+        setLoading(false)
+      }
+    }
+
+    fetchBranchData()
+  }, [branchId])
 
   const handleDeleteBranch = async () => {
-    const confirmDelete = window.confirm(
-      "Tem certeza que deseja excluir esta filial?\nEsta ação é irreversível."
-    );
+    const confirmDelete = window.confirm("Tem certeza que deseja excluir esta filial?\nEsta ação é irreversível.")
 
     if (confirmDelete) {
       try {
-        await fetchClientSide<Response>("DELETE", `/branches/${branchId}`);
-        router.push("/branch");
+        await fetchClientSide<Response>("DELETE", `/branchs/${branchId}`)
+        router.push("/branchs")
       } catch (error: any) {
-        console.error("Erro ao deletar filial:", error);
+        console.error("Erro ao deletar filial:", error)
       }
     } else {
-      console.log("Exclusão da filial cancelada.");
+      console.log("Exclusão da filial cancelada.")
     }
-  };
+  }
 
   // Calcular estatísticas da filial
   const getBranchStats = () => {
     // Estatísticas de veículos
     const vehicleStats = {
       total: vehicles.length,
-      available: vehicles.filter(v => v.status === VehicleStatus.AVAILABLE).length,
-      unavailable: vehicles.filter(v => v.status === VehicleStatus.UNAVAILABLE).length,
-      maintenance: vehicles.filter(v => v.status === VehicleStatus.MAINTENANCE).length,
-    };
+      available: vehicles.filter((v) => v.status === VehicleStatus.AVAILABLE).length,
+      unavailable: vehicles.filter((v) => v.status === VehicleStatus.UNAVAILABLE).length,
+      maintenance: vehicles.filter((v) => v.status === VehicleStatus.MAINTENANCE).length,
+    }
 
     // Estatísticas de ordens de serviço
     const orderStats = {
       total: orders.length,
-      pending: orders.filter(o => o.status === OrderStatus.PENDING || o.status === OrderStatus.IN_PROGRESS).length,
-      completed: orders.filter(o => o.status === OrderStatus.COMPLETED).length,
-      cancelled: orders.filter(o => o.status === OrderStatus.CANCELLED).length,
+      pending: orders.filter((o) => o.status === OrderStatus.PENDING || o.status === OrderStatus.IN_PROGRESS).length,
+      completed: orders.filter((o) => o.status === OrderStatus.COMPLETED).length,
+      cancelled: orders.filter((o) => o.status === OrderStatus.CANCELLED).length,
       totalCost: orders.reduce((acc, order) => acc + order.totalCost, 0),
-    };
+    }
 
     // Estatísticas de usuários
     const userStats = {
-      total: users.filter(u => u.role !== UserRole.WORKSHOP_MANAGER).length,
-      drivers: users.filter(u => u.role === UserRole.DRIVER).length,
-      managers: users.filter(u => u.role === UserRole.BRANCH_MANAGER).length,
-      admins: users.filter(u => u.role === UserRole.ADMIN).length,
-    };
+      total: users.filter((u) => u.role !== UserRole.WORKSHOP_MANAGER).length,
+      drivers: users.filter((u) => u.role === UserRole.DRIVER).length,
+      managers: users.filter((u) => u.role === UserRole.BRANCH_MANAGER).length,
+      admins: users.filter((u) => u.role === UserRole.ADMIN).length,
+    }
 
     // Estatísticas de oficinas
     const workshopStats = {
       total: workshops.length,
       activeOrders: workshops.reduce((acc, workshop) => {
         const activeOrdersCount = orders.filter(
-          o => o.workshopId === workshop.id && 
-          (o.status === OrderStatus.PENDING || o.status === OrderStatus.IN_PROGRESS)
-        ).length;
-        return acc + activeOrdersCount;
+          (o) =>
+            o.workshopId === workshop.id && (o.status === OrderStatus.PENDING || o.status === OrderStatus.IN_PROGRESS),
+        ).length
+        return acc + activeOrdersCount
       }, 0),
-    };
+    }
 
     return {
       vehicles: vehicleStats,
       orders: orderStats,
       users: userStats,
       workshops: workshopStats,
-    };
-  };
+    }
+  }
 
   // Calcular gastos mensais
   const getMonthlyExpenses = () => {
-    const months = 5; // Últimos 5 meses
+    const months = 5 // Últimos 5 meses
     return Array.from({ length: months }).map((_, index) => {
-      const now = new Date();
-      const targetDate = new Date(now.getFullYear(), now.getMonth() - index, 1);
+      const now = new Date()
+      const targetDate = new Date(now.getFullYear(), now.getMonth() - index, 1)
 
       const total = orders
         .filter((order) => {
-          const orderDate = new Date(order.startDate);
-          return (
-            orderDate.getMonth() === targetDate.getMonth() &&
-            orderDate.getFullYear() === targetDate.getFullYear()
-          );
+          const orderDate = new Date(order.startDate)
+          return orderDate.getMonth() === targetDate.getMonth() && orderDate.getFullYear() === targetDate.getFullYear()
         })
-        .reduce((acc, order) => acc + order.totalCost, 0);
+        .reduce((acc, order) => acc + order.totalCost, 0)
 
       return {
         month: targetDate.toLocaleString("pt-BR", { month: "short" }),
         value: total,
-      };
-    });
-  };
+      }
+    })
+  }
 
   // Obter ordens recentes
   const getRecentOrders = () => {
     return orders
       .filter((o) => !!o.startDate)
       .sort((o1, o2) => {
-        const date1 = new Date(o1.startDate).getTime();
-        const date2 = new Date(o2.startDate).getTime();
-        return date2 - date1;
+        const date1 = new Date(o1.startDate).getTime()
+        const date2 = new Date(o2.startDate).getTime()
+        return date2 - date1
       })
-      .slice(0, 5);
-  };
+      .slice(0, 5)
+  }
 
   // Obter motoristas mais ativos (com mais ordens de serviço)
   const getTopDrivers = () => {
-    const driverOrders = new Map();
-    
-    orders.forEach(order => {
+    const driverOrders = new Map()
+
+    orders.forEach((order) => {
       if (order.vehicle && order.vehicle.driver) {
-        const driverId = order.vehicle.driver.id;
-        driverOrders.set(driverId, (driverOrders.get(driverId) || 0) + 1);
+        const driverId = order.vehicle.driver.id
+        driverOrders.set(driverId, (driverOrders.get(driverId) || 0) + 1)
       }
-    });
-    
-    const drivers = users.filter(user => user.role === UserRole.DRIVER);
-    
+    })
+
+    const drivers = users.filter((user) => user.role === UserRole.DRIVER)
+
     return drivers
-      .map(driver => ({
+      .map((driver) => ({
         ...driver,
         orderCount: driverOrders.get(driver.id) || 0,
-        vehicle: vehicles.find(v => v.driverId === driver.id)
+        vehicle: vehicles.find((v) => v.driverId === driver.id),
       }))
       .sort((a, b) => b.orderCount - a.orderCount)
-      .slice(0, 5);
-  };
+      .slice(0, 5)
+  }
 
   // Formatar valores monetários
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
-    }).format(value);
-  };
+    }).format(value)
+  }
 
   if (loading || !branch) {
     return (
@@ -236,13 +229,13 @@ export default function BranchDetailPage({
           <p className="mt-4">Carregando dados da filial...</p>
         </div>
       </div>
-    );
+    )
   }
 
-  const stats = getBranchStats();
-  const monthlyExpenses = getMonthlyExpenses();
-  const recentOrders = getRecentOrders();
-  const topDrivers = getTopDrivers();
+  const stats = getBranchStats()
+  const monthlyExpenses = getMonthlyExpenses()
+  const recentOrders = getRecentOrders()
+  const topDrivers = getTopDrivers()
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
@@ -250,7 +243,7 @@ export default function BranchDetailPage({
         <header className="flex items-center mb-8">
           <button
             className="mr-4 text-gray-400 hover:text-white hover:bg-gray-800"
-            onClick={() => router.push("/branch")}
+            onClick={() => router.push("/branchs")}
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
@@ -331,15 +324,11 @@ export default function BranchDetailPage({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
                 <div className="pb-2 flex flex-row items-center justify-between space-y-0">
-                  <h2 className="text-sm font-medium text-gray-400">
-                    Total de Veículos
-                  </h2>
+                  <h2 className="text-sm font-medium text-gray-400">Total de Veículos</h2>
                   <Car className="h-4 w-4 text-indigo-400" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">
-                    {stats.vehicles.total}
-                  </div>
+                  <div className="text-2xl font-bold">{stats.vehicles.total}</div>
                   <div className="text-xs text-gray-400 mt-1">
                     {stats.vehicles.available} disponíveis • {stats.vehicles.maintenance} em manutenção
                   </div>
@@ -348,15 +337,11 @@ export default function BranchDetailPage({
 
               <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
                 <div className="pb-2 flex flex-row items-center justify-between space-y-0">
-                  <h2 className="text-sm font-medium text-gray-400">
-                    Ordens de Serviço
-                  </h2>
+                  <h2 className="text-sm font-medium text-gray-400">Ordens de Serviço</h2>
                   <ClipboardList className="h-4 w-4 text-blue-400" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">
-                    {stats.orders.total}
-                  </div>
+                  <div className="text-2xl font-bold">{stats.orders.total}</div>
                   <div className="text-xs text-gray-400 mt-1">
                     {stats.orders.pending} pendentes • {stats.orders.completed} concluídas
                   </div>
@@ -365,15 +350,11 @@ export default function BranchDetailPage({
 
               <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
                 <div className="pb-2 flex flex-row items-center justify-between space-y-0">
-                  <h2 className="text-sm font-medium text-gray-400">
-                    Equipe
-                  </h2>
+                  <h2 className="text-sm font-medium text-gray-400">Equipe</h2>
                   <UserCircle className="h-4 w-4 text-purple-400" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">
-                    {stats.users.total}
-                  </div>
+                  <div className="text-2xl font-bold">{stats.users.total}</div>
                   <div className="text-xs text-gray-400 mt-1">
                     {stats.users.drivers} motoristas • {stats.users.managers} gerentes
                   </div>
@@ -382,21 +363,21 @@ export default function BranchDetailPage({
 
               <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
                 <div className="pb-2 flex flex-row items-center justify-between space-y-0">
-                  <h2 className="text-sm font-medium text-gray-400">
-                    Gastos do Mês
-                  </h2>
+                  <h2 className="text-sm font-medium text-gray-400">Gastos do Mês</h2>
                   <TrendingUp className="h-4 w-4 text-emerald-400" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">
-                    {formatCurrency(monthlyExpenses[0].value)}
-                  </div>
+                  <div className="text-2xl font-bold">{formatCurrency(monthlyExpenses[0].value)}</div>
                   <div className="text-xs text-gray-400 mt-1">
                     {monthlyExpenses[1].value > 0 ? (
-                      <span className={`${monthlyExpenses[0].value > monthlyExpenses[1].value ? 'text-rose-400' : 'text-emerald-400'}`}>
-                        {monthlyExpenses[0].value > monthlyExpenses[1].value ? '+' : '-'}
-                        {Math.abs(((monthlyExpenses[0].value - monthlyExpenses[1].value) / monthlyExpenses[1].value) * 100).toFixed(1)}% 
-                        vs. mês anterior
+                      <span
+                        className={`${monthlyExpenses[0].value > monthlyExpenses[1].value ? "text-rose-400" : "text-emerald-400"}`}
+                      >
+                        {monthlyExpenses[0].value > monthlyExpenses[1].value ? "+" : "-"}
+                        {Math.abs(
+                          ((monthlyExpenses[0].value - monthlyExpenses[1].value) / monthlyExpenses[1].value) * 100,
+                        ).toFixed(1)}
+                        % vs. mês anterior
                       </span>
                     ) : (
                       <span>Primeiro mês com registros</span>
@@ -411,9 +392,7 @@ export default function BranchDetailPage({
               <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
                 <div>
                   <h2 className="text-lg font-bold">Status da Frota</h2>
-                  <div className="text-gray-400">
-                    Distribuição dos veículos por status
-                  </div>
+                  <div className="text-gray-400">Distribuição dos veículos por status</div>
                 </div>
                 <div className="mt-4">
                   <div className="space-y-4">
@@ -426,7 +405,8 @@ export default function BranchDetailPage({
                               <span className="text-sm">Disponíveis</span>
                             </div>
                             <span className="text-sm font-medium">
-                              {stats.vehicles.available} ({Math.round((stats.vehicles.available / stats.vehicles.total) * 100)}%)
+                              {stats.vehicles.available} (
+                              {Math.round((stats.vehicles.available / stats.vehicles.total) * 100)}%)
                             </span>
                           </div>
                           <div className="h-2 bg-gray-800 rounded-full">
@@ -446,7 +426,8 @@ export default function BranchDetailPage({
                               <span className="text-sm">Em Manutenção</span>
                             </div>
                             <span className="text-sm font-medium">
-                              {stats.vehicles.maintenance} ({Math.round((stats.vehicles.maintenance / stats.vehicles.total) * 100)}%)
+                              {stats.vehicles.maintenance} (
+                              {Math.round((stats.vehicles.maintenance / stats.vehicles.total) * 100)}%)
                             </span>
                           </div>
                           <div className="h-2 bg-gray-800 rounded-full">
@@ -466,7 +447,8 @@ export default function BranchDetailPage({
                               <span className="text-sm">Indisponíveis</span>
                             </div>
                             <span className="text-sm font-medium">
-                              {stats.vehicles.unavailable} ({Math.round((stats.vehicles.unavailable / stats.vehicles.total) * 100)}%)
+                              {stats.vehicles.unavailable} (
+                              {Math.round((stats.vehicles.unavailable / stats.vehicles.total) * 100)}%)
                             </span>
                           </div>
                           <div className="h-2 bg-gray-800 rounded-full">
@@ -495,28 +477,21 @@ export default function BranchDetailPage({
 
                 <div className="h-[220px] flex items-end justify-between gap-2">
                   {(() => {
-                    const maxValue = Math.max(
-                      ...monthlyExpenses.map((i) => i.value)
-                    );
+                    const maxValue = Math.max(...monthlyExpenses.map((i) => i.value))
 
                     return monthlyExpenses.map((item) => {
-                      const height = maxValue > 0 ? (item.value / maxValue) * 100 : 0;
+                      const height = maxValue > 0 ? (item.value / maxValue) * 100 : 0
 
                       return (
-                        <div
-                          key={item.month}
-                          className="flex flex-col items-center gap-2 w-12"
-                        >
+                        <div key={item.month} className="flex flex-col items-center gap-2 w-12">
                           <div
                             className="w-full bg-indigo-600 hover:bg-indigo-500 rounded-t-md transition-all duration-200"
                             style={{ height: `${height}%` }}
                           />
-                          <span className="text-xs font-medium text-center">
-                            {item.month}
-                          </span>
+                          <span className="text-xs font-medium text-center">{item.month}</span>
                         </div>
-                      );
-                    });
+                      )
+                    })
                   })()}
                 </div>
               </div>
@@ -528,7 +503,7 @@ export default function BranchDetailPage({
                 <div className="pb-2">
                   <div className="flex justify-between items-center">
                     <h2 className="text-lg font-bold">Ordens Recentes</h2>
-                    <Link href={`/branch/${branchId}/orders`}>
+                    <Link href={`/branchs/${branchId}/orders`}>
                       <button className="text-indigo-400 hover:text-indigo-300 p-0 h-auto">
                         Ver todas
                         <ArrowRight className="ml-1 h-4 w-4 inline" />
@@ -540,41 +515,34 @@ export default function BranchDetailPage({
                   <div className="space-y-4">
                     {recentOrders.length > 0 ? (
                       recentOrders.map((order) => {
-                        const statusInfo = getStatusInfo(order.status);
+                        const statusInfo = getStatusInfo(order.status)
                         return (
                           <Link href={`/orders/${order.id}`} key={order.id}>
                             <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition-colors">
                               <div className="flex items-start space-x-4">
-                                <div className={`p-2 rounded-md ${statusInfo.color}`}>
-                                  {statusInfo.icon}
-                                </div>
+                                <div className={`p-2 rounded-md ${statusInfo.color}`}>{statusInfo.icon}</div>
                                 <div>
                                   <h3 className="font-medium">
                                     {order.vehicle?.plate} - {order.vehicle?.model}
                                   </h3>
-                                  <p className="text-sm text-gray-400">
-                                    {order.type}
-                                  </p>
+                                  <p className="text-sm text-gray-400">{order.type}</p>
                                   <p className="text-xs text-gray-500 mt-1">
                                     {order.workshop?.name} • {formatShortDate(order.startDate)}
                                   </p>
                                 </div>
                               </div>
                               <div className="text-right">
-                                <StatusBadge
-                                  status={order.status}
-                                  type="orderStatus"
-                                />
-                                <p className="text-sm font-medium mt-1">
-                                  {formatCurrency(order.totalCost)}
-                                </p>
+                                <StatusBadge status={order.status} type="orderStatus" />
+                                <p className="text-sm font-medium mt-1">{formatCurrency(order.totalCost)}</p>
                               </div>
                             </div>
                           </Link>
-                        );
+                        )
                       })
                     ) : (
-                      <p className="text-gray-400 text-center py-8">Nenhuma ordem de serviço registrada para esta filial.</p>
+                      <p className="text-gray-400 text-center py-8">
+                        Nenhuma ordem de serviço registrada para esta filial.
+                      </p>
                     )}
                   </div>
                 </div>
@@ -585,7 +553,7 @@ export default function BranchDetailPage({
                 <div className="pb-2">
                   <div className="flex justify-between items-center">
                     <h2 className="text-lg font-bold">Motoristas Principais</h2>
-                    <Link href={`/branch/${branchId}/team`}>
+                    <Link href={`/branchs/${branchId}/team`}>
                       <button className="text-indigo-400 hover:text-indigo-300 p-0 h-auto">
                         Ver todos
                         <ArrowRight className="ml-1 h-4 w-4 inline" />
@@ -621,9 +589,7 @@ export default function BranchDetailPage({
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-medium">
-                              {driver.orderCount} ordens
-                            </p>
+                            <p className="text-sm font-medium">{driver.orderCount} ordens</p>
                           </div>
                         </Link>
                       ))
@@ -668,12 +634,9 @@ export default function BranchDetailPage({
                           {vehicle.brand} {vehicle.model} • {vehicle.modelYear}/{vehicle.manufactureYear}
                         </p>
                       </div>
-                      <StatusBadge
-                        status={vehicle.status as VehicleStatus}
-                        type="vehicleStatus"
-                      />
+                      <StatusBadge status={vehicle.status as VehicleStatus} type="vehicleStatus" />
                     </div>
-                    
+
                     <div className="mt-4 grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-xs text-gray-400">Quilometragem</p>
@@ -690,12 +653,8 @@ export default function BranchDetailPage({
             ) : (
               <div className="text-center py-12 bg-gray-900 rounded-lg border border-gray-800">
                 <Car className="h-12 w-12 mx-auto text-gray-600" />
-                <h3 className="mt-4 text-lg font-medium text-white">
-                  Nenhum veículo cadastrado
-                </h3>
-                <p className="mt-2 text-sm text-gray-400">
-                  Esta filial ainda não possui veículos cadastrados.
-                </p>
+                <h3 className="mt-4 text-lg font-medium text-white">Nenhum veículo cadastrado</h3>
+                <p className="mt-2 text-sm text-gray-400">Esta filial ainda não possui veículos cadastrados.</p>
                 <Link href="/fleet/new">
                   <button className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded">
                     Adicionar Veículo
@@ -734,29 +693,31 @@ export default function BranchDetailPage({
                         </div>
                         <div>
                           <h3 className="font-medium text-lg">{user.name}</h3>
-                          <div className={`inline-block px-2 py-0.5 rounded-full text-xs ${
-                            user.role === UserRole.DRIVER 
-                              ? "bg-blue-900/30 text-blue-400" 
+                          <div
+                            className={`inline-block px-2 py-0.5 rounded-full text-xs ${
+                              user.role === UserRole.DRIVER
+                                ? "bg-blue-900/30 text-blue-400"
+                                : user.role === UserRole.BRANCH_MANAGER
+                                  ? "bg-emerald-900/30 text-emerald-400"
+                                  : "bg-purple-900/30 text-purple-400"
+                            }`}
+                          >
+                            {user.role === UserRole.DRIVER
+                              ? "Motorista"
                               : user.role === UserRole.BRANCH_MANAGER
-                              ? "bg-emerald-900/30 text-emerald-400"
-                              : "bg-purple-900/30 text-purple-400"
-                          }`}>
-                            {user.role === UserRole.DRIVER 
-                              ? "Motorista" 
-                              : user.role === UserRole.BRANCH_MANAGER
-                              ? "Gerente de Filial"
-                              : "Administrador"}
+                                ? "Gerente de Filial"
+                                : "Administrador"}
                           </div>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="mt-4 space-y-3">
                       <div className="flex items-center">
                         <Mail className="h-4 w-4 mr-2 text-gray-400" />
                         <span className="text-sm text-gray-300">{user.email}</span>
                       </div>
-                      
+
                       <div className="flex items-center">
                         <Phone className="h-4 w-4 mr-2 text-gray-400" />
                         <span className="text-sm text-gray-300">{user.phone}</span>
@@ -766,7 +727,7 @@ export default function BranchDetailPage({
                         <div className="flex items-center">
                           <Car className="h-4 w-4 mr-2 text-gray-400" />
                           <span className="text-sm text-gray-300">
-                            {vehicles.find(v => v.driverId === user.id)?.plate || "Sem veículo"}
+                            {vehicles.find((v) => v.driverId === user.id)?.plate || "Sem veículo"}
                           </span>
                         </div>
                       )}
@@ -777,12 +738,8 @@ export default function BranchDetailPage({
             ) : (
               <div className="text-center py-12 bg-gray-900 rounded-lg border border-gray-800">
                 <UserCircle className="h-12 w-12 mx-auto text-gray-600" />
-                <h3 className="mt-4 text-lg font-medium text-white">
-                  Nenhum usuário cadastrado
-                </h3>
-                <p className="mt-2 text-sm text-gray-400">
-                  Esta filial ainda não possui usuários cadastrados.
-                </p>
+                <h3 className="mt-4 text-lg font-medium text-white">Nenhum usuário cadastrado</h3>
+                <p className="mt-2 text-sm text-gray-400">Esta filial ainda não possui usuários cadastrados.</p>
                 <Link href="/team/new">
                   <button className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded">
                     Adicionar Usuário
@@ -831,13 +788,13 @@ export default function BranchDetailPage({
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="mt-4 space-y-3">
                       <div className="flex items-center">
                         <Phone className="h-4 w-4 mr-2 text-gray-400" />
                         <span className="text-sm text-gray-300">{workshop.phone}</span>
                       </div>
-                      
+
                       <div className="flex items-center">
                         <Mail className="h-4 w-4 mr-2 text-gray-400" />
                         <span className="text-sm text-gray-300">{workshop.email}</span>
@@ -846,9 +803,7 @@ export default function BranchDetailPage({
                       {workshop.manager && (
                         <div className="flex items-center">
                           <UserCircle className="h-4 w-4 mr-2 text-gray-400" />
-                          <span className="text-sm text-gray-300">
-                            {workshop.manager}
-                          </span>
+                          <span className="text-sm text-gray-300">{workshop.manager}</span>
                         </div>
                       )}
                     </div>
@@ -858,9 +813,7 @@ export default function BranchDetailPage({
             ) : (
               <div className="text-center py-12 bg-gray-900 rounded-lg border border-gray-800">
                 <Wrench className="h-12 w-12 mx-auto text-gray-600" />
-                <h3 className="mt-4 text-lg font-medium text-white">
-                  Nenhuma oficina cadastrada
-                </h3>
+                <h3 className="mt-4 text-lg font-medium text-white">Nenhuma oficina cadastrada</h3>
                 <p className="mt-2 text-sm text-gray-400">
                   Esta filial ainda não possui oficinas parceiras cadastradas.
                 </p>
@@ -883,30 +836,22 @@ export default function BranchDetailPage({
               {/* Card de Resumo Financeiro */}
               <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
                 <h3 className="text-lg font-bold mb-4">Resumo Financeiro</h3>
-                
+
                 <div className="space-y-4">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-400 mb-1">
-                      Gastos Totais com Manutenção
-                    </h4>
-                    <p className="text-2xl font-bold text-emerald-400">
-                      {formatCurrency(stats.orders.totalCost)}
-                    </p>
+                    <h4 className="text-sm font-medium text-gray-400 mb-1">Gastos Totais com Manutenção</h4>
+                    <p className="text-2xl font-bold text-emerald-400">{formatCurrency(stats.orders.totalCost)}</p>
                   </div>
-                  
+
                   <div>
-                    <h4 className="text-sm font-medium text-gray-400 mb-1">
-                      Custo Médio por Ordem
-                    </h4>
+                    <h4 className="text-sm font-medium text-gray-400 mb-1">Custo Médio por Ordem</h4>
                     <p className="font-medium">
                       {formatCurrency(stats.orders.total > 0 ? stats.orders.totalCost / stats.orders.total : 0)}
                     </p>
                   </div>
-                  
+
                   <div>
-                    <h4 className="text-sm font-medium text-gray-400 mb-1">
-                      Custo Médio por Veículo
-                    </h4>
+                    <h4 className="text-sm font-medium text-gray-400 mb-1">Custo Médio por Veículo</h4>
                     <p className="font-medium">
                       {formatCurrency(stats.vehicles.total > 0 ? stats.orders.totalCost / stats.vehicles.total : 0)}
                     </p>
@@ -917,50 +862,52 @@ export default function BranchDetailPage({
               {/* Card de Eficiência da Frota */}
               <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
                 <h3 className="text-lg font-bold mb-4">Eficiência da Frota</h3>
-                
+
                 <div className="space-y-4">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-400 mb-1">
-                      Taxa de Disponibilidade
-                    </h4>
+                    <h4 className="text-sm font-medium text-gray-400 mb-1">Taxa de Disponibilidade</h4>
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-bold">
-                        {stats.vehicles.total > 0 ? Math.round((stats.vehicles.available / stats.vehicles.total) * 100) : 0}%
+                        {stats.vehicles.total > 0
+                          ? Math.round((stats.vehicles.available / stats.vehicles.total) * 100)
+                          : 0}
+                        %
                       </span>
                     </div>
                     <div className="h-2 bg-gray-800 rounded-full mt-1">
                       <div
                         className="h-full bg-emerald-600 rounded-full"
-                        style={{ width: `${stats.vehicles.total > 0 ? (stats.vehicles.available / stats.vehicles.total) * 100 : 0}%` }}
+                        style={{
+                          width: `${stats.vehicles.total > 0 ? (stats.vehicles.available / stats.vehicles.total) * 100 : 0}%`,
+                        }}
                       ></div>
                     </div>
                   </div>
-                  
+
                   <div>
-                    <h4 className="text-sm font-medium text-gray-400 mb-1">
-                      Taxa de Manutenção
-                    </h4>
+                    <h4 className="text-sm font-medium text-gray-400 mb-1">Taxa de Manutenção</h4>
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-bold">
-                        {stats.vehicles.total > 0 ? Math.round((stats.vehicles.maintenance / stats.vehicles.total) * 100) : 0}%
+                        {stats.vehicles.total > 0
+                          ? Math.round((stats.vehicles.maintenance / stats.vehicles.total) * 100)
+                          : 0}
+                        %
                       </span>
                     </div>
                     <div className="h-2 bg-gray-800 rounded-full mt-1">
                       <div
                         className="h-full bg-amber-600 rounded-full"
-                        style={{ width: `${stats.vehicles.total > 0 ? (stats.vehicles.maintenance / stats.vehicles.total) * 100 : 0}%` }}
+                        style={{
+                          width: `${stats.vehicles.total > 0 ? (stats.vehicles.maintenance / stats.vehicles.total) * 100 : 0}%`,
+                        }}
                       ></div>
                     </div>
                   </div>
-                  
+
                   <div>
-                    <h4 className="text-sm font-medium text-gray-400 mb-1">
-                      Veículos por Motorista
-                    </h4>
+                    <h4 className="text-sm font-medium text-gray-400 mb-1">Veículos por Motorista</h4>
                     <p className="font-medium">
-                      {stats.users.drivers > 0 
-                        ? (stats.vehicles.total / stats.users.drivers).toFixed(1) 
-                        : "N/A"}
+                      {stats.users.drivers > 0 ? (stats.vehicles.total / stats.users.drivers).toFixed(1) : "N/A"}
                     </p>
                   </div>
                 </div>
@@ -969,12 +916,10 @@ export default function BranchDetailPage({
               {/* Card de Análise de Ordens */}
               <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
                 <h3 className="text-lg font-bold mb-4">Análise de Ordens</h3>
-                
+
                 <div className="space-y-4">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-400 mb-1">
-                      Taxa de Conclusão
-                    </h4>
+                    <h4 className="text-sm font-medium text-gray-400 mb-1">Taxa de Conclusão</h4>
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-bold">
                         {stats.orders.total > 0 ? Math.round((stats.orders.completed / stats.orders.total) * 100) : 0}%
@@ -983,28 +928,25 @@ export default function BranchDetailPage({
                     <div className="h-2 bg-gray-800 rounded-full mt-1">
                       <div
                         className="h-full bg-blue-600 rounded-full"
-                        style={{ width: `${stats.orders.total > 0 ? (stats.orders.completed / stats.orders.total) * 100 : 0}%` }}
+                        style={{
+                          width: `${stats.orders.total > 0 ? (stats.orders.completed / stats.orders.total) * 100 : 0}%`,
+                        }}
                       ></div>
                     </div>
                   </div>
-                  
+
                   <div>
-                    <h4 className="text-sm font-medium text-gray-400 mb-1">
-                      Ordens por Veículo
-                    </h4>
+                    <h4 className="text-sm font-medium text-gray-400 mb-1">Ordens por Veículo</h4>
                     <p className="font-medium">
-                      {stats.vehicles.total > 0 
-                        ? (stats.orders.total / stats.vehicles.total).toFixed(1) 
-                        : "N/A"}
+                      {stats.vehicles.total > 0 ? (stats.orders.total / stats.vehicles.total).toFixed(1) : "N/A"}
                     </p>
                   </div>
-                  
+
                   <div>
-                    <h4 className="text-sm font-medium text-gray-400 mb-1">
-                      Ordens Pendentes
-                    </h4>
+                    <h4 className="text-sm font-medium text-gray-400 mb-1">Ordens Pendentes</h4>
                     <p className="font-medium">
-                      {stats.orders.pending} ({stats.orders.total > 0 ? Math.round((stats.orders.pending / stats.orders.total) * 100) : 0}%)
+                      {stats.orders.pending} (
+                      {stats.orders.total > 0 ? Math.round((stats.orders.pending / stats.orders.total) * 100) : 0}%)
                     </p>
                   </div>
                 </div>
@@ -1013,7 +955,7 @@ export default function BranchDetailPage({
               {/* Card de Comparação com Outras Filiais */}
               <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
                 <h3 className="text-lg font-bold mb-4">Comparação com Outras Filiais</h3>
-                
+
                 <div className="flex items-center justify-center h-40">
                   <p className="text-gray-400 text-center">
                     Dados comparativos entre filiais serão exibidos aqui quando houver mais filiais cadastradas.
@@ -1025,5 +967,5 @@ export default function BranchDetailPage({
         )}
       </div>
     </div>
-  );
+  )
 }

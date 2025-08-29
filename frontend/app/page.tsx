@@ -10,11 +10,11 @@ export default async function Home() {
   }
 
   try {
-    console.log("[v0] Verificando autenticação via /auth/me...")
+    console.log("Verificando autenticação via /auth/me...")
     const user = await fetchServerSide("GET", "/auth/me")
 
     if (!user || !user.role) {
-      console.log("[v0] Redirecionando para login - usuário inválido")
+      console.log("Redirecionando para login - usuário inválido")
       return redirect("/login")
     }
 

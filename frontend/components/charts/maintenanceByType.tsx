@@ -1,57 +1,46 @@
-"use client";
+"use client"
 
-import { PieChart, Pie, Cell, Label, Sector } from "recharts";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-} from "@/components/ui/chart";
-import { useMemo, useState } from "react";
+import { PieChart, Pie, Cell, Label, Sector } from "recharts"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { type ChartConfig, ChartContainer, ChartLegend, ChartLegendContent } from "@/components/ui/chart"
+import { useMemo, useState } from "react"
 
-type MaintenanceType = "PREVENTIVE" | "CORRECTIVE" | "PERIODIC";
+type MaintenanceType = "PREVENTIVE" | "CORRECTIVE" | "PERIODIC"
 
 type ChartDataItem = {
-  type: MaintenanceType;
-  totalCost: number;
-  averageCost: number;
-  quantity: number;
-  avgDuration: number;
-};
+  type: MaintenanceType
+  totalCost: number
+  averageCost: number
+  quantity: number
+  avgDuration: number
+}
 
 type DataType = {
-  type: MaintenanceType;
-  totalCost: number;
-  quantity: number;
-  avgDuration: number;
-};
+  type: MaintenanceType
+  totalCost: number
+  quantity: number
+  avgDuration: number
+}
 
 interface MaintenanceByTypeProps {
-  data: DataType[];
+  data: DataType[]
 }
 
 type PieActiveShapeProps = {
-  cx: number;
-  cy: number;
-  startAngle: number;
-  endAngle: number;
-  midAngle: number;
-  innerRadius: number;
-  outerRadius: number;
-  fill: string;
-  payload: ChartDataItem;
-  percent: number;
-  value: number;
-  name?: string;
-  index?: number;
-};
+  cx: number
+  cy: number
+  startAngle: number
+  endAngle: number
+  midAngle: number
+  innerRadius: number
+  outerRadius: number
+  fill: string
+  payload: ChartDataItem
+  percent: number
+  value: number
+  name?: string
+  index?: number
+}
 
 const chartConfig = {
   PREVENTIVE: {
@@ -66,35 +55,23 @@ const chartConfig = {
     label: "Periódica",
     color: "#4f46e5",
   },
-} satisfies ChartConfig;
+} satisfies ChartConfig
 
 const renderActiveShape = (props: unknown) => {
-  const RADIAN = Math.PI / 180;
-  const {
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    startAngle,
-    endAngle,
-    fill,
-    payload,
-    percent,
-    value,
-  } = props as PieActiveShapeProps;
-  const sin = Math.sin(-RADIAN * midAngle);
-  const cos = Math.cos(-RADIAN * midAngle);
-  const sx = cx + (outerRadius + 10) * cos;
-  const sy = cy + (outerRadius + 10) * sin;
-  const mx = cx + (outerRadius + 30) * cos;
-  const my = cy + (outerRadius + 30) * sin;
-  const ex = mx + (cos >= 0 ? 1 : -1) * 22;
-  const ey = my;
-  const textAnchor = cos >= 0 ? "start" : "end";
+  const RADIAN = Math.PI / 180
+  const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, value } =
+    props as PieActiveShapeProps
+  const sin = Math.sin(-RADIAN * midAngle)
+  const cos = Math.cos(-RADIAN * midAngle)
+  const sx = cx + (outerRadius + 10) * cos
+  const sy = cy + (outerRadius + 10) * sin
+  const mx = cx + (outerRadius + 30) * cos
+  const my = cy + (outerRadius + 30) * sin
+  const ex = mx + (cos >= 0 ? 1 : -1) * 22
+  const ey = my
+  const textAnchor = cos >= 0 ? "start" : "end"
 
-  console.log(payload);
-  
+  console.log(payload)
 
   return (
     <g>
@@ -107,11 +84,7 @@ const renderActiveShape = (props: unknown) => {
         endAngle={endAngle}
         fill={fill}
       />
-      <path
-        d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
-        stroke={fill}
-        fill="none"
-      />
+      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
       <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
       <text
         x={ex + (cos >= 0 ? 1 : -1) * 12}
@@ -127,52 +100,53 @@ const renderActiveShape = (props: unknown) => {
         fill="oklch(96.7% 0.003 264.542)"
       >{`Total: R$ ${value.toFixed(0)}`}</text>
       <text
-        x={ex + (cos >= 0 ? 1 : -1) * 12} 
+        x={ex + (cos >= 0 ? 1 : -1) * 12}
         y={ey}
         dy={18}
         textAnchor={textAnchor}
         fill="oklch(44.6% 0.03 256.802)"
       >{`Duração média: ${payload.avgDuration.toFixed(0)} dias`}</text>
-      <text
-        x={ex + (cos >= 0 ? 1 : -1) * 12}
-        y={ey}
-        dy={36}
-        textAnchor={textAnchor}
-        fill="oklch(44.6% 0.03 256.802)"
-      >
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={36} textAnchor={textAnchor} fill="oklch(44.6% 0.03 256.802)">
         {`(${(percent * 100).toFixed(0)}% das ordens)`}
       </text>
     </g>
-  );
-};
+  )
+}
 
 export default function MaintenanceByType({ data }: MaintenanceByTypeProps) {
   const chartData = data.map((item) => ({
     ...item,
     averageCost: Number((item.totalCost / item.quantity).toFixed(0)),
-  }));
+  }))
 
-  const [activeType, setActiveType] = useState(chartData[0].type);
+  const [activeType, setActiveType] = useState(chartData.length > 0 ? chartData[0].type : "PREVENTIVE")
 
-  const activeIndex = useMemo(
-    () => chartData.findIndex((item) => item.type === activeType),
-    [activeType, chartData]
-  );
+  const activeIndex = useMemo(() => chartData.findIndex((item) => item.type === activeType), [activeType, chartData])
+
+  if (chartData.length === 0) {
+    return (
+      <Card className="bg-gray-900">
+        <CardHeader>
+          <CardTitle className="text-gray-200">Tipos de Manutenção</CardTitle>
+          <CardDescription>Custo e quantidade de manutenção por tipo</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-96 text-gray-400">
+            Nenhum dado de manutenção disponível
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card className="bg-gray-900">
       <CardHeader>
         <CardTitle className="text-gray-200">Tipos de Manutenção</CardTitle>
-        <CardDescription>
-          Custo e quantidade de manutenção por tipo
-        </CardDescription>
+        <CardDescription>Custo e quantidade de manutenção por tipo</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer
-          id="maintenance-by-type"
-          config={chartConfig}
-          className="mx-auto aspect-square w-full h-96"
-        >
+        <ChartContainer id="maintenance-by-type" config={chartConfig} className="mx-auto aspect-square w-full h-96">
           <PieChart>
             <Pie
               data={chartData}
@@ -182,7 +156,7 @@ export default function MaintenanceByType({ data }: MaintenanceByTypeProps) {
               outerRadius={90}
               strokeWidth={5}
               onClick={(data) => {
-                setActiveType(data.name);
+                setActiveType(data.name)
               }}
               label={renderActiveShape}
               labelLine={false}
@@ -194,18 +168,8 @@ export default function MaintenanceByType({ data }: MaintenanceByTypeProps) {
                 content={({ viewBox }) => {
                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
                     return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="text-3xl font-bold"
-                          fill="#f3f3f3"
-                        >
+                      <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
+                        <tspan x={viewBox.cx} y={viewBox.cy} className="text-3xl font-bold" fill="#f3f3f3">
                           {chartData[activeIndex].quantity.toLocaleString()}
                         </tspan>
                         <tspan
@@ -217,7 +181,7 @@ export default function MaintenanceByType({ data }: MaintenanceByTypeProps) {
                           Ordens
                         </tspan>
                       </text>
-                    );
+                    )
                   }
                 }}
               />
@@ -239,5 +203,5 @@ export default function MaintenanceByType({ data }: MaintenanceByTypeProps) {
         </ChartContainer>
       </CardContent>
     </Card>
-  );
+  )
 }

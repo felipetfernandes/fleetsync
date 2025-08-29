@@ -1,24 +1,14 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  Car,
-  Wrench,
-  ClipboardList,
-  BarChart3,
-  LogOut,
-  Menu,
-  X,
-  Users,
-  Building2,
-} from "lucide-react";
-import Image from "next/image";
-import UserMenu from "../User/userMenu";
-import { User } from "@/types/types";
-import { fetchClientSide } from "@/lib/utils/fetchClientSide";
-import { UserRole } from "@/types/enums";
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { Car, Wrench, ClipboardList, BarChart3, LogOut, Menu, X, Users, Building2 } from "lucide-react"
+import Image from "next/image"
+import UserMenu from "../User/userMenu"
+import type { User } from "@/types/types"
+import { fetchClientSide } from "@/lib/utils/fetchClientSide"
+import { UserRole } from "@/types/enums"
 
 // Links de navegação
 const navLinks = [
@@ -58,29 +48,45 @@ const navLinks = [
     icon: Users,
     roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER, UserRole.WORKSHOP_MANAGER],
   },
-];
+]
 
 export function MainNav() {
-  const pathname = usePathname();
-  const [user, setUser] = useState<User | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname()
+  const [user, setUser] = useState<User | null>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const handleLogout = async () => {
-    console.log("Logout");
-    await fetchClientSide<User>("POST", "/auth/logout");
-    window.location.href = "/login";
-  };
+    console.log("Logout")
+    await fetchClientSide<User>("POST", "/auth/logout")
+    window.location.href = "/login"
+  }
 
   useEffect(() => {
     const fetchUser = async () => {
-      const data = await fetchClientSide<User>("GET", "/auth/me");
-      setUser(data);
-    };
+      if (pathname === "/login") {
+        setIsLoading(false)
+        return
+      }
 
-    if (pathname !== "/login") {
-      fetchUser();
+      try {
+        setIsLoading(true)
+        const data = await fetchClientSide<User>("GET", "/auth/me")
+        setUser(data)
+      } catch (error) {
+        console.error("Error fetching user:", error)
+        window.location.href = "/login"
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }, []);
+
+    fetchUser()
+  }, [pathname])
+
+  if (isLoading && pathname !== "/login") {
+    return null
+  }
 
   return (
     <>
@@ -90,32 +96,32 @@ export function MainNav() {
             <div className="flex items-center gap-4">
               <Link href="/" className="flex items-center gap-2">
                 <Car className="h-6 w-6 text-indigo-400" />
-                <span className="text-xl font-bold text-white">
-                  GestãoFrota
-                </span>
+                <span className="text-xl font-bold text-white">GestãoFrota</span>
               </Link>
 
               {/* Menu de navegação para desktop */}
-              <nav className="hidden md:flex items-center gap-6 ml-6">
-                {navLinks.map((link) => {
-                  const isActive = pathname === link.href;
-                  if (!link.roles.includes(user?.role!)) {
-                    return null;
-                  }
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className={`flex items-center text-sm font-medium transition-colors hover:text-white ${
-                        isActive ? "text-white" : "text-gray-400"
-                      }`}
-                    >
-                      <link.icon className="mr-2 h-4 w-4" />
-                      {link.title}
-                    </Link>
-                  );
-                })}
-              </nav>
+              {user && (
+                <nav className="hidden md:flex items-center gap-6 ml-6">
+                  {navLinks.map((link) => {
+                    const isActive = pathname === link.href
+                    if (!link.roles.includes(user.role!)) {
+                      return null
+                    }
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className={`flex items-center text-sm font-medium transition-colors hover:text-white ${
+                          isActive ? "text-white" : "text-gray-400"
+                        }`}
+                      >
+                        <link.icon className="mr-2 h-4 w-4" />
+                        {link.title}
+                      </Link>
+                    )
+                  })}
+                </nav>
+              )}
             </div>
 
             <div className="flex items-center gap-4">
@@ -145,14 +151,9 @@ export function MainNav() {
                       <div className="flex items-center justify-between p-4 border-b border-gray-800">
                         <div className="flex items-center gap-2">
                           <Car className="h-6 w-6 text-indigo-400" />
-                          <span className="text-xl font-bold text-white">
-                            GestãoFrota
-                          </span>
+                          <span className="text-xl font-bold text-white">GestãoFrota</span>
                         </div>
-                        <button
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="text-gray-400 hover:text-white"
-                        >
+                        <button onClick={() => setMobileMenuOpen(false)} className="text-gray-400 hover:text-white">
                           <X className="h-5 w-5" />
                         </button>
                       </div>
@@ -160,12 +161,7 @@ export function MainNav() {
                       <div className="flex flex-col p-4 border-b border-gray-800">
                         <div className="flex items-center gap-3 mb-4">
                           <div className="h-10 w-10 border border-gray-700">
-                            <Image
-                              src={"/placeholder.svg"}
-                              alt={user.name}
-                              width={40}
-                              height={40}
-                            />
+                            <Image src={"/placeholder.svg"} alt={user.name} width={40} height={40} />
                             <div className="bg-gray-800 text-white">
                               {user.name
                                 .split(" ")
@@ -174,9 +170,7 @@ export function MainNav() {
                             </div>
                           </div>
                           <div>
-                            <p className="font-medium text-white">
-                              {user.name}
-                            </p>
+                            <p className="font-medium text-white">{user.name}</p>
                             <p className="text-sm text-gray-400">{user.role}</p>
                           </div>
                         </div>
@@ -187,22 +181,20 @@ export function MainNav() {
                           Navegação
                         </div>
                         {navLinks.map((link) => {
-                          const isActive = pathname === link.href;
+                          const isActive = pathname === link.href
                           return (
                             <Link
                               key={link.href}
                               href={link.href}
                               onClick={() => setMobileMenuOpen(false)}
                               className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors hover:bg-gray-800 ${
-                                isActive
-                                  ? "bg-gray-800 text-white"
-                                  : "text-gray-300"
+                                isActive ? "bg-gray-800 text-white" : "text-gray-300"
                               }`}
                             >
                               <link.icon className="h-5 w-5 text-indigo-400" />
                               {link.title}
                             </Link>
-                          );
+                          )
                         })}
                       </nav>
 
@@ -224,5 +216,5 @@ export function MainNav() {
         </header>
       )}
     </>
-  );
+  )
 }

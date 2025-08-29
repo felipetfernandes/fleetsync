@@ -1,31 +1,32 @@
-"use client";
+"use client"
 
-import { User } from "@/types/types";
-import { ChevronDown, LogOut, Settings, UserRound } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import type { User } from "@/types/types"
+import { ChevronDown, LogOut, Settings, UserRound } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import Link from "next/link"
 
 function UserMenu({
   user,
   handleLogout,
 }: {
-  user: User;
-  handleLogout: () => void;
+  user: User
+  handleLogout: () => void
 }) {
-  const [opened, setOpened] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [opened, setOpened] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setOpened(false);
+        setOpened(false)
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside)
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
 
   return (
     <div ref={menuRef} className="relative">
@@ -45,10 +46,12 @@ function UserMenu({
       {opened && (
         <div className="w-56 bg-gray-900 border border-gray-800 text-gray-100 text-sm font-normal absolute top-14 rounded-2xl p-4">
           <div className="border-b pb-2 border-gray-800">Minha Conta</div>
-          <div className="flex items-center gap-2 p-2 hover:bg-gray-800 cursor-pointer">
-            <UserRound className="mr-2 h-4 w-4 text-indigo-400" />
-            <span>Perfil</span>
-          </div>
+          <Link href="/profile" onClick={() => setOpened(false)}>
+            <div className="flex items-center gap-2 p-2 hover:bg-gray-800 cursor-pointer">
+              <UserRound className="mr-2 h-4 w-4 text-indigo-400" />
+              <span>Perfil</span>
+            </div>
+          </Link>
           <div className="flex items-center gap-2 p-2 hover:bg-gray-800 cursor-pointer">
             <Settings className="mr-2 h-4 w-4 text-indigo-400" />
             <span>Configurações</span>
@@ -63,7 +66,7 @@ function UserMenu({
         </div>
       )}
     </div>
-  );
+  )
 }
 
-export default UserMenu;
+export default UserMenu

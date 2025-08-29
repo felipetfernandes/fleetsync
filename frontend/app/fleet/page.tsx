@@ -1,43 +1,49 @@
-"use client";
+"use client"
 
-import VehicleCard from "@/components/Vehicle/vehicleCard";
-import VehicleForm from "@/components/Vehicle/vehicleForm";
-import { fetchClientSide } from "@/lib/utils/fetchClientSide";
-import { Vehicle } from "@/types/types";
-import { PlusCircle } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import VehicleCard from "@/components/Vehicle/vehicleCard"
+import VehicleForm from "@/components/Vehicle/vehicleForm"
+import { fetchClientSide } from "@/lib/utils/fetchClientSide"
+import type { Vehicle } from "@/types/types"
+import { PlusCircle } from "lucide-react"
+import { useEffect, useState } from "react"
 
 export default function FleetPage() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchBranch, setSearchBranch] = useState("");
-  const [showForm, setShowForm] = useState(false);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [searchTerm, setSearchTerm] = useState("")
+  const [searchBranch, setSearchBranch] = useState("")
+  const [showForm, setShowForm] = useState(false)
+
+  const fetchVehicles = async () => {
+    try {
+      const data = await fetchClientSide<Vehicle[]>("GET", "/vehicles?driver=true")
+      setVehicles(data)
+    } catch (error) {
+      console.error("Erro ao buscar veículos:", error)
+      // redirecionar para login se necessário
+    }
+  }
 
   useEffect(() => {
-    const fetchVehicles = async () => {
-      try {
-        const data = await fetchClientSide<Vehicle[]>("GET", "/vehicles?driver=true");
-        setVehicles(data);
-      } catch (error) {
-        console.error("Erro ao buscar veículos:", error);
-        // redirecionar para login se necessário
-      }
-    };
+    fetchVehicles()
+  }, [])
 
-    fetchVehicles();
-  }, []);
+  const handleFormSuccess = async () => {
+    setShowForm(false)
+    // Recarrega a lista de veículos para mostrar o novo veículo
+    await fetchVehicles()
+  }
 
   const filteredVehicles = vehicles.filter(
     (vehicle) =>
       vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vehicle.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vehicle.driver?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      vehicle.driver?.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
 
   const filteredVehiclesByBranch = filteredVehicles.filter((vehicle) => {
-    if (!searchBranch || +searchBranch === 0) return true;
-    return vehicle.branchId === +searchBranch;
-  });
+    if (!searchBranch || +searchBranch === 0) return true
+    return vehicle.branchId === +searchBranch
+  })
 
   return (
     <div className="px-10 bg-gray-950">
@@ -47,21 +53,12 @@ export default function FleetPage() {
             <div className="bg-gray-900 rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-white">
-                    Adicionar Novo Veículo
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={() => setShowForm(false)}
-                    className="text-gray-400 hover:text-white"
-                  >
+                  <h2 className="text-2xl font-bold text-white">Adicionar Novo Veículo</h2>
+                  <button type="button" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-white">
                     X
                   </button>
                 </div>
-                <VehicleForm
-                  onSubmit={() => setShowForm(false)}
-                  onCancel={() => setShowForm(false)}
-                />
+                <VehicleForm onSubmit={handleFormSuccess} onCancel={() => setShowForm(false)} />
               </div>
             </div>
           </div>
@@ -69,12 +66,8 @@ export default function FleetPage() {
           <div>
             <header className="flex flex-wrap justify-between items-center py-8">
               <div>
-                <h1 className="text-3xl font-bold text-white">
-                  Gestão de Veículos
-                </h1>
-                <p className="text-gray-400 mt-1">
-                  Visualize e gerencie sua frota
-                </p>
+                <h1 className="text-3xl font-bold text-white">Gestão de Veículos</h1>
+                <p className="text-gray-400 mt-1">Visualize e gerencie sua frota</p>
               </div>
               <input
                 type="text"
@@ -108,5 +101,5 @@ export default function FleetPage() {
         )}
       </div>
     </div>
-  );
+  )
 }

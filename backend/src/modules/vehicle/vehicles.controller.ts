@@ -35,12 +35,12 @@ export class VehiclesController {
   @ApiResponse({ status: 201, description: "Veículo criado com sucesso" })
   @ApiResponse({ status: 409, description: "Placa já está em uso" })
   create(@Body() createVehiclePayload: CreateVehicleDto, @Req() req) {
-    const { companyId } = req.user;
+    const { companyId } = req.user
 
     return this.vehiclesService.create({
       ...createVehiclePayload,
       companyId,
-    });
+    })
   }
 
   @Get()
@@ -54,7 +54,7 @@ export class VehiclesController {
   @ApiResponse({ status: 200, description: "Veículo encontrado" })
   @ApiResponse({ status: 404, description: "Veículo não encontrado" })
   findOne(@Param("plate") plate: string, @Query() query: VehicleQueryDto) {
-    return this.vehiclesService.findOne({ plate, query });
+    return this.vehiclesService.findOne({ plate, query })
   }
 
   @Patch(":id")
@@ -62,17 +62,24 @@ export class VehiclesController {
   @ApiResponse({ status: 200, description: "Veículo atualizado com sucesso" })
   @ApiResponse({ status: 404, description: "Veículo não encontrado" })
   update(@Param("id") id: string, @Body() updateVehicleDto: UpdateVehicleDto) {
-    return this.vehiclesService.update(id, updateVehicleDto);
+    return this.vehiclesService.update(id, updateVehicleDto)
   }
 
   @Delete(":plate")
   @ApiOperation({ summary: "Remover um veículo" })
   @ApiResponse({ status: 200, description: "Veículo removido com sucesso" })
   @ApiResponse({ status: 404, description: "Veículo não encontrado" })
-  remove(@Param("plate") plate: string, @Req() req) {
-    if (req.user.role !== "ADMIN") {
-      throw new Error("Apenas administradores podem remover veículos");
+  async remove(@Param("plate") plate: string, @Req() req) {
+    if (req.user.role === "ADMIN") {
+      return this.vehiclesService.remove(plate)
+    } else if (req.user.role === "BRANCH_MANAGER") {
+      const vehicle = await this.vehiclesService.findOne({ plate, query: {} })
+      if (vehicle.branchId !== req.user.branchId) {
+        throw new Error("Você só pode excluir veículos da sua filial")
+      }
+      return this.vehiclesService.remove(plate)
+    } else {
+      throw new Error("Apenas administradores e gerentes de filial podem remover veículos")
     }
-    return this.vehiclesService.remove(plate);
   }
 }

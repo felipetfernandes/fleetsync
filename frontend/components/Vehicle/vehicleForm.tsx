@@ -3,28 +3,30 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
-import type { Branch } from "@/types/types"
+import type { Branch, Vehicle } from "@/types/types"
 import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants"
 import { Loader2 } from "lucide-react"
 
 interface VehicleFormProps {
   onSubmit: () => void
   onCancel: () => void
+  vehicle?: Vehicle
+  isEditing?: boolean
 }
 
-export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
+export default function VehicleForm({ onSubmit, onCancel, vehicle, isEditing = false }: VehicleFormProps) {
   const [formData, setFormData] = useState({
-    plate: "",
-    branchId: "",
-    model: "",
-    brand: "",
-    modelYear: "",
-    manufactureYear: "",
-    color: "",
-    renavam: "",
-    chassis: "",
-    status: "AVAILABLE",
-    mileageStart: "",
+    plate: vehicle?.plate || "",
+    branchId: vehicle?.branchId?.toString() || "",
+    model: vehicle?.model || "",
+    brand: vehicle?.brand || "",
+    modelYear: vehicle?.modelYear?.toString() || "",
+    manufactureYear: vehicle?.manufactureYear?.toString() || "",
+    color: vehicle?.color || "",
+    renavam: vehicle?.renavam || "",
+    chassis: vehicle?.chassis || "",
+    status: vehicle?.status || "AVAILABLE",
+    mileage: isEditing ? vehicle?.mileageCurrent?.toString() || "" : vehicle?.mileageStart?.toString() || "",
   })
 
   const [branchs, setBranchs] = useState<Branch[]>([])
@@ -46,7 +48,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
         })
         const data = await response.json()
         setBranchs(data)
-        if (data.length > 0) {
+        if (data.length > 0 && !vehicle) {
           setFormData((prev) => ({ ...prev, branchId: String(data[0].id) }))
         }
       } catch (err) {
@@ -54,7 +56,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
       }
     }
     fetchBranchs()
-  }, [])
+  }, [vehicle])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -63,7 +65,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
 
     if (name === "plate") {
       processedValue = value.toUpperCase()
-    } else if (name === "modelYear" || name === "manufactureYear" || name === "mileageStart") {
+    } else if (name === "modelYear" || name === "manufactureYear" || name === "mileage") {
       processedValue = value.replace(/\D/g, "")
     } else if (name === "renavam") {
       processedValue = value.replace(/\D/g, "")
@@ -84,12 +86,21 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
       branchId: Number.parseInt(formData.branchId),
       modelYear: Number.parseInt(formData.modelYear),
       manufactureYear: Number.parseInt(formData.manufactureYear),
-      mileageStart: Number.parseInt(formData.mileageStart),
+      // For creation, use mileageStart; for editing, use mileageCurrent
+      ...(isEditing
+        ? { mileageCurrent: Number.parseInt(formData.mileage) }
+        : { mileageStart: Number.parseInt(formData.mileage) }),
     }
 
+    // Remove the mileage field as it's not part of the API
+    delete (preparedFormData as any).mileage
+
     try {
-      const response = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/vehicles`, {
-        method: "POST",
+      const method = isEditing ? "PATCH" : "POST"
+      const url = isEditing ? `${NEXT_PUBLIC_LOCAL_URL}/vehicles/${vehicle?.id}` : `${NEXT_PUBLIC_LOCAL_URL}/vehicles`
+
+      const response = await fetch(url, {
+        method,
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
@@ -103,7 +114,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
         }, 500)
       } else {
         const errorData = await response.json()
-        setError(errorData.message || "Erro ao salvar veículo")
+        setError(errorData.message || `Erro ao ${isEditing ? "atualizar" : "salvar"} veículo`)
         setIsLoading(false)
       }
     } catch (err) {
@@ -114,10 +125,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-6 bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-700"
-    >
+    <form onSubmit={handleSubmit} className="space-y-6 bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-700">
       {error && (
         <div className="bg-red-800/40 border border-red-600 text-red-200 p-3 rounded-lg font-medium text-sm">
           {error}
@@ -128,7 +136,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-gray-800 p-6 rounded-lg flex items-center space-x-3 shadow-xl">
             <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
-            <span className="text-white font-medium">Salvando veículo...</span>
+            <span className="text-white font-medium">{isEditing ? "Atualizando" : "Salvando"} veículo...</span>
           </div>
         </div>
       )}
@@ -146,7 +154,8 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             onChange={handleChange}
             placeholder="ABC1234"
             required
-            className="bg-gray-800 border-gray-700 text-gray-100 rounded-md"
+            disabled={isEditing}
+            className="bg-gray-800 border-gray-700 text-gray-100 rounded-md disabled:opacity-50"
             maxLength={7}
           />
         </div>
@@ -186,7 +195,9 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             required
             className="bg-gray-800 border border-gray-700 p-2 rounded-md text-gray-100"
           >
-            <option value="" disabled>Selecione a marca</option>
+            <option value="" disabled>
+              Selecione a marca
+            </option>
             <option value="HONDA">HONDA</option>
             <option value="YAMAHA">YAMAHA</option>
           </select>
@@ -265,7 +276,9 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
             required
             className="bg-gray-800 border border-gray-700 p-2 rounded-md text-gray-100"
           >
-            <option value="" disabled>Selecione a cor</option>
+            <option value="" disabled>
+              Selecione a cor
+            </option>
             <option value="AZUL">AZUL</option>
             <option value="AMARELO">AMARELO</option>
             <option value="BRANCO">BRANCO</option>
@@ -326,17 +339,16 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
           />
         </div>
 
-        {/* ODOMETRO */}
         <div className="flex flex-col space-y-2">
-          <label htmlFor="mileageStart" className="text-sm font-semibold text-gray-200">
-            Odômetro
+          <label htmlFor="mileage" className="text-sm font-semibold text-gray-200">
+            {isEditing ? "Odômetro" : "Odômetro Inicial"}
           </label>
           <Input
-            id="mileageStart"
-            name="mileageStart"
-            value={formData.mileageStart}
+            id="mileage"
+            name="mileage"
+            value={formData.mileage}
             onChange={handleChange}
-            placeholder="10000"
+            placeholder={isEditing ? "15000" : "10000"}
             required
             maxLength={9}
             className="bg-gray-800 border-gray-700 text-gray-100 rounded-md"
@@ -344,7 +356,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
         </div>
       </div>
 
-      {/* BOTÕES */}
+      {/* BOTÕES */}
       <div className="flex justify-end space-x-4 pt-6 border-t border-gray-700">
         <button
           type="button"
@@ -360,7 +372,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
           className="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow transition flex items-center space-x-2 disabled:opacity-50"
         >
           {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-          <span>{isLoading ? "Salvando..." : "SALVAR"}</span>
+          <span>{isLoading ? (isEditing ? "Atualizando..." : "Salvando...") : isEditing ? "ATUALIZAR" : "SALVAR"}</span>
         </button>
       </div>
     </form>

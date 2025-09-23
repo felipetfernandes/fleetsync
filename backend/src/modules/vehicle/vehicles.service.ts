@@ -35,7 +35,6 @@ export class VehiclesService {
     });
   }
 
-  // Método para encontrar um veículo pelo id
   async findOne({ plate, query }: { plate: string; query: VehicleQueryDto }) {
     const include = getVehicleInclude(query);
 
@@ -51,9 +50,7 @@ export class VehiclesService {
     return vehicle;
   }
 
-  // Método para criar um veículo
   async create(createVehicleDto: CreateVehicleDto) {
-    // Verificar se a placa já existe
     const existingVehicle = await this.prisma.vehicle.findFirst({
       where: { plate: createVehicleDto.plate },
     });
@@ -82,49 +79,79 @@ export class VehiclesService {
     });
   }
 
-  // Método para atualizar um veículo
+  // MÉTODO UPDATE COMPLETAMENTE REESCRITO
   async update(id: string, updateVehicleDto: UpdateVehicleDto) {
-    await this.prisma.vehicle.findFirst({
+
+    // 1. Verificar se o veículo existe usando findFirst
+    const existingVehicle = await this.prisma.vehicle.findFirst({
       where: { id },
     });
 
+    if (!existingVehicle) {
+      throw new NotFoundException('Veículo não encontrado');
+    }
+
+    // 2. Preparar os dados de atualização (sem relações)
     const { companyId, branchId, driverId, ...rest } = updateVehicleDto;
+    
+    const updateData: any = { ...rest };
 
-    return this.prisma.vehicle.update({
+    // 3. Adicionar IDs das relações diretamente (não usar connect)
+    if (companyId) {
+      updateData.companyId = companyId;
+    }
+
+    if (branchId) {
+      updateData.branchId = branchId;
+    }
+
+    if (driverId) {
+      updateData.driverId = driverId;
+    } else if (driverId === null || driverId === undefined) {
+      // Se driverId for null/undefined, remover a associação
+      updateData.driverId = null;
+    }
+
+    // 4. Usar updateMany em vez de update
+    const updateResult = await this.prisma.vehicle.updateMany({
       where: { id },
-      data: {
-        ...rest,
+      data: updateData,
+    });
 
-        ...(companyId && {
-          company: {
-            connect: { id: companyId },
-          },
-        }),
+    if (updateResult.count === 0) {
+      throw new NotFoundException('Veículo não foi atualizado');
+    }
 
-        ...(branchId && {
-          branch: {
-            connect: { id: branchId },
-          },
-        }),
-
-        ...(driverId && {
-          driver: {
-            connect: { id: driverId },
-          },
-        }),
+    // 5. Buscar e retornar o veículo atualizado
+    const updatedVehicle = await this.prisma.vehicle.findFirst({
+      where: { id },
+      include: {
+        company: true,
+        branch: true,
+        driver: true,
       },
     });
+
+    return updatedVehicle;
   }
 
-  // Método para remover um veículo
   async remove(plate: string) {
-    await this.prisma.vehicle.findFirst({
+    const existingVehicle = await this.prisma.vehicle.findFirst({
       where: { plate },
     });
 
-    await this.prisma.vehicle.delete({
+    if (!existingVehicle) {
+      throw new NotFoundException('Veículo não encontrado');
+    }
+
+    // Usar deleteMany em vez de delete
+    const deleteResult = await this.prisma.vehicle.deleteMany({
       where: { plate },
     });
+
+    if (deleteResult.count === 0) {
+      throw new NotFoundException('Veículo não foi removido');
+    }
 
     return { message: "Veículo removido com sucesso" };
   }

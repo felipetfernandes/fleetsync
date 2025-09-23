@@ -176,10 +176,13 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
             </div>
           </div>
           <div className="flex gap-2 ml-4">
-            <button className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white py-2 px-5 border rounded flex flex-row items-center justify-center">
+            <Link
+              href={`/team/${userId}/edit`}
+              className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white py-2 px-5 border rounded flex flex-row items-center justify-center"
+            >
               <Edit className="mr-2 h-4 w-4" />
               Editar
-            </button>
+            </Link>
             <button
               className="bg-rose-900 hover:bg-rose-800 text-white py-2 px-5 rounded flex flex-row items-center justify-center"
               onClick={handleDeleteUser}

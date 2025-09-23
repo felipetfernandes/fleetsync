@@ -115,10 +115,46 @@ export class UsersService {
   }
 
   async remove(id: string) {
-    await this.prisma.user.delete({
-      where: { id },
-    });
+    try {
+      const user = await this.prisma.user.findFirst({
+        where: { id },
+        include: {
+          vehicle: true,
+          workshop: true,
+        },
+      })
 
-    return { message: "Usuário removido com sucesso" };
+      if (!user) {
+        throw new NotFoundException("Usuário não encontrado")
+      }
+
+      // Se o usuário é um driver, remover a associação do veículo
+      if (user.vehicle) {
+        await this.prisma.vehicle.update({
+          where: { id: user.vehicle.id },
+          data: { driverId: null },
+        })
+      }
+
+      // Se o usuário é um manager de oficina, remover a associação
+      if (user.workshop) {
+        await this.prisma.workshop.update({
+          where: { id: user.workshop.id },
+          data: { managerId: null },
+        })
+      }
+
+      await this.prisma.user.delete({
+        where: { id },
+      })
+
+      return { message: "Usuário removido com sucesso" }
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error
+      }
+      console.error("Erro ao remover usuário:", error)
+      throw new Error("Erro interno ao remover usuário")
+    }
   }
 }

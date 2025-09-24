@@ -1,8 +1,33 @@
-const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_LOCAL_API_URL
+// Função para determinar a URL base da API dinamicamente
+const getApiUrl = () => {
+  // Se estiver no navegador
+  if (typeof window !== 'undefined') {
+    const host = window.location.origin;
+    
+    // Em produção
+    if (host.includes('fivecoresolutions.com')) {
+      return 'https://fivecoresolutions.com/api';
+    }
+    
+    // Em desenvolvimento local
+    if (host.includes('localhost')) {
+      return '/api';
+    }
+    
+    // Outros ambientes (staging, etc)
+    return `${host}/api`;
+  }
+  
+  // Fallback para server-side ou build time
+  return process.env.NEXT_PUBLIC_LOCAL_API_URL || '/api';
+};
 
 export async function fetchClientSide<T>(method: string, url: string, payload?: any): Promise<T> {
   try {
-    const res = await fetch(NEXT_PUBLIC_BASE_URL + url, {
+    const baseUrl = getApiUrl();
+    const fullUrl = `${baseUrl}${url}`;
+    
+    const res = await fetch(fullUrl, {
       method,
       credentials: "include", // Isso inclui cookies do navegador automaticamente
       headers: {

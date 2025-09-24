@@ -36,7 +36,7 @@ export class WorkshopController {
   constructor(private readonly workshopService: WorkshopService) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard, TenantClsGuard) // ✅ Guards específicos por endpoint
+  @UseGuards(JwtAuthGuard, TenantClsGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Listar todos as oficinas" })
   findAll(@Query() query: WorkshopQueryDto) {
@@ -52,6 +52,16 @@ export class WorkshopController {
     return this.workshopService.findAllWithVehicles(companyId);
   }
 
+  // ⚠️ MOVIDO PARA ANTES DO :id GENÉRICO
+  @Get(":id/vehicles")
+  @UseGuards(JwtAuthGuard, TenantClsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Listar veículos de uma oficina específica" })
+  async findVehiclesByWorkshop(@Param("id") id: string) {
+    return this.workshopService.findOneWithVehicles(id);
+  }
+
+  // ✅ Rota genérica :id vem DEPOIS das rotas específicas
   @Get(":id")
   @UseGuards(JwtAuthGuard, TenantClsGuard)
   @ApiBearerAuth()

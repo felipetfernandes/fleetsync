@@ -55,17 +55,17 @@ export default function WorkshopDetailPage({
       }
     };
 
-    const fetchOrders = async () => {
-      try {
-        const data = await fetchClientSide<Order[]>(
-          "GET",
-          `/orders/?workshopId=${workshopId}`
-        );
-        if (data.length > 0) setOrders(data);
-      } catch (error) {
-        console.error("Erro ao buscar ordens de serviço:", error);
-      }
-    };
+	const fetchOrders = async () => {
+	try {
+		const data = await fetchClientSide<Order[]>(
+		"GET",
+		`/orders?workshopId=${workshopId}&vehicle=true` // Adicione o include do vehicle
+		);
+		if (data.length > 0) setOrders(data);
+	} catch (error) {
+		console.error("Erro ao buscar ordens de serviço:", error);
+	}
+	};
 
     const fetchVehiclesInMaintenance = async () => {
       try {

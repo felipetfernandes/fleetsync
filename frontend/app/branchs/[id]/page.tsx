@@ -817,7 +817,7 @@ export default function BranchDetailPage({
                 <p className="mt-2 text-sm text-gray-400">
                   Esta filial ainda não possui oficinas parceiras cadastradas.
                 </p>
-                <Link href="/workshop/new">
+                <Link href="/workshops/new">
                   <button className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded">
                     Adicionar Oficina
                   </button>

@@ -304,7 +304,7 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
                         <h3 className="text-sm font-medium text-gray-400 mb-1">Oficina Gerenciada</h3>
                         {user.workshop ? (
                           <Link
-                            href={`/workshop/${user.workshop.id}`}
+                            href={`/workshops/${user.workshop.id}`}
                             className="font-medium flex items-center text-indigo-400 hover:text-indigo-300"
                           >
                             <Building2 className="h-4 w-4 mr-1" />

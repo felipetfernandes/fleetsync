@@ -19,7 +19,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.enableCors({
-    origin: "http://localhost:3000", // Trocar depos pela URL do front-end
+    origin: "https://fivecoresolutions.com", // Trocar depos pela URL do front-end
     credentials: true, // Permite envio de cookies
   })
 

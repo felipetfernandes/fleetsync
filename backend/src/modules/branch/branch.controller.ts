@@ -13,7 +13,7 @@ import {
 import { BranchService } from "./branch.service";
 import { CreateBranchBodyDto } from "./dto/create-branch.dto";
 import { UpdateBranchDto } from "./dto/update-branch.dto";
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { TenantClsGuard } from "../auth/guards/tenant-cls.guard";
 import { BranchQueryDto } from "./dto/branch-query.dto";
@@ -21,6 +21,7 @@ import { BranchQueryDto } from "./dto/branch-query.dto";
 @ApiTags("branchs")
 @Controller("branchs")
 @UseGuards(JwtAuthGuard, TenantClsGuard)
+@ApiBearerAuth()
 export class BranchController {
   constructor(private readonly branchService: BranchService) {}
 
@@ -44,6 +45,24 @@ export class BranchController {
     return this.branchService.findAll(includes);
   }
 
+  // ⚠️ IMPORTANTE: Rotas específicas ANTES da rota genérica :id
+  @ApiOperation({ summary: "Listar ordens de uma filial" })
+  @ApiResponse({ status: 200, description: "Ordens listadas com sucesso" })
+  @ApiResponse({ status: 404, description: "Filial não encontrada" })
+  @Get(":id/orders")
+  findOrdersByBranch(@Param("id") id: string) {
+    return this.branchService.findOrdersByBranch(+id);
+  }
+
+  @ApiOperation({ summary: "Listar equipe de uma filial" })
+  @ApiResponse({ status: 200, description: "Equipe listada com sucesso" })
+  @ApiResponse({ status: 404, description: "Filial não encontrada" })
+  @Get(":id/team")
+  findTeamByBranch(@Param("id") id: string) {
+    return this.branchService.findTeamByBranch(+id);
+  }
+
+  // ✅ Rota genérica :id vem DEPOIS das rotas específicas
   @ApiOperation({ summary: "Encontrar uma filial pelo id" })
   @ApiResponse({ status: 200, description: "Filial encontrada com sucesso" })
   @ApiResponse({ status: 404, description: "Filial não encontrada" })

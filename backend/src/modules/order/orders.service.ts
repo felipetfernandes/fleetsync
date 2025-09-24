@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  Logger,
 } from "@nestjs/common";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
@@ -10,10 +11,12 @@ import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
 import { getOrderInclude } from "src/utils/includes/order.includes";
 import { OrderQueryDto } from "./dto/order-query.dto";
-import { UserRole } from "@prisma/client";
+import { UserRole, Prisma } from "@prisma/client";
 
 @Injectable()
 export class OrderService {
+  private readonly logger = new Logger(OrderService.name);
+
   constructor(
     @Inject(TENANT_PRISMA_CLIENT) private readonly prisma: ExtendedTenantClient
   ) {}
@@ -62,20 +65,35 @@ export class OrderService {
         workshop: true,
         company: true,
         branch: true,
+        orderItems: true,
       },
     });
 
-    await this.prisma.orderItem.createMany({
-      data: items.map((item) => ({
-        orderId: order.id,
-        description: item.description,
-        cost: item.cost,
-        laborCost: item.laborCost,
-        totalCost: item.totalCost,
-      })),
-    });
+    if (items && items.length > 0) {
+      await this.prisma.orderItem.createMany({
+        data: items.map((item) => ({
+          orderId: order.id,
+          description: item.description,
+          cost: item.cost,
+          laborCost: item.laborCost,
+          totalCost: item.totalCost,
+        })),
+      });
 
-    return null;
+      // Retornar a ordem com os items incluídos
+      return this.prisma.order.findUnique({
+        where: { id: order.id },
+        include: {
+          vehicle: true,
+          workshop: true,
+          company: true,
+          branch: true,
+          orderItems: true,
+        },
+      });
+    }
+
+    return order;
   }
 
   async findAll(query: OrderQueryDto) {
@@ -94,18 +112,32 @@ export class OrderService {
       where.branch = { id: Number(query.branchId) };
     }
 
+    // Criar um include que sempre tenha vehicle e workshop
+    const defaultInclude: Prisma.OrderInclude = {
+      vehicle: true,
+      workshop: true,
+      ...include,
+    };
+
     return this.prisma.order.findMany({
       where,
-      include,
+      include: defaultInclude,
     });
   }
 
   async findOne({ id, query }: { id: string; query: OrderQueryDto }) {
     const include = getOrderInclude(query);
 
+    // Criar um include que sempre tenha vehicle e workshop
+    const defaultInclude: Prisma.OrderInclude = {
+      vehicle: true,
+      workshop: true,
+      ...include,
+    };
+
     const service = await this.prisma.order.findFirst({
       where: { id },
-      include,
+      include: defaultInclude,
     });
 
     if (!service) {
@@ -117,20 +149,102 @@ export class OrderService {
 
   async update(id: string, updateOrderDto: UpdateOrderDto) {
     try {
-      return this.prisma.order.update({
+      this.logger.log('=== UPDATE ORDER SERVICE ===');
+      this.logger.log(`Order ID: ${id}`);
+      this.logger.log(`Update DTO: ${JSON.stringify(updateOrderDto)}`);
+
+      // Verificar se a ordem existe
+      this.logger.log('Checking if order exists...');
+      const existingOrder = await this.prisma.order.findFirst({
         where: { id },
-        data: { ...updateOrderDto },
       });
+
+      if (!existingOrder) {
+        this.logger.error(`Order ${id} not found`);
+        throw new NotFoundException("Ordem de serviço não encontrada");
+      }
+
+      this.logger.log(`Existing order found: ${existingOrder.id}`);
+
+      // Processar dados de atualização
+      const dataToUpdate: any = { ...updateOrderDto };
+
+      this.logger.log('Processing update data...');
+
+      // Se está atualizando para COMPLETED, adicionar a data de finalização
+      if (updateOrderDto.status === 'COMPLETED' && !updateOrderDto.endDate) {
+        dataToUpdate.endDate = new Date();
+        this.logger.log('Adding endDate for COMPLETED status');
+      }
+
+      // Converter datas se necessário
+      if (dataToUpdate.startDate) {
+        dataToUpdate.startDate = new Date(dataToUpdate.startDate);
+        this.logger.log(`Converting startDate: ${dataToUpdate.startDate}`);
+      }
+      
+      if (dataToUpdate.endDate) {
+        dataToUpdate.endDate = new Date(dataToUpdate.endDate);
+        this.logger.log(`Converting endDate: ${dataToUpdate.endDate}`);
+      }
+
+      this.logger.log(`Final data to update: ${JSON.stringify(dataToUpdate)}`);
+
+      // Executar update usando updateMany para contornar o problema de tenancy
+      this.logger.log('Executing database update...');
+      const updateResult = await this.prisma.order.updateMany({
+        where: { id },
+        data: dataToUpdate,
+      });
+
+      if (updateResult.count === 0) {
+        throw new NotFoundException("Ordem de serviço não encontrada ou não foi possível atualizar");
+      }
+
+      this.logger.log('Update successful, fetching updated order...');
+
+      // Buscar a ordem atualizada com todos os relacionamentos
+      const updatedOrder = await this.prisma.order.findFirst({
+        where: { id },
+        include: {
+          vehicle: true,
+          workshop: true,
+          company: true,
+          branch: true,
+          orderItems: true,
+        },
+      });
+
+      this.logger.log(`Update completed for order ${id}`);
+      return updatedOrder;
+
     } catch (error) {
-      return new NotFoundException("Ordem de serviço não encontrada");
+      this.logger.error(`Error in update service for order ${id}:`, error.stack);
+      
+      // Log específico para erros do Prisma
+      if (error.code) {
+        this.logger.error(`Prisma error code: ${error.code}`);
+        this.logger.error(`Prisma error message: ${error.message}`);
+      }
+      
+      throw error;
     }
   }
 
   async remove(id: string, role: UserRole) {
     if (role !== UserRole.ADMIN) {
-      return new UnauthorizedException(
-        "Apenas administradores podem remover filiais"
+      throw new UnauthorizedException(
+        "Apenas administradores podem remover ordens de serviço"
       );
+    }
+
+    // Verificar se a ordem existe antes de tentar deletar
+    const existingOrder = await this.prisma.order.findFirst({
+      where: { id },
+    });
+
+    if (!existingOrder) {
+      throw new NotFoundException("Ordem de serviço não encontrada");
     }
 
     return this.prisma.order.delete({

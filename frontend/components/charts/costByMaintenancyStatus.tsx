@@ -1,42 +1,19 @@
-"use client";
+"use client"
 
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  LabelList,
-  Text,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, Text, XAxis, YAxis } from "recharts"
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import { OrderStatus } from "@/types/enums";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { type ChartConfig, ChartContainer, ChartLegend, ChartLegendContent } from "@/components/ui/chart"
+import type { OrderStatus } from "@/types/enums"
 
-export const description = "A bar chart with a custom label";
+export const description = "A bar chart with a custom label"
 
 type ChartDataType = {
-  status: OrderStatus;
-  cost: number;
-  services: number;
-  averageCost: number;
-};
+  status: OrderStatus
+  cost: number
+  services: number
+  averageCost: number
+}
 
 const chartConfig = {
   IN_PROGRESS: {
@@ -62,20 +39,18 @@ const chartConfig = {
   label: {
     color: "var(--background)",
   },
-} satisfies ChartConfig;
+} satisfies ChartConfig
 
 export default function ChartBarLabelCustom({
   chartData,
 }: {
-  chartData: ChartDataType[];
+  chartData: ChartDataType[]
 }) {
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-gray-200">Manutenção por status</CardTitle>
-        <CardDescription>
-          Ordens de serviço por estatus com custo total
-        </CardDescription>
+        <CardDescription>Ordens de serviço por estatus com custo total</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
@@ -88,14 +63,7 @@ export default function ChartBarLabelCustom({
             }}
           >
             <CartesianGrid horizontal={false} />
-            <YAxis
-              dataKey="status"
-              type="category"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              hide
-            />
+            <YAxis dataKey="status" type="category" tickLine={false} tickMargin={10} axisLine={false} hide />
             <XAxis dataKey="cost" type="number" hide />
             <ChartLegend
               content={() => (
@@ -112,11 +80,7 @@ export default function ChartBarLabelCustom({
             />
             <Bar dataKey="cost" name="cost" layout="vertical" radius={4}>
               {chartData.map(({ status }, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  name={chartConfig[status].label}
-                  fill={chartConfig[status].color}
-                />
+                <Cell key={`cell-${index}`} name={chartConfig[status].label} fill={chartConfig[status].color} />
               ))}
               <LabelList
                 dataKey="cost"
@@ -134,7 +98,7 @@ export default function ChartBarLabelCustom({
                     fontWeight="bold"
                     textAnchor="start"
                   >
-                    {`R$ ${Number(value).toFixed(2)}`}
+                    {`R$ ${Number(value || 0).toFixed(2)}`}
                   </Text>
                 )}
               />
@@ -156,5 +120,5 @@ export default function ChartBarLabelCustom({
         </div>
       </CardFooter>
     </Card>
-  );
+  )
 }

@@ -105,11 +105,13 @@ export default async function DashboardPage() {
                 <p className="text-xs text-gray-400 mt-1">
                   <span className="text-rose-400 inline-flex items-center">
                     <ArrowUpRight className="h-3 w-3 mr-1" />
-                    {(
-                      (((dashboardData.monthlyExpenses[0].value || 0) - (dashboardData.monthlyExpenses[1].value || 0)) /
-                        (dashboardData.monthlyExpenses[1].value || 0)) *
-                      100
-                    ).toFixed(2)}{" "}
+                    {(() => {
+                      const currentValue = dashboardData.monthlyExpenses[0]?.value || 0
+                      const previousValue = dashboardData.monthlyExpenses[1]?.value || 0
+                      if (previousValue === 0) return "0.00"
+                      const percentage = ((currentValue - previousValue) / previousValue) * 100
+                      return isFinite(percentage) ? percentage.toFixed(2) : "0.00"
+                    })()}{" "}
                   </span>{" "}
                 </p>
               </div>

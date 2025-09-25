@@ -92,22 +92,22 @@ const renderActiveShape = (props: unknown) => {
         dy={-18}
         textAnchor={textAnchor}
         fill="oklch(55.1% 0.027 264.364)"
-      >{`Média: R$ ${payload.averageCost.toFixed(0)}`}</text>
+      >{`Média: R$ ${(payload.averageCost || 0).toFixed(0)}`}</text>
       <text
         x={ex + (cos >= 0 ? 1 : -1) * 12}
         y={ey}
         textAnchor={textAnchor}
         fill="oklch(96.7% 0.003 264.542)"
-      >{`Total: R$ ${value.toFixed(0)}`}</text>
+      >{`Total: R$ ${(value || 0).toFixed(0)}`}</text>
       <text
         x={ex + (cos >= 0 ? 1 : -1) * 12}
         y={ey}
         dy={18}
         textAnchor={textAnchor}
         fill="oklch(44.6% 0.03 256.802)"
-      >{`Duração média: ${payload.avgDuration.toFixed(0)} dias`}</text>
+      >{`Duração média: ${(payload.avgDuration || 0).toFixed(0)} dias`}</text>
       <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={36} textAnchor={textAnchor} fill="oklch(44.6% 0.03 256.802)">
-        {`(${(percent * 100).toFixed(0)}% das ordens)`}
+        {`(${((percent || 0) * 100).toFixed(0)}% das ordens)`}
       </text>
     </g>
   )
@@ -116,7 +116,7 @@ const renderActiveShape = (props: unknown) => {
 export default function MaintenanceByType({ data }: MaintenanceByTypeProps) {
   const chartData = data.map((item) => ({
     ...item,
-    averageCost: Number((item.totalCost / item.quantity).toFixed(0)),
+    averageCost: item.quantity > 0 ? Number(((item.totalCost || 0) / item.quantity).toFixed(0)) : 0,
   }))
 
   const [activeType, setActiveType] = useState(chartData.length > 0 ? chartData[0].type : "PREVENTIVE")

@@ -1,59 +1,56 @@
-import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUUID,
-  IsNumber,
-} from 'class-validator';
+import { ApiProperty } from "@nestjs/swagger"
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, IsNumber } from "class-validator"
 
 export class CreateWorkshopDto {
-  @ApiProperty({ example: 'Oficina São José' })
+  @ApiProperty({ example: "Oficina São José" })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name: string
 
-  @ApiProperty({ example: '12345678000190' })
+  @ApiProperty({ example: "12345678000190" })
   @IsString()
   @IsNotEmpty()
-  cnpj: string;
+  cnpj: string
 
-  @ApiProperty({ example: 'Rua das Oficinas, 1000' })
+  @ApiProperty({ example: "Rua das Oficinas, 1000" })
   @IsString()
   @IsNotEmpty()
-  address: string;
+  address: string
 
-  @ApiProperty({ example: '+5511999999999' })
+  @ApiProperty({ example: "+5511999999999" })
   @IsString()
   @IsNotEmpty()
-  phone: string;
+  phone: string
 
-  @ApiProperty({ example: 'oficina@email.com' })
+  @ApiProperty({ example: "oficina@email.com" })
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email: string
 
-  @ApiProperty({
-    example: 'senhaSegura123',
-    description: 'A senha será criptografada automaticamente ao salvar',
+  @ApiProperty({ 
+    example: "uuid-da-empresa", 
+    required: false,
+    description: "ID da empresa. Se não fornecido, usa a primeira empresa disponível"
   })
-  @IsString()
-  @IsNotEmpty()
-  password: string;
-
-  @ApiProperty({ example: 'uuid-da-empresa' })
-  @IsUUID()
-  @IsNotEmpty()
-  companyId: string;
-
-  @ApiProperty({ example: 1 })
-  @IsNumber()
-  @IsNotEmpty()
-  branchId: number;
-
-  @ApiProperty({ example: 'uuid-do-gerente', required: false })
   @IsOptional()
   @IsUUID()
-  managerId?: string;
+  companyId?: string
+
+  @ApiProperty({ 
+    example: 1, 
+    required: false,
+    description: "ID da filial. Se não fornecido, usa a primeira filial da empresa"
+  })
+  @IsOptional()
+  @IsNumber()
+  branchId?: number
+
+  @ApiProperty({ 
+    example: "uuid-do-gerente", 
+    required: false,
+    description: "ID do usuário gerente existente para vincular à oficina"
+  })
+  @IsOptional()
+  @IsUUID()
+  managerId?: string
 }

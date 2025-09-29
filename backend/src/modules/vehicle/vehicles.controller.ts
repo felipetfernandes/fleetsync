@@ -82,4 +82,18 @@ export class VehiclesController {
       throw new Error("Apenas administradores e gerentes de filial podem remover veículos")
     }
   }
+  
+@Patch(":id/driver")
+@UseGuards(JwtAuthGuard, TenantClsGuard)
+@ApiBearerAuth()
+@ApiOperation({ summary: "Vincular ou desvincular motorista do veículo" })
+@ApiResponse({ status: 200, description: "Motorista vinculado com sucesso" })
+@ApiResponse({ status: 404, description: "Veículo ou usuário não encontrado" })
+async setDriver(
+  @Param("id") id: string,
+  @Body() body: { driverId: string | null }
+) {
+  return this.vehiclesService.setDriver(id, body.driverId); // <-- vehiclesService com 's'
+}
+  
 }

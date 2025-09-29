@@ -17,8 +17,6 @@ export default function WorkshopForm({ onSubmit, onCancel }: WorkshopFormProps) 
     name: "",
     cnpj: "",
     email: "",
-    password: "",
-    confirmPassword: "",
     phone: "",
     address: "",
   })
@@ -71,39 +69,26 @@ export default function WorkshopForm({ onSubmit, onCancel }: WorkshopFormProps) 
     setIsLoading(true)
     setError("")
 
-    // Validações atualizadas
-    if (!formData.password) {
-      setError("A senha é obrigatória")
-      setIsLoading(false)
-      return
-    }
-
-    if (!formData.confirmPassword) {
-      setError("A confirmação de senha é obrigatória")
-      setIsLoading(false)
-      return
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("As senhas não são iguais")
-      setIsLoading(false)
-      return
-    }
-
     try {
-      const { confirmPassword, ...dataToSend } = formData
+      const workshopData = {
+        name: formData.name,
+        cnpj: formData.cnpj.replace(/\D/g, ""), // Remove formatação do CNPJ
+        email: formData.email,
+        phone: formData.phone.replace(/\D/g, ""), // Remove formatação do telefone
+        address: formData.address,
+      }
 
-      const response = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/workshops/register`, {
+      const response = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/workshops`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify(dataToSend),
+        body: JSON.stringify(workshopData),
       })
 
       if (response.ok) {
-        // Oficina registrada com sucesso
+        // Oficina criada com sucesso
         onSubmit() // Notifica o componente pai sobre o sucesso
       } else {
         const errorData = await response.json()
@@ -173,38 +158,6 @@ export default function WorkshopForm({ onSubmit, onCancel }: WorkshopFormProps) 
               value={formData.email}
               onChange={handleChange}
               placeholder="contato@oficina.com"
-              required
-              disabled={isLoading}
-            />
-          </div>
-
-          <div className="space-y-2 flex flex-col">
-            <label className="-mb-2" htmlFor="password">
-              Senha
-            </label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              required
-              disabled={isLoading}
-            />
-          </div>
-
-          <div className="space-y-2 flex flex-col">
-            <label className="-mb-2" htmlFor="confirmPassword">
-              Confirmar Senha
-            </label>
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="••••••••"
               required
               disabled={isLoading}
             />

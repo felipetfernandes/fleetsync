@@ -6,13 +6,10 @@ import {
 } from "@nestjs/common";
 import { CreateWorkshopDto } from "./dto/create-workshop.dto";
 import { UpdateWorkshopDto } from "./dto/update-workshop.dto";
-import { RegisterWorkshopDto } from "./dto/register-workshop.dto";
-import * as bcrypt from "bcrypt";
 import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
 import { WorkshopQueryDto } from "./dto/workshop-query.dto";
 import { getWorkshopInclude } from "src/utils/includes/workshop.includes";
-import { UsersService } from "../user/users.service";
 
 @Injectable()
 export class WorkshopService {
@@ -21,31 +18,31 @@ export class WorkshopService {
   ) {}
 
   async findAll(query: WorkshopQueryDto) {
-    const include = getWorkshopInclude(query);
-    const where: any = {};
+    const include = getWorkshopInclude(query)
+    const where: any = {}
 
     if (query.branchId) {
-      where.branch = { id: Number(query.branchId) };
+      where.branch = { id: Number(query.branchId) }
     }
 
     return await this.prisma.workshop.findMany({
       include,
       where,
-    });
+    })
   }
 
   async findManyByBranch(query: WorkshopQueryDto) {
-    const include = getWorkshopInclude(query);
-    const where: any = {};
+    const include = getWorkshopInclude(query)
+    const where: any = {}
 
     if (query.branchId) {
-      where.branch = { id: Number(query.branchId) };
+      where.branch = { id: Number(query.branchId) }
     }
 
     return this.prisma.workshop.findMany({
       where,
       include,
-    });
+    })
   }
 
   findAllWithVehicles(companyId: string) {
@@ -59,15 +56,23 @@ export class WorkshopService {
           },
         },
       },
-    });
+    })
   }
 
-  async findOne({ id, query }: { id: string; query: WorkshopQueryDto }) {
-    const include = getWorkshopInclude(query);
-
+  async findOneWithVehicles(id: string) {
     const workshop = await this.prisma.workshop.findFirst({
       where: { id },
-      include,
+      include: {
+        orders: {
+          where: { endDate: null },
+          include: {
+            vehicle: true,
+          },
+        },
+        company: true,
+        branch: true,
+        manager: true,
+      },
     });
 
     if (!workshop) {
@@ -77,126 +82,188 @@ export class WorkshopService {
     return workshop;
   }
 
-  // ✅ MÉTODO MODIFICADO
-  async register(registerWorkshopDto: RegisterWorkshopDto, companyId?: string) {
-    // Verifica se já existe oficina com este CNPJ
-    const existingWorkshop = await this.prisma.workshop.findFirst({
-      where: { cnpj: registerWorkshopDto.cnpj },
-    });
+  async findOne({ id, query }: { id: string; query: WorkshopQueryDto }) {
+    const include = getWorkshopInclude(query)
 
-    if (existingWorkshop) {
-      throw new ConflictException("Oficina já cadastrada com este CNPJ");
+    const workshop = await this.prisma.workshop.findFirst({
+      where: { id },
+      include,
+    })
+
+    if (!workshop) {
+      throw new NotFoundException(`Oficina com ID ${id} não encontrada`)
     }
 
-    // ✅ Verifica se já existe usuário com este email
-    const existingUser = await this.prisma.user.findFirst({
-      where: { email: registerWorkshopDto.email },
-    });
-
-    if (existingUser) {
-      throw new ConflictException("Já existe um usuário com este email");
-    }
-
-    const company = companyId
-      ? await this.prisma.company.findFirst({ where: { id: companyId } })
-      : await this.prisma.company.findFirst();
-
-    if (!company) {
-      throw new NotFoundException(
-        "Nenhuma empresa encontrada para associar à oficina"
-      );
-    }
-
-    const defaultBranch = await this.prisma.branch.findFirst({
-      where: { companyId: company.id },
-    });
-
-    if (!defaultBranch) {
-      throw new NotFoundException(
-        "Nenhuma filial encontrada para associar à oficina"
-      );
-    }
-
-    if (!registerWorkshopDto.password) {
-      throw new Error("A senha é obrigatória para o cadastro de oficinas");
-    }
-
-    const hashedPassword = await bcrypt.hash(registerWorkshopDto.password, 10);
-
-    // ✅ 1. Criar o usuário primeiro
-    const user = await this.prisma.user.create({
-      data: {
-        name: registerWorkshopDto.name,
-        email: registerWorkshopDto.email,
-        phone: registerWorkshopDto.phone,
-        password: hashedPassword,
-        role: 'WORKSHOP_MANAGER',              // ← Role correta!
-        company: { connect: { id: company.id } },
-        branch: { connect: { id: defaultBranch.id } },
-        emailVerified: true, // Ou false, dependendo do seu fluxo
-      },
-    });
-
-    // ✅ 2. Criar a oficina linkada ao usuário
-    const workshop = await this.prisma.workshop.create({
-      data: {
-        name: registerWorkshopDto.name,
-        cnpj: registerWorkshopDto.cnpj,
-        email: registerWorkshopDto.email,
-        phone: registerWorkshopDto.phone,
-        address: registerWorkshopDto.address,
-        password: hashedPassword, // Mantendo por compatibilidade
-        company: { connect: { id: company.id } },
-        branch: { connect: { id: defaultBranch.id } },
-        manager: { connect: { id: user.id } },  // ← Link com o usuário!
-      },
-    });
-
-    return { user, workshop }; // ✅ Retorna ambos
+    return workshop
   }
 
   async create(createWorkshopDto: CreateWorkshopDto) {
     const existingWorkshop = await this.prisma.workshop.findFirst({
       where: { cnpj: createWorkshopDto.cnpj },
-    });
+    })
 
     if (existingWorkshop) {
-      throw new ConflictException("Oficina já cadastrada com este CNPJ");
+      throw new ConflictException("Oficina já cadastrada com este CNPJ")
     }
 
-    const { companyId, branchId, managerId, ...rest } = createWorkshopDto;
+    let companyId = createWorkshopDto.companyId
+    let branchId = createWorkshopDto.branchId
+
+    if (!companyId) {
+      const company = await this.prisma.company.findFirst()
+      if (!company) {
+        throw new NotFoundException("Nenhuma empresa encontrada")
+      }
+      companyId = company.id
+    }
+
+    if (!branchId) {
+      const branch = await this.prisma.branch.findFirst({
+        where: { companyId },
+      })
+      if (!branch) {
+        throw new NotFoundException("Nenhuma filial encontrada")
+      }
+      branchId = branch.id
+    }
+
+    // Desestruturar para remover os IDs quando usando connect
+    const { managerId, companyId: _, branchId: __, ...workshopData } = createWorkshopDto
 
     return this.prisma.workshop.create({
       data: {
-        ...rest,
+        ...workshopData,
         company: { connect: { id: companyId } },
         branch: { connect: { id: branchId } },
         ...(managerId && { manager: { connect: { id: managerId } } }),
       },
-    });
+    })
   }
 
-  async update({ id, updateWorkshopDto }: {id: string, updateWorkshopDto: UpdateWorkshopDto}) {
-    await this.prisma.workshop.findFirst({ where: { id } });
+  async update({ id, updateWorkshopDto }: { id: string; updateWorkshopDto: UpdateWorkshopDto }) {
+    // Verificar se existe
+    const existingWorkshop = await this.prisma.workshop.findFirst({ 
+      where: { id } 
+    });
+
+    if (!existingWorkshop) {
+      throw new NotFoundException('Oficina não encontrada');
+    }
 
     const { companyId, branchId, managerId, ...rest } = updateWorkshopDto;
+    
+    const updateData: any = { ...rest };
 
-    return this.prisma.workshop.update({
+    // Adicionar IDs diretamente (sem usar connect)
+    if (companyId) {
+      updateData.companyId = companyId;
+    }
+
+    if (branchId) {
+      updateData.branchId = branchId;
+    }
+
+    if (managerId !== undefined) {
+      updateData.managerId = managerId; // pode ser null para desvincular
+    }
+
+    // Usar updateMany
+    const updateResult = await this.prisma.workshop.updateMany({
       where: { id },
-      data: {
-        ...rest,
-        ...(branchId && { branch: { connect: { id: branchId } } }),
-        ...(managerId && { manager: { connect: { id: managerId } } }),
-        ...(companyId && { company: { connect: { id: companyId } } }),
-      },
+      data: updateData
+    });
+
+    if (updateResult.count === 0) {
+      throw new NotFoundException('Oficina não foi atualizada');
+    }
+
+    // Retornar a oficina atualizada
+    return this.prisma.workshop.findFirst({
+      where: { id },
+      include: {
+        company: true,
+        branch: true,
+        manager: true
+      }
     });
   }
 
   async remove({ id, companyId }: { id: string; companyId: string }) {
-    await this.prisma.workshop.delete({
-      where: { id, companyId },
+    // Verificar se a oficina existe
+    const existingWorkshop = await this.prisma.workshop.findFirst({
+      where: { id }
     });
 
+    if (!existingWorkshop) {
+      throw new NotFoundException('Oficina não encontrada');
+    }
+
+    // Usar deleteMany para evitar problemas com multi-tenancy
+    const deleteResult = await this.prisma.workshop.deleteMany({
+      where: { id }
+    });
+
+    if (deleteResult.count === 0) {
+      throw new NotFoundException('Oficina não foi removida');
+    }
+
     return { message: "Oficina removida com sucesso" };
+  }
+  
+  async setManager(workshopId: string, managerId: string | null) {
+    // Verificar se a oficina existe
+    const workshop = await this.prisma.workshop.findFirst({
+      where: { id: workshopId }
+    });
+
+    if (!workshop) {
+      throw new NotFoundException('Oficina não encontrada');
+    }
+
+    // Se estiver vinculando um gerente, verificar se ele existe e é um WORKSHOP_MANAGER
+    if (managerId) {
+      const user = await this.prisma.user.findFirst({
+        where: { 
+          id: managerId,
+          role: 'WORKSHOP_MANAGER'
+        }
+      });
+
+      if (!user) {
+        throw new NotFoundException('Usuário não encontrado ou não é um gerente de oficina');
+      }
+
+      // Verificar se o usuário já gerencia outra oficina
+      const existingWorkshop = await this.prisma.workshop.findFirst({
+        where: { 
+          managerId: managerId,
+          NOT: { id: workshopId }
+        }
+      });
+
+      if (existingWorkshop) {
+        throw new ConflictException('Este usuário já gerencia outra oficina');
+      }
+    }
+
+    // Usar updateMany para evitar problemas com multi-tenancy
+    const updateResult = await this.prisma.workshop.updateMany({
+      where: { id: workshopId },
+      data: { managerId }
+    });
+
+    if (updateResult.count === 0) {
+      throw new NotFoundException('Falha ao atualizar a oficina');
+    }
+
+    // Buscar e retornar a oficina atualizada
+    return this.prisma.workshop.findFirst({
+      where: { id: workshopId },
+      include: {
+        manager: true,
+        company: true,
+        branch: true
+      }
+    });
   }
 }

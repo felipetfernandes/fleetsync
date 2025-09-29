@@ -95,7 +95,7 @@ export default function WorkshopDetailPage({
           "DELETE",
           `/workshops/${workshopId}`
         );
-        router.push("/workshop");
+        router.push("/workshops");
       } catch (error: any) {
         console.error("Erro ao deletar oficina:", error);
         // Aqui você pode adicionar uma lógica para exibir uma mensagem de erro ao usuário

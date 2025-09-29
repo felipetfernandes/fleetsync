@@ -1,53 +1,52 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { PlusCircle, X, Search, Filter, UserPlus } from "lucide-react";
-import { User } from "@/types/types";
-import { fetchClientSide } from "@/lib/utils/fetchClientSide";
-import UserCard from "@/components/User/userCard";
-//import UserForm from "@/components/User/userForm";
-import { UserRole } from "@/types/enums";
+import { useEffect, useState } from "react"
+import { X, Search, Filter, UserPlus } from "lucide-react"
+import type { User } from "@/types/types"
+import { fetchClientSide } from "@/lib/utils/fetchClientSide"
+import UserCard from "@/components/User/userCard"
+import UserForm from "@/components/User/userForm"
+import { UserRole } from "@/types/enums"
 
 export default function TeamPage() {
-  const [showForm, setShowForm] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeFilter, setActiveFilter] = useState<UserRole | "ALL">("ALL");
+  const [showForm, setShowForm] = useState(false)
+  const [users, setUsers] = useState<User[]>([])
+  const [searchTerm, setSearchTerm] = useState("")
+  const [activeFilter, setActiveFilter] = useState<UserRole | "ALL">("ALL")
 
   useEffect(() => {
-    (async () => {
-      const data = await fetchClientSide<User[]>("GET", `/users/`);
-      setUsers(data);
-    })();
-  }, []);
+    ;(async () => {
+      const data = await fetchClientSide<User[]>("GET", `/users/`)
+      setUsers(data)
+    })()
+  }, [])
 
   const filteredUsers = (): User[] => {
-    let result = users;
+    let result = users
 
     if (searchTerm) {
       result = users.filter(
         (user) =>
           user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.phone.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+          user.phone.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
     }
-
 
     if (activeFilter !== "ALL") {
-      result = users.filter((user) => user.role === activeFilter);
+      result = users.filter((user) => user.role === activeFilter)
     }
 
-    return result;
+    return result
   }
 
   const handleOpenForm = () => {
-    setShowForm(true);
-  };
+    setShowForm(true)
+  }
 
   const handleCloseForm = () => {
-    setShowForm(false);
-  };
+    setShowForm(false)
+  }
 
   const handleAddUser = (user: User) => {
     // Simular adição de um novo usuário
@@ -57,13 +56,13 @@ export default function TeamPage() {
         ...user,
         id: Date.now().toString(),
       },
-    ]);
-    setShowForm(false);
-  };
+    ])
+    setShowForm(false)
+  }
 
   const handleFilterChange = (filter: UserRole | "ALL") => {
-    setActiveFilter(filter);
-  };
+    setActiveFilter(filter)
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
@@ -71,9 +70,7 @@ export default function TeamPage() {
         <header className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white">Equipe</h1>
-            <p className="text-gray-400 mt-1">
-              Gerencie motoristas, administradores e gerentes de oficina
-            </p>
+            <p className="text-gray-400 mt-1">Gerencie motoristas, administradores e gerentes de oficina</p>
           </div>
           <button
             onClick={handleOpenForm}
@@ -105,9 +102,7 @@ export default function TeamPage() {
               <button
                 onClick={() => handleFilterChange("ALL")}
                 className={`px-3 py-1 rounded-full text-sm ${
-                  activeFilter === "ALL"
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                  activeFilter === "ALL" ? "bg-indigo-600 text-white" : "bg-gray-800 text-gray-300 hover:bg-gray-700"
                 }`}
               >
                 Todos
@@ -115,9 +110,7 @@ export default function TeamPage() {
               <button
                 onClick={() => handleFilterChange(UserRole.DRIVER)}
                 className={`px-3 py-1 rounded-full text-sm ${
-                  activeFilter === "DRIVER"
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                  activeFilter === "DRIVER" ? "bg-indigo-600 text-white" : "bg-gray-800 text-gray-300 hover:bg-gray-700"
                 }`}
               >
                 Motoristas
@@ -125,9 +118,7 @@ export default function TeamPage() {
               <button
                 onClick={() => handleFilterChange(UserRole.ADMIN)}
                 className={`px-3 py-1 rounded-full text-sm ${
-                  activeFilter === "ADMIN"
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                  activeFilter === "ADMIN" ? "bg-indigo-600 text-white" : "bg-gray-800 text-gray-300 hover:bg-gray-700"
                 }`}
               >
                 Administradores
@@ -156,43 +147,37 @@ export default function TeamPage() {
           </div>
         </div>
 
-        {showForm ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredUsers().length > 0 ? (
+            filteredUsers().map((user) => <UserCard key={user.id} user={user} />)
+          ) : (
+            <div className="col-span-full text-center py-12 bg-gray-900 rounded-lg border border-gray-800">
+              <p className="text-gray-400">
+                {searchTerm || activeFilter !== "ALL"
+                  ? "Nenhum usuário encontrado com os filtros aplicados."
+                  : "Nenhum usuário cadastrado."}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Modal do formulário */}
+        {showForm && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-900 rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-gray-900 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-white">
-                    Adicionar Novo Usuário
-                  </h2>
-                  <button
-                    onClick={handleCloseForm}
-                    className="text-gray-400 hover:text-white"
-                  >
+                  <h2 className="text-2xl font-bold text-white">Adicionar Novo Usuário</h2>
+                  <button onClick={handleCloseForm} className="text-gray-400 hover:text-white">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
-                {/*<UserForm onSubmit={handleAddUser} onCancel={handleCloseForm} />*/}
+                <UserForm onSubmit={handleAddUser} onCancel={handleCloseForm} />
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredUsers().length > 0 ? (
-              filteredUsers().map((user) => (
-                <UserCard key={user.id} user={user} />
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12 bg-gray-900 rounded-lg border border-gray-800">
-                <p className="text-gray-400">
-                  {searchTerm || activeFilter !== "ALL"
-                    ? "Nenhum usuário encontrado com os filtros aplicados."
-                    : "Nenhum usuário cadastrado."}
-                </p>
-              </div>
-            )}
           </div>
         )}
       </div>
     </div>
-  );
+  )
 }

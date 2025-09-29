@@ -148,7 +148,6 @@ model Workshop {
   address  String
   phone    String
   email    String
-  password String
 
   // Relationships
   company   Company @relation(fields: [companyId], references: [id])

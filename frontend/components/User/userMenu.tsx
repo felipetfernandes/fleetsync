@@ -1,9 +1,41 @@
 "use client"
 
 import type { User } from "@/types/types"
+import { UserRole } from "@/types/enums"
 import { ChevronDown, LogOut, Settings, UserRound } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
+
+// Helper functions to get role display name and colors
+function getRoleDisplay(role: UserRole): string {
+  switch (role) {
+    case UserRole.ADMIN:
+      return "Administrador"
+    case UserRole.BRANCH_MANAGER:
+      return "Gerente de Filial"
+    case UserRole.WORKSHOP_MANAGER:
+      return "Gerente de Oficina"
+    case UserRole.DRIVER:
+      return "Motorista"
+    default:
+      return role
+  }
+}
+
+function getRoleColors(role: UserRole): string {
+  switch (role) {
+    case UserRole.ADMIN:
+      return "bg-purple-900/30 text-purple-400"
+    case UserRole.BRANCH_MANAGER:
+      return "bg-emerald-900/30 text-emerald-400"
+    case UserRole.WORKSHOP_MANAGER:
+      return "bg-amber-900/30 text-amber-400"
+    case UserRole.DRIVER:
+      return "bg-blue-900/30 text-blue-400"
+    default:
+      return "bg-gray-900/30 text-gray-400"
+  }
+}
 
 function UserMenu({
   user,
@@ -38,7 +70,9 @@ function UserMenu({
           <UserRound className="h-8 w-8 text-indigo-400" />
           <div className="hidden md:block text-left">
             <p className="text-sm font-medium text-white">{user.name}</p>
-            <p className="text-xs text-gray-400">{user.role}</p>
+            <span className={`inline-block px-2 py-0.5 rounded-full text-xs ${getRoleColors(user.role)}`}>
+              {getRoleDisplay(user.role)}
+            </span>
           </div>
           <ChevronDown className="h-4 w-4 text-gray-400" />
         </button>

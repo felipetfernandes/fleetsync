@@ -24,6 +24,7 @@ import { fetchClientSide } from "@/lib/utils/fetchClientSide"
 import OrderCard from "@/components/Order/orderCard"
 import OrderForm from "@/components/Order/orderForm"
 import Link from "next/link"
+import { UserRole as UserRoleEnum } from "@/types/enums"
 
 // Função para obter o nome da função em português
 const getRoleName = (role: UserRole): string => {
@@ -55,11 +56,32 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
   const [tab, setTab] = useState("info")
   const [showOrderForm, setShowOrderForm] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const cachedUser = sessionStorage.getItem("user")
+        if (cachedUser) {
+          setCurrentUser(JSON.parse(cachedUser))
+        } else {
+          const userData = await fetchClientSide<User>("GET", "/auth/me")
+          setCurrentUser(userData)
+          sessionStorage.setItem("user", JSON.stringify(userData))
+        }
+      } catch (error) {
+        console.error("Error fetching current user:", error)
+      }
+    })()
+  }, [])
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const userData = await fetchClientSide<User>("GET", `/users/id/${userId}?vehicle=orders,driver&workshop=true`)
+        const userData = await fetchClientSide<User>(
+          "GET",
+          `/users/id/${userId}?vehicle=orders,driver&workshop=true&branch=true`,
+        )
         setUser(userData)
       } catch (error) {
         console.error("Erro ao buscar usuário:", error)
@@ -152,6 +174,8 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
   const resume = maintenancesResume()
   const distribution = maintenanceTypeDistribution()
 
+  const canManageUsers = currentUser?.role === UserRoleEnum.ADMIN || currentUser?.role === UserRoleEnum.BRANCH_MANAGER
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
@@ -175,22 +199,24 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
               </div>
             </div>
           </div>
-          <div className="flex gap-2 ml-4">
-            <Link
-              href={`/team/${userId}/edit`}
-              className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white py-2 px-5 border rounded flex flex-row items-center justify-center"
-            >
-              <Edit className="mr-2 h-4 w-4" />
-              Editar
-            </Link>
-            <button
-              className="bg-rose-900 hover:bg-rose-800 text-white py-2 px-5 rounded flex flex-row items-center justify-center"
-              onClick={handleDeleteUser}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Excluir
-            </button>
-          </div>
+          {canManageUsers && (
+            <div className="flex gap-2 ml-4">
+              <Link
+                href={`/team/${userId}/edit`}
+                className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white py-2 px-5 border rounded flex flex-row items-center justify-center"
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Editar
+              </Link>
+              <button
+                className="bg-rose-900 hover:bg-rose-800 text-white py-2 px-5 rounded flex flex-row items-center justify-center"
+                onClick={handleDeleteUser}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Excluir
+              </button>
+            </div>
+          )}
         </header>
 
         <div defaultValue="info" className="space-y-6">

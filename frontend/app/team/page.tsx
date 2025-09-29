@@ -13,6 +13,24 @@ export default function TeamPage() {
   const [users, setUsers] = useState<User[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [activeFilter, setActiveFilter] = useState<UserRole | "ALL">("ALL")
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const cachedUser = sessionStorage.getItem("user")
+        if (cachedUser) {
+          setCurrentUser(JSON.parse(cachedUser))
+        } else {
+          const userData = await fetchClientSide<User>("GET", "/auth/me")
+          setCurrentUser(userData)
+          sessionStorage.setItem("user", JSON.stringify(userData))
+        }
+      } catch (error) {
+        console.error("Error fetching current user:", error)
+      }
+    })()
+  }, [])
 
   useEffect(() => {
     ;(async () => {
@@ -64,6 +82,8 @@ export default function TeamPage() {
     setActiveFilter(filter)
   }
 
+  const canAddUsers = currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.BRANCH_MANAGER
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
@@ -72,13 +92,15 @@ export default function TeamPage() {
             <h1 className="text-3xl font-bold text-white">Equipe</h1>
             <p className="text-gray-400 mt-1">Gerencie motoristas, administradores e gerentes de oficina</p>
           </div>
-          <button
-            onClick={handleOpenForm}
-            className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded text-sm"
-          >
-            <UserPlus className="mr-2 h-4 w-4" />
-            Novo Usuário
-          </button>
+          {canAddUsers && (
+            <button
+              onClick={handleOpenForm}
+              className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded text-sm"
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Novo Usuário
+            </button>
+          )}
         </header>
 
         {/* Barra de pesquisa e filtros */}
@@ -133,16 +155,6 @@ export default function TeamPage() {
               >
                 Gerentes de Oficina
               </button>
-              {/*<button
-                onClick={() => handleFilterChange("BRANCH_MANAGER")}
-                className={`px-3 py-1 rounded-full text-sm ${
-                  activeFilter === "BRANCH_MANAGER"
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                }`}
-              >
-                Gerentes de Filial
-              </button>*/}
             </div>
           </div>
         </div>

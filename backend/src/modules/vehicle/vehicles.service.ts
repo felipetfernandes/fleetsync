@@ -79,8 +79,9 @@ export class VehiclesService {
     });
   }
 
-  // MÉTODO UPDATE COMPLETAMENTE REESCRITO
+  // ✅ MÉTODO UPDATE COMPLETAMENTE REESCRITO
   async update(id: string, updateVehicleDto: UpdateVehicleDto) {
+ 
 
     // 1. Verificar se o veículo existe usando findFirst
     const existingVehicle = await this.prisma.vehicle.findFirst({
@@ -90,6 +91,7 @@ export class VehiclesService {
     if (!existingVehicle) {
       throw new NotFoundException('Veículo não encontrado');
     }
+
 
     // 2. Preparar os dados de atualização (sem relações)
     const { companyId, branchId, driverId, ...rest } = updateVehicleDto;
@@ -155,4 +157,48 @@ export class VehiclesService {
 
     return { message: "Veículo removido com sucesso" };
   }
+  
+  async setDriver(vehicleId: string, driverId: string | null) {
+  // Verificar se o veículo existe
+  const vehicle = await this.prisma.vehicle.findFirst({
+    where: { id: vehicleId }
+  });
+
+  if (!vehicle) {
+    throw new NotFoundException('Veículo não encontrado');
+  }
+
+  // Se estiver vinculando um motorista, verificar se ele existe e é um DRIVER
+  if (driverId) {
+    const user = await this.prisma.user.findFirst({
+      where: { 
+        id: driverId,
+        role: 'DRIVER'
+      }
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado ou não é um motorista');
+    }
+
+    // Verificar se o usuário já dirige outro veículo
+    const existingVehicle = await this.prisma.vehicle.findFirst({
+      where: { 
+        driverId: driverId,
+        NOT: { id: vehicleId }
+      }
+    });
+
+    if (existingVehicle) {
+      throw new ConflictException('Este motorista já está vinculado a outro veículo');
+    }
+  }
+
+  // Fazer o update
+  const updateResult = await this.prisma.vehicle.updateMany({
+  where: { id: vehicleId },
+  data: { driverId }
+ });
+}
+  
 }

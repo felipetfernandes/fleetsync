@@ -3,7 +3,7 @@ import {
   ConflictException,
   NotFoundException,
   Inject,
-  Logger, // Adicione esta importação
+  Logger,
 } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
@@ -16,13 +16,13 @@ import { getUserInclude } from "src/utils/includes/user.includes";
 
 @Injectable()
 export class UsersService {
-  private readonly logger = new Logger(UsersService.name); // Adicione esta linha
+  private readonly logger = new Logger(UsersService.name);
 
   constructor(
     @Inject(TENANT_PRISMA_CLIENT) private readonly prisma: ExtendedTenantClient
   ) {}
 
-async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
     // Verificar se o email já existe
     const existingUser = await this.prisma.user.findFirst({
       where: { email: createUserDto.email },
@@ -108,10 +108,24 @@ async create(createUserDto: CreateUserDto) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10)
     }
 
-    const updatedUser = await this.prisma.user.update({
+    // Usar updateMany para evitar problemas com multi-tenant
+    const updateResult = await this.prisma.user.updateMany({
       where: { id },
       data: updateUserDto,
     })
+
+    if (updateResult.count === 0) {
+      throw new NotFoundException('Usuário não encontrado')
+    }
+
+    // Buscar o usuário atualizado para retornar
+    const updatedUser = await this.prisma.user.findFirst({
+      where: { id },
+    })
+
+    if (!updatedUser) {
+      throw new NotFoundException('Usuário não encontrado')
+    }
 
     const { password, ...result } = updatedUser
     return result
@@ -133,7 +147,8 @@ async create(createUserDto: CreateUserDto) {
 
       // Se o usuário é um driver, remover a associação do veículo
       if (user.vehicle) {
-        await this.prisma.vehicle.update({
+        // Usar updateMany para evitar problemas com multi-tenant
+        await this.prisma.vehicle.updateMany({
           where: { id: user.vehicle.id },
           data: { driverId: null },
         })
@@ -141,12 +156,14 @@ async create(createUserDto: CreateUserDto) {
 
       // Se o usuário é um manager de oficina, remover a associação
       if (user.workshop) {
-        await this.prisma.workshop.update({
+        // Usar updateMany para evitar problemas com multi-tenant
+        await this.prisma.workshop.updateMany({
           where: { id: user.workshop.id },
           data: { managerId: null },
         })
       }
 
+      // Deletar o usuário
       await this.prisma.user.delete({
         where: { id },
       })

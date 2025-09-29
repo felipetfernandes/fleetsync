@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Put,
+  Patch,
   UseGuards,
   Req,
   Query,
@@ -115,4 +116,16 @@ export class WorkshopController {
     const { companyId } = req.user;
     return this.workshopService.remove({ id, companyId });
   }
+   @Patch(":id/manager")
+ @UseGuards(JwtAuthGuard, TenantClsGuard)
+ @ApiBearerAuth()
+ @ApiOperation({ summary: "Vincular ou desvincular gerente da oficina" })
+ @ApiResponse({ status: 200, description: "Gerente vinculado com sucesso" })
+ @ApiResponse({ status: 404, description: "Oficina ou usuário não encontrado" })
+ async setManager(
+  @Param("id") id: string,
+  @Body() body: { managerId: string | null }
+ ) {
+  return this.workshopService.setManager(id, body.managerId);
+}
 }

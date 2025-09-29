@@ -135,6 +135,7 @@ export default function BranchDetailPage({
       drivers: users.filter((u) => u.role === UserRole.DRIVER).length,
       managers: users.filter((u) => u.role === UserRole.BRANCH_MANAGER).length,
       admins: users.filter((u) => u.role === UserRole.ADMIN).length,
+      workshopManagers: users.filter((u) => u.role === UserRole.WORKSHOP_MANAGER).length,
     }
 
     // Estatísticas de oficinas
@@ -699,14 +700,18 @@ export default function BranchDetailPage({
                                 ? "bg-blue-900/30 text-blue-400"
                                 : user.role === UserRole.BRANCH_MANAGER
                                   ? "bg-emerald-900/30 text-emerald-400"
-                                  : "bg-purple-900/30 text-purple-400"
+                                  : user.role === UserRole.WORKSHOP_MANAGER
+                                    ? "bg-amber-900/30 text-amber-400"
+                                    : "bg-purple-900/30 text-purple-400"
                             }`}
                           >
                             {user.role === UserRole.DRIVER
                               ? "Motorista"
                               : user.role === UserRole.BRANCH_MANAGER
                                 ? "Gerente de Filial"
-                                : "Administrador"}
+                                : user.role === UserRole.WORKSHOP_MANAGER
+                                  ? "Gerente de Oficina"
+                                  : "Administrador"}
                           </div>
                         </div>
                       </div>

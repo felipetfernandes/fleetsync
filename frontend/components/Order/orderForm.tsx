@@ -1,22 +1,35 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { useEffect, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Branch, OrderItemForm, Vehicle, Workshop } from "@/types/types";
-import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants";
-import { fetchClientSide } from "@/lib/utils/fetchClientSide";
+import { useEffect, useState } from "react"
+import { Input } from "@/components/ui/input"
+import type { Branch, OrderItemForm, Vehicle, Workshop } from "@/types/types"
+import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants"
+import { fetchClientSide } from "@/lib/utils/fetchClientSide"
 
 const serviceTypes = {
   PREVENTIVE: "Manutenção Preventiva",
   CORRECTIVE: "Manutenção Corretiva",
   PERIODIC: "Manutenção Periódica",
-};
+}
 
 interface OrderFormProps {
-  onSubmit: (data: any) => void;
-  onCancel: () => void;
+  onSubmit: (data: any) => void
+  onCancel: () => void
+}
+
+const formatCurrency = (value: string): string => {
+  // Remove tudo exceto números
+  const numbers = value.replace(/\D/g, "")
+
+  if (!numbers) return ""
+
+  // Converte para número e divide por 100 para ter os centavos
+  const amount = Number.parseInt(numbers, 10) / 100
+
+  // Formata com vírgula para centavos
+  return amount.toFixed(2).replace(".", ",")
 }
 
 export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
@@ -28,90 +41,91 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
     workshopId: "",
     branchId: "",
     status: "IN_PROGRESS",
-  });
+  })
 
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [workshops, setWorkshops] = useState<Workshop[]>([]);
-  const [branchs, setBranchs] = useState<Branch[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [workshops, setWorkshops] = useState<Workshop[]>([])
+  const [branchs, setBranchs] = useState<Branch[]>([])
 
   const [formItems, setformItems] = useState<OrderItemForm[]>([
     { id: crypto.randomUUID(), description: "", cost: "", laborCost: "" },
-  ]);
+  ])
 
   useEffect(() => {
-    (async () => {
-      const data = await fetchClientSide<Branch[]>("GET", `/branchs`);
+    ;(async () => {
+      const data = await fetchClientSide<Branch[]>("GET", `/branchs`)
 
-      setFormData((prev) => ({ ...prev, branchId: String(data[0].id) }));
-      setBranchs(data);
-    })();
-  }, []);
+      setFormData((prev) => ({ ...prev, branchId: String(data[0].id) }))
+      setBranchs(data)
+    })()
+  }, [])
 
   useEffect(() => {
-    if (!formData.branchId) return;
+    if (!formData.branchId) return
 
     const fetchData = async () => {
       try {
         const [vehiclesData, workshopsData] = await Promise.all([
-          fetchClientSide<Vehicle[]>(
-            "GET",
-            `/vehicles?branchId=${formData.branchId}`
-          ),
-          fetchClientSide<Workshop[]>(
-            "GET",
-            `/workshops?branchId=${formData.branchId}`
-          ),
-        ]);
+          fetchClientSide<Vehicle[]>("GET", `/vehicles?branchId=${formData.branchId}`),
+          fetchClientSide<Workshop[]>("GET", `/workshops?branchId=${formData.branchId}`),
+        ])
 
         setFormData((prev) => ({
           ...prev,
           vehicleId: String(vehiclesData[0].id),
           workshopId: String(workshopsData[0].id),
-        }));
-        setVehicles(vehiclesData);
-        setWorkshops(workshopsData);
+        }))
+        setVehicles(vehiclesData)
+        setWorkshops(workshopsData)
       } catch (err) {
-        console.error(err);
+        console.error(err)
       }
-    };
+    }
 
-    fetchData();
-  }, [formData.branchId]);
+    fetchData()
+  }, [formData.branchId])
 
-  const handleItemChange = (
-    id: string,
-    field: keyof Omit<OrderItemForm, "id">,
-    value: string
-  ) => {
-    setformItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
-    );
-  };
+  const handleItemChange = (id: string, field: keyof Omit<OrderItemForm, "id">, value: string) => {
+    let formattedValue = value
+
+    // Formata valores monetários
+    if (field === "cost" || field === "laborCost") {
+      formattedValue = formatCurrency(value)
+    }
+
+    setformItems((prev) => prev.map((item) => (item.id === id ? { ...item, [field]: formattedValue } : item)))
+  }
 
   const handleAddItem = () => {
-    setformItems((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), description: "", cost: "", laborCost: "" },
-    ]);
-  };
+    setformItems((prev) => [...prev, { id: crypto.randomUUID(), description: "", cost: "", laborCost: "" }])
+  }
 
   const handleRemoveItem = (id: string) => {
-    setformItems((prev) => prev.filter((item) => item.id !== id));
-  };
+    setformItems((prev) => prev.filter((item) => item.id !== id))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     const items = formItems.map((item) => {
-      const cost = parseFloat(item.cost.replace(",", "."));
-      const laborCost = parseFloat(item.laborCost.replace(",", "."));
+      const cost = Number.parseFloat(item.cost.replace(",", "."))
+      const laborCost = Number.parseFloat(item.laborCost.replace(",", "."))
       return {
         description: item.description,
         cost,
         laborCost,
         totalCost: cost + laborCost,
-      };
-    });
+      }
+    })
+
+    const payload = {
+      ...formData,
+      branchId: Number(formData.branchId), // Convert to number
+      items,
+      startDate: new Date().toISOString(),
+    }
+
+    console.log("[v0] Order creation payload:", payload)
 
     const res = await fetch(`${NEXT_PUBLIC_LOCAL_URL}/orders`, {
       method: "POST",
@@ -119,35 +133,35 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        ...formData,
-        items,
-        startDate: new Date().toISOString(),
-      }),
-    });
+      body: JSON.stringify(payload),
+    })
 
-    if (!res.ok) throw new Error("Erro ao criar ordem de serviço");
-    onSubmit(res);
-  };
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}))
+      console.error("[v0] Order creation failed:", errorData)
+      throw new Error("Erro ao criar ordem de serviço")
+    }
+
+    onSubmit(res)
+  }
 
   useEffect(() => {
+    const total = formItems.reduce((acc, item) => {
+      const cost = Number.parseFloat(item.cost.replace(",", ".")) || 0
+      const laborCost = Number.parseFloat(item.laborCost.replace(",", ".")) || 0
+      return acc + cost + laborCost
+    }, 0)
+
     setFormData((prev) => ({
       ...prev,
-      totalCost: formItems.reduce(
-        (acc, item) => acc + Number(item.cost) + Number(item.laborCost),
-        0
-      ),
-    }));
-  }, [formItems]);
+      totalCost: total,
+    }))
+  }, [formItems])
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
   return (
     <form
@@ -177,9 +191,7 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
             name="type"
             onChange={handleChange}
           >
-            {(
-              Object.keys(serviceTypes) as Array<keyof typeof serviceTypes>
-            ).map((type) => (
+            {(Object.keys(serviceTypes) as Array<keyof typeof serviceTypes>).map((type) => (
               <option key={type} value={type}>
                 {serviceTypes[type]}
               </option>
@@ -215,7 +227,7 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
             className="bg-gray-800 border-gray-700 p-2 rounded border"
           >
             {vehicles.map((vehicle) => (
-              <option key={vehicle.plate} value={vehicle.plate}>
+              <option key={vehicle.plate} value={vehicle.id}>
                 {vehicle.plate} - {vehicle.brand} {vehicle.model}
               </option>
             ))}
@@ -259,10 +271,7 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
       </div>
 
       {formItems.map((item, index) => (
-        <div
-          key={item.id}
-          className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end"
-        >
+        <div key={item.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
           <div className="md:col-span-5 space-y-2 flex flex-col">
             <label htmlFor={`desc-${item.id}`} className="-mb-2">
               Descrição do item
@@ -270,9 +279,7 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
             <Input
               id={`desc-${item.id}`}
               value={item.description}
-              onChange={(e) =>
-                handleItemChange(item.id, "description", e.target.value)
-              }
+              onChange={(e) => handleItemChange(item.id, "description", e.target.value)}
               placeholder={`Item ${index + 1}`}
               className="bg-gray-800 border-gray-700"
               required
@@ -286,12 +293,11 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
             <Input
               id={`cost-${item.id}`}
               value={item.cost}
-              onChange={(e) =>
-                handleItemChange(item.id, "cost", e.target.value)
-              }
+              onChange={(e) => handleItemChange(item.id, "cost", e.target.value)}
               placeholder="0,00"
               className="bg-gray-800 border-gray-700"
               required
+              inputMode="numeric"
             />
           </div>
 
@@ -302,12 +308,11 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
             <Input
               id={`labor-${item.id}`}
               value={item.laborCost}
-              onChange={(e) =>
-                handleItemChange(item.id, "laborCost", e.target.value)
-              }
+              onChange={(e) => handleItemChange(item.id, "laborCost", e.target.value)}
               placeholder="0,00"
               className="bg-gray-800 border-gray-700"
               required
+              inputMode="numeric"
             />
           </div>
 
@@ -344,11 +349,10 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
         <button
           type="submit"
           className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded text-sm"
-          onSubmit={onSubmit}
         >
           Salvar Ordem
         </button>
       </div>
     </form>
-  );
+  )
 }

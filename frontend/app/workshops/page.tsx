@@ -4,12 +4,25 @@ import { useEffect, useState } from "react"
 import { PlusCircle, X } from "lucide-react"
 import WorkshopForm from "@/components/Workshops/workshopForm"
 import WorkshopCard from "@/components/Workshops/workshopCard"
-import type { Workshop } from "@/types/types"
+import type { Workshop, User } from "@/types/types"
 import { fetchClientSide } from "@/lib/utils/fetchClientSide"
+import { UserRole } from "@/types/enums"
 
 export default function WorkshopsPage() {
   const [showForm, setShowForm] = useState(false)
   const [workshops, setWorkshops] = useState<Workshop[]>([])
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const cachedUser = localStorage.getItem("user")
+    if (cachedUser) {
+      setCurrentUser(JSON.parse(cachedUser))
+    } else {
+      fetchClientSide<User>("GET", "/user/me").then((userData) => {
+        setCurrentUser(userData)
+      })
+    }
+  }, [])
 
   const loadWorkshops = async () => {
     const data = await fetchClientSide<Workshop[]>("GET", `/workshops`)
@@ -33,6 +46,13 @@ export default function WorkshopsPage() {
     await loadWorkshops() // Recarrega a lista de oficinas
   }
 
+  const filteredWorkshops =
+    currentUser?.role === UserRole.WORKSHOP_MANAGER && currentUser?.workshop
+      ? workshops.filter((w) => w.id === currentUser.workshop?.id)
+      : workshops
+
+  const canAddWorkshop = currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.BRANCH_MANAGER
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
@@ -41,13 +61,15 @@ export default function WorkshopsPage() {
             <h1 className="text-3xl font-bold text-white">Oficinas Cadastradas</h1>
             <p className="text-gray-400 mt-1">Gerencie as oficinas parceiras e acompanhe as manutenções</p>
           </div>
-          <button
-            onClick={handleOpenForm}
-            className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded text-sm"
-          >
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Nova Oficina
-          </button>
+          {canAddWorkshop && (
+            <button
+              onClick={handleOpenForm}
+              className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-gray-100 p-2 rounded text-sm"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Nova Oficina
+            </button>
+          )}
         </header>
 
         {showForm ? (
@@ -66,7 +88,7 @@ export default function WorkshopsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-6">
-            {workshops.map((workshop) => (
+            {filteredWorkshops.map((workshop) => (
               <WorkshopCard key={workshop.id} workshop={workshop} />
             ))}
           </div>

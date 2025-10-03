@@ -1,9 +1,8 @@
-import { Order, Vehicle } from "@/types/types";
-import { Building, Calendar, Car, User, Wrench } from "lucide-react";
-import Link from "next/link";
-import React from "react";
-import { StatusBadge } from "../ui/statusBadge";
-import { formatCurrency, formatDate } from "@/lib/utils/formatFunctions";
+import type { Order, Vehicle } from "@/types/types"
+import { Building, Calendar, Car, Wrench, CheckCircle } from "lucide-react"
+import Link from "next/link"
+import { StatusBadge } from "../ui/statusBadge"
+import { formatCurrency, formatDate } from "@/lib/utils/formatFunctions"
 
 function OrderCard({ order, vehicle }: { order: Order; vehicle: Vehicle }) {
   return (
@@ -38,23 +37,25 @@ function OrderCard({ order, vehicle }: { order: Order; vehicle: Vehicle }) {
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1 md:min-w-[150px]">
-                <div className="text-lg font-semibold text-emerald-400">
-                  {formatCurrency(order.totalCost)}
-                </div>
+                <div className="text-lg font-semibold text-emerald-400">{formatCurrency(order.totalCost)}</div>
                 <div className="flex items-center text-sm text-gray-400">
                   <Calendar className="h-3 w-3 mr-1" />
                   {formatDate(order.createdAt)}
                 </div>
-                <div className="text-xs text-gray-500">
-                  Criado em: {formatDate(order.createdAt)}
-                </div>
+                {order.endDate && (
+                  <div className="flex items-center text-xs text-emerald-400">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Concluído: {formatDate(order.endDate)}
+                  </div>
+                )}
+                <div className="text-xs text-gray-500">Criado: {formatDate(order.createdAt)}</div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </Link>
-  );
+  )
 }
 
-export default OrderCard;
+export default OrderCard

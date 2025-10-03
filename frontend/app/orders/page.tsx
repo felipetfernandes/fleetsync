@@ -1,27 +1,30 @@
-"use client";
+"use client"
 
-import { Search, PlusCircle } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import OrderCard from "@/components/Order/orderCard";
-import OrderForm from "@/components/Order/orderForm";
-import { useEffect, useState } from "react";
-import { Order } from "@/types/types";
-import { fetchClientSide } from "@/lib/utils/fetchClientSide";
+import { Search, PlusCircle } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import OrderCard from "@/components/Order/orderCard"
+import OrderForm from "@/components/Order/orderForm"
+import { useEffect, useState } from "react"
+import type { Order } from "@/types/types"
+import { fetchClientSide } from "@/lib/utils/fetchClientSide"
 
 export default function OrdersPage() {
-  const [showForm, setShowForm] = useState(false);
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [showForm, setShowForm] = useState(false)
+  const [orders, setOrders] = useState<Order[]>([])
+
+  const fetchOrders = async () => {
+    const data = await fetchClientSide<Order[]>("GET", `/orders?vehicle=driver&branch=true&workshop=true`)
+    setOrders(data)
+  }
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      const data = await fetchClientSide<Order[]>(
-        "GET",
-        `/orders?vehicle=driver&branch=true&workshop=true`
-      );
-      setOrders(data);
-    };
-    fetchOrders();
-  }, []);
+    fetchOrders()
+  }, [])
+
+  const handleOrderSubmit = async () => {
+    setShowForm(false)
+    await fetchOrders() // Refetch orders to update the list
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
@@ -29,9 +32,7 @@ export default function OrdersPage() {
         <header className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white">Ordens de Serviço</h1>
-            <p className="text-gray-400 mt-1">
-              Gerencie e acompanhe todas as ordens de manutenção
-            </p>
+            <p className="text-gray-400 mt-1">Gerencie e acompanhe todas as ordens de manutenção</p>
           </div>
           <div className="flex items-center gap-2">
             <div className="relative w-full md:w-64">
@@ -47,21 +48,14 @@ export default function OrdersPage() {
             Nova Orden
           </button>
         </header>
-        {showForm && (
-          <OrderForm
-            onCancel={() => setShowForm(false)}
-            onSubmit={() => setShowForm(false)}
-          />
-        )}
+        {showForm && <OrderForm onCancel={() => setShowForm(false)} onSubmit={handleOrderSubmit} />}
         <div className="space-y-4">
           {orders.length === 0 ? (
             <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-800">
                 <Search className="h-6 w-6 text-gray-400" />
               </div>
-              <h3 className="mt-4 text-lg font-medium text-white">
-                Nenhuma ordem encontrada
-              </h3>
+              <h3 className="mt-4 text-lg font-medium text-white">Nenhuma ordem encontrada</h3>
               <p className="mt-2 text-sm text-gray-400">
                 Tente ajustar seus filtros ou criar uma nova ordem de serviço.
               </p>
@@ -80,12 +74,12 @@ export default function OrdersPage() {
                     statusInfo={{ icon: "", color: "" }}
                     vehicle={order.vehicle}
                   />
-                );
+                )
               })}
             </div>
           )}
         </div>
       </div>
     </div>
-  );
+  )
 }

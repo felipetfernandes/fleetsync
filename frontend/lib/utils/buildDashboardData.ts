@@ -96,6 +96,17 @@ export function buildDashboardData({
       }))
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()),
 
+    _completed: enrichedOrders
+      .filter((item) => item.status === "COMPLETED" && item.endDate)
+      .map((item) => ({
+        vehiclePlate: item.vehiclePlate,
+        description: item.description,
+        endDate: item.endDate,
+        totalCost: item.totalCost,
+        workshopName: item.workshopName,
+      }))
+      .sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime()),
+
     _ordersByVehicle: groupOrdersByVehicle(enrichedOrders),
   }
 }

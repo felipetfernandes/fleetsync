@@ -252,6 +252,28 @@ export class OrderService {
 
       this.logger.log("Update successful, fetching updated order...")
 
+      if (updateOrderDto.status) {
+        const vehicleId = existingOrder.vehicleId
+
+        if (updateOrderDto.status === "COMPLETED" || updateOrderDto.status === "CANCELLED") {
+          // Ordem finalizada ou cancelada - veículo volta para AVAILABLE
+          this.logger.log(`Updating vehicle ${vehicleId} status to AVAILABLE (order ${updateOrderDto.status})`)
+          await this.prisma.vehicle.updateMany({
+            where: { id: vehicleId },
+            data: { status: "AVAILABLE" },
+          })
+          this.logger.log(`Vehicle status updated to AVAILABLE`)
+        } else if (updateOrderDto.status === "IN_PROGRESS") {
+          // Ordem em progresso - veículo vai para MAINTENANCE
+          this.logger.log(`Updating vehicle ${vehicleId} status to MAINTENANCE`)
+          await this.prisma.vehicle.updateMany({
+            where: { id: vehicleId },
+            data: { status: "MAINTENANCE" },
+          })
+          this.logger.log(`Vehicle status updated to MAINTENANCE`)
+        }
+      }
+
       // Buscar a ordem atualizada com todos os relacionamentos
       const updatedOrder = await this.prisma.order.findFirst({
         where: { id },

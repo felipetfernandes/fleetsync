@@ -40,7 +40,7 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
     vehicleId: "",
     workshopId: "",
     branchId: "",
-    status: "IN_PROGRESS",
+    status: "PENDING",
   })
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
@@ -108,8 +108,8 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
     e.preventDefault()
 
     const items = formItems.map((item) => {
-      const cost = Number.parseFloat(item.cost.replace(",", "."))
-      const laborCost = Number.parseFloat(item.laborCost.replace(",", "."))
+      const cost = Number.parseFloat(item.cost.replace(",", ".")) || 0
+      const laborCost = Number.parseFloat(item.laborCost.replace(",", ".")) || 0
       return {
         description: item.description,
         cost,

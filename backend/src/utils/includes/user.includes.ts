@@ -32,6 +32,18 @@ export function getUserInclude(query: any): Prisma.UserInclude {
     if (workshopIncludes.includes("manager")) {
       nestedWorkshopInclude.manager = true;
     }
+	
+    if (workshopIncludes.includes("company")) {
+      nestedWorkshopInclude.company = true;
+    }
+    
+    if (workshopIncludes.includes("branch")) {
+      nestedWorkshopInclude.branch = true;
+    }
+    
+    if (workshopIncludes.includes("orders")) {
+      nestedWorkshopInclude.orders = true;
+    }
     include.workshop = { include: nestedWorkshopInclude };
   }
 

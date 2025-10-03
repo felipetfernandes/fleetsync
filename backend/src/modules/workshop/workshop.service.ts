@@ -10,6 +10,7 @@ import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
 import { WorkshopQueryDto } from "./dto/workshop-query.dto";
 import { getWorkshopInclude } from "src/utils/includes/workshop.includes";
+import { UserRole } from "@prisma/client";
 
 @Injectable()
 export class WorkshopService {
@@ -17,19 +18,39 @@ export class WorkshopService {
     @Inject(TENANT_PRISMA_CLIENT) private readonly prisma: ExtendedTenantClient
   ) {}
 
-  async findAll(query: WorkshopQueryDto) {
-    const include = getWorkshopInclude(query)
-    const where: any = {}
+// workshop/workshop.service.ts
 
-    if (query.branchId) {
-      where.branch = { id: Number(query.branchId) }
-    }
+async findAll(query: WorkshopQueryDto & { userId?: string; userRole?: UserRole; userBranchId?: number }) {
 
-    return await this.prisma.workshop.findMany({
-      include,
-      where,
-    })
+  const include = getWorkshopInclude(query)
+  const where: any = {}
+
+  // 1. Se for WORKSHOP_MANAGER, só mostra a oficina que ele gerencia
+  if (query.userRole === UserRole.WORKSHOP_MANAGER && query.userId) {
+    where.managerId = query.userId;
   }
+  
+  // 2. Se for BRANCH_MANAGER, mostra todas as oficinas da filial dele
+  else if (query.userRole === UserRole.BRANCH_MANAGER && query.userBranchId) {
+    where.branchId = query.userBranchId;
+  }
+  
+  // 3. Se for ADMIN, mostra todas (sem filtro adicional)
+  else {
+  }
+
+  // 4. Se vier branchId na query, sobrescreve
+  if (query.branchId) {
+    where.branchId = Number(query.branchId);
+  }
+
+  const workshops = await this.prisma.workshop.findMany({
+    include,
+    where,
+  })
+
+  return workshops;
+}
 
   async findManyByBranch(query: WorkshopQueryDto) {
     const include = getWorkshopInclude(query)

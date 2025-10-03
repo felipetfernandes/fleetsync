@@ -21,8 +21,19 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException("Credenciais inválidas");
     }
+
+    const payload = {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      companyId: user.companyId,
+      branchId: user.branchId,
+    };
+
+
     return {
-      access_token: this.jwtService.sign(user),
+      access_token: this.jwtService.sign(payload), 
+      user,
     };
   }
 }

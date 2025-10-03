@@ -27,6 +27,8 @@ import { WorkshopQueryDto } from "./dto/workshop-query.dto";
 interface JwtPayload {
   userId: string;
   companyId: string;
+  role?: string;
+  branchId?: number;
 }
 
 @ApiTags("workshops")
@@ -38,8 +40,15 @@ export class WorkshopController {
   @UseGuards(JwtAuthGuard, TenantClsGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Listar todos as oficinas" })
-  findAll(@Query() query: WorkshopQueryDto) {
-    return this.workshopService.findAll(query);
+  findAll(@Query() query: WorkshopQueryDto, @Req() req) {
+    const { userId, role, branchId } = req.user;
+
+    return this.workshopService.findAll({ 
+      ...query, 
+      userId, 
+      userRole: role,
+      userBranchId: branchId,
+    });
   }
 
   @Get("vehicles")
@@ -80,7 +89,6 @@ export class WorkshopController {
     return this.workshopService.create({ ...createWorkshopDto, companyId });
   }
 
-  // SIMPLIFICADO: Endpoint público para registro sem criar usuário
   @Post("register")
   @ApiOperation({ summary: "Registrar uma nova oficina (público)" })
   @ApiResponse({ 

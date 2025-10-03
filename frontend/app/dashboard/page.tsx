@@ -8,9 +8,12 @@ import CostByMaintenancyStatus from "@/components/charts/costByMaintenancyStatus
 import { CostByBranch } from "@/components/charts/costByBranch"
 import { DataTable } from "@/components/ui/dataTable"
 import { ordersInProgress } from "@/components/columns/ordersInProgress"
+import { ordersCompleted } from "@/components/columns/ordersCompleted"
 import { groupedOrdersByVehicle } from "@/components/columns/groupedOrdersByVehicle"
 import { formatCurrency } from "@/lib/utils/formatFunctions"
 import { buildDashboardData } from "@/lib/utils/buildDashboardData"
+
+export const dynamic = "force-dynamic"
 
 export default async function DashboardPage() {
   const [company] = await fetchServerSide<Company[]>(
@@ -136,6 +139,9 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
           {/* Ordens em Andamento */}
           <DataTable columns={ordersInProgress} data={dashboardData._inProgress} header="Ordens em Andamento" />
+
+          {/* Ordens Concluídas */}
+          <DataTable columns={ordersCompleted} data={dashboardData._completed} header="Ordens Concluídas" />
 
           {/* Ordens por Veículo */}
           <DataTable

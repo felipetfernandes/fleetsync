@@ -44,11 +44,11 @@ export default function OrderDetailPage({ params }: PageProps) {
       setShowStatusModal(false)
       setSelectedStatus(null)
 
-      // Opcional: mostrar uma mensagem de sucesso
+      router.refresh()
+
       console.log("Status atualizado com sucesso!")
     } catch (error) {
       console.error("Erro ao atualizar status:", error)
-      // Opcional: mostrar uma mensagem de erro
     } finally {
       setUpdatingStatus(false)
     }

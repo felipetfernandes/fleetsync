@@ -1,7 +1,8 @@
+"use client"
+
 import Link from "next/link"
 import { Car, Wrench, ClipboardList, TrendingUp, BarChart3, ArrowUpRight, KeyRound, AlertTriangle } from "lucide-react"
 import type { Company } from "@/types/types"
-import { fetchServerSide } from "@/lib/utils/fetchServerSide"
 import MonthlyMaintenance from "@/components/charts/monthlyMaintenance"
 import MaintenanceByType from "@/components/charts/maintenanceByType"
 import CostByMaintenancyStatus from "@/components/charts/costByMaintenancyStatus"
@@ -12,14 +13,44 @@ import { ordersCompleted } from "@/components/columns/ordersCompleted"
 import { groupedOrdersByVehicle } from "@/components/columns/groupedOrdersByVehicle"
 import { formatCurrency } from "@/lib/utils/formatFunctions"
 import { buildDashboardData } from "@/lib/utils/buildDashboardData"
+import useSWR from "swr"
+import { fetchClientSide } from "@/lib/utils/fetchClientSide"
 
-export const dynamic = "force-dynamic"
-
-export default async function DashboardPage() {
-  const [company] = await fetchServerSide<Company[]>(
+const fetcher = async () => {
+  const [company] = await fetchClientSide<Company[]>(
     "GET",
     `/company?orders=vehicle,workshop,branch&vehicles=driver&workshops=orders`,
   )
+  return company
+}
+
+export default function DashboardPage() {
+  const {
+    data: company,
+    error,
+    isLoading,
+  } = useSWR("/api/dashboard", fetcher, {
+    revalidateOnFocus: true, // Refetch when window regains focus
+    refreshInterval: 30000, // Auto-refresh every 30 seconds
+    dedupingInterval: 5000, // Prevent duplicate requests within 5 seconds
+  })
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-gray-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    )
+  }
+
+  if (error || !company) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-gray-950 text-red-500">
+        <p>Erro ao carregar dados do dashboard</p>
+      </div>
+    )
+  }
+
   const { vehicles, orders, workshops } = company
 
   const dashboardData = buildDashboardData({

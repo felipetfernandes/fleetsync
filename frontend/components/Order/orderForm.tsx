@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import type { Branch, OrderItemForm, Vehicle, Workshop } from "@/types/types"
 import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants"
 import { fetchClientSide } from "@/lib/utils/fetchClientSide"
+import { mutate } from "swr"
 
 const serviceTypes = {
   PREVENTIVE: "Manutenção Preventiva",
@@ -141,6 +142,8 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
       console.error("[v0] Order creation failed:", errorData)
       throw new Error("Erro ao criar ordem de serviço")
     }
+
+    mutate("/api/dashboard")
 
     onSubmit(res)
   }

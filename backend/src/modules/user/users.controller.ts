@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  Req,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -34,6 +35,22 @@ export class UsersController {
   @ApiResponse({ status: 409, description: "Email já está em uso" })
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
+  }
+  
+  @Get("me")
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Buscar usuário logado com suas relações" })
+  @ApiResponse({ status: 200, description: "Usuário encontrado" })
+  findMe(@Req() req) {
+    const { userId } = req.user;
+    
+    const query: UserQueryDto = {
+      branch: true,
+      company: true,
+      workshop: "manager,company,branch",
+    };
+    
+    return this.usersService.findOne({ id: userId, query });
   }
 
   @ApiBearerAuth()

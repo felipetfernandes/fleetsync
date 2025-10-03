@@ -36,38 +36,38 @@ export default function WorkshopDetailPage({
   const [orders, setOrders] = useState<Order[]>([])
   const [vehiclesInMaintenance, setVehiclesInMaintenance] = useState<Vehicle[]>([])
 
+  const fetchWorkshop = async () => {
+    try {
+      const data = await fetchClientSide<Workshop>("GET", `/workshops/${workshopId}?manager=true`)
+      setWorkshop(data)
+    } catch (error) {
+      console.error("Erro ao buscar oficina:", error)
+      // redirecionar para login se necessário
+    }
+  }
+
+  const fetchOrders = async () => {
+    try {
+      const data = await fetchClientSide<Order[]>(
+        "GET",
+        `/orders?workshopId=${workshopId}&vehicle=true`, // Adicione o include do vehicle
+      )
+      if (data.length > 0) setOrders(data)
+    } catch (error) {
+      console.error("Erro ao buscar ordens de serviço:", error)
+    }
+  }
+
+  const fetchVehiclesInMaintenance = async () => {
+    try {
+      const data = await fetchClientSide<Vehicle[]>("GET", `/workshops/${workshopId}/vehicles`)
+      if (data.length > 0) setVehiclesInMaintenance(data)
+    } catch (error) {
+      console.error("Erro ao buscar veículos em manutenção:", error)
+    }
+  }
+
   useEffect(() => {
-    const fetchWorkshop = async () => {
-      try {
-        const data = await fetchClientSide<Workshop>("GET", `/workshops/${workshopId}?manager=true`)
-        setWorkshop(data)
-      } catch (error) {
-        console.error("Erro ao buscar oficina:", error)
-        // redirecionar para login se necessário
-      }
-    }
-
-    const fetchOrders = async () => {
-      try {
-        const data = await fetchClientSide<Order[]>(
-          "GET",
-          `/orders?workshopId=${workshopId}&vehicle=true`, // Adicione o include do vehicle
-        )
-        if (data.length > 0) setOrders(data)
-      } catch (error) {
-        console.error("Erro ao buscar ordens de serviço:", error)
-      }
-    }
-
-    const fetchVehiclesInMaintenance = async () => {
-      try {
-        const data = await fetchClientSide<Vehicle[]>("GET", `/workshops/${workshopId}/vehicles`)
-        if (data.length > 0) setVehiclesInMaintenance(data)
-      } catch (error) {
-        console.error("Erro ao buscar veículos em manutenção:", error)
-      }
-    }
-
     fetchWorkshop()
     fetchOrders()
     fetchVehiclesInMaintenance()
@@ -88,6 +88,12 @@ export default function WorkshopDetailPage({
       // O usuário cancelou a exclusão, nada acontece
       console.log("Exclusão da oficina cancelada pelo usuário.")
     }
+  }
+
+  const handleOrderSubmit = async () => {
+    setShowForm(false)
+    await fetchOrders() // Refetch orders to update the list
+    await fetchVehiclesInMaintenance() // Also update vehicles in maintenance
   }
 
   // Calcular a distribuição de tipos de manutenção
@@ -486,7 +492,7 @@ export default function WorkshopDetailPage({
                 </button>
               </div>
 
-              {showForm && <OrderForm onCancel={() => setShowForm(false)} onSubmit={() => setShowForm(false)} />}
+              {showForm && <OrderForm onCancel={() => setShowForm(false)} onSubmit={handleOrderSubmit} />}
 
               {/* Filtros de status */}
               <div className="flex flex-wrap gap-2">

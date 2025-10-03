@@ -75,21 +75,20 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
     })()
   }, [])
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userData = await fetchClientSide<User>(
-          "GET",
-          `/users/id/${userId}?vehicle=orders,driver&workshop=true&branch=true`,
-        )
-        setUser(userData)
-      } catch (error) {
-        console.error("Erro ao buscar usuário:", error)
-        // redirecionar para login se necessário
-      }
+  const fetchUserData = async () => {
+    try {
+      const userData = await fetchClientSide<User>(
+        "GET",
+        `/users/id/${userId}?vehicle=orders,driver&workshop=true&branch=true`,
+      )
+      setUser(userData)
+    } catch (error) {
+      console.error("Erro ao buscar usuário:", error)
     }
+  }
 
-    fetchUser()
+  useEffect(() => {
+    fetchUserData()
   }, [])
 
   const handleDeleteUser = async () => {
@@ -106,6 +105,11 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
     } else {
       console.log("Exclusão do usuário cancelada.")
     }
+  }
+
+  const handleOrderSubmit = async () => {
+    setShowOrderForm(false)
+    await fetchUserData() // Refetch user data including vehicle orders
   }
 
   // Funções de cálculo de estatísticas (adaptadas de VehicleDetailPage)
@@ -377,12 +381,7 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
                 )}
               </div>
 
-              {showOrderForm && (
-                <OrderForm
-                  onCancel={() => setShowOrderForm(false)}
-                  onSubmit={() => setShowOrderForm(false)} // Idealmente, deveria recarregar as ordens
-                />
-              )}
+              {showOrderForm && <OrderForm onCancel={() => setShowOrderForm(false)} onSubmit={handleOrderSubmit} />}
 
               <div className="space-y-4">
                 {user?.vehicle?.orders.length === 0 ? (

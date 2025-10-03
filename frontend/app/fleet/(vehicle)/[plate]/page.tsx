@@ -26,19 +26,18 @@ export default function VehicleDetailPage({
   const [vehicle, setvehicle] = useState<Vehicle | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
 
-  useEffect(() => {
-    const fetchVehicle = async () => {
-      try {
-        const data = await fetchClientSide<Vehicle>("GET", `/vehicles/${plate}?driver=true&orders=branch,workshop`)
-        setvehicle(data)
-        setOrders(data.orders)
-      } catch (error) {
-        console.error("Erro ao buscar veículos:", error)
-        // redirecionar para login se necessário
-      }
+  const fetchVehicleData = async () => {
+    try {
+      const data = await fetchClientSide<Vehicle>("GET", `/vehicles/${plate}?driver=true&orders=branch,workshop`)
+      setvehicle(data)
+      setOrders(data.orders)
+    } catch (error) {
+      console.error("Erro ao buscar veículos:", error)
     }
+  }
 
-    fetchVehicle()
+  useEffect(() => {
+    fetchVehicleData()
   }, [])
 
   const handleDeleteVehicle = async () => {
@@ -58,16 +57,15 @@ export default function VehicleDetailPage({
     }
   }
 
+  const handleOrderSubmit = async () => {
+    setShowForm(false)
+    await fetchVehicleData() // Refetch vehicle data including orders
+  }
+
   const handleEditFormSuccess = async () => {
     setShowEditForm(false)
     // Reload vehicle data to show updated information
-    try {
-      const data = await fetchClientSide<Vehicle>("GET", `/vehicles/${plate}?driver=true&orders=branch,workshop`)
-      setvehicle(data)
-      setOrders(data.orders)
-    } catch (error) {
-      console.error("Erro ao recarregar dados do veículo:", error)
-    }
+    await fetchVehicleData()
   }
 
   // Calcular a distribuição de tipos de manutenção
@@ -356,7 +354,7 @@ export default function VehicleDetailPage({
                 </button>
               </div>
 
-              {showForm && <OrderForm onCancel={() => setShowForm(false)} onSubmit={() => setShowForm(false)} />}
+              {showForm && <OrderForm onCancel={() => setShowForm(false)} onSubmit={handleOrderSubmit} />}
 
               <div className="space-y-4">
                 {orders.length === 0 ? (

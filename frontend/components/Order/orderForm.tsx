@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import type { Branch, OrderItemForm, Vehicle, Workshop } from "@/types/types"
 import { NEXT_PUBLIC_LOCAL_URL } from "@/lib/constants"
 import { fetchClientSide } from "@/lib/utils/fetchClientSide"
+import { mutate } from "swr"
 
 const serviceTypes = {
   PREVENTIVE: "Manutenção Preventiva",
@@ -40,7 +41,7 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
     vehicleId: "",
     workshopId: "",
     branchId: "",
-    status: "IN_PROGRESS",
+    status: "PENDING",
   })
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
@@ -108,8 +109,8 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
     e.preventDefault()
 
     const items = formItems.map((item) => {
-      const cost = Number.parseFloat(item.cost.replace(",", "."))
-      const laborCost = Number.parseFloat(item.laborCost.replace(",", "."))
+      const cost = Number.parseFloat(item.cost.replace(",", ".")) || 0
+      const laborCost = Number.parseFloat(item.laborCost.replace(",", ".")) || 0
       return {
         description: item.description,
         cost,
@@ -141,6 +142,8 @@ export default function OrderForm({ onSubmit, onCancel }: OrderFormProps) {
       console.error("[v0] Order creation failed:", errorData)
       throw new Error("Erro ao criar ordem de serviço")
     }
+
+    mutate("/api/dashboard")
 
     onSubmit(res)
   }

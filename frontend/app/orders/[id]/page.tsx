@@ -11,6 +11,7 @@ import { fetchClientSide } from "@/lib/utils/fetchClientSide"
 import { useRouter } from "next/navigation"
 import { OrderStatus } from "@/types/enums"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { mutate } from "swr"
 
 export default function OrderDetailPage({ params }: PageProps) {
   const [order, setOrder] = useState<Order | null>(null)
@@ -44,11 +45,12 @@ export default function OrderDetailPage({ params }: PageProps) {
       setShowStatusModal(false)
       setSelectedStatus(null)
 
-      // Opcional: mostrar uma mensagem de sucesso
+      mutate("/api/dashboard")
+      router.refresh()
+
       console.log("Status atualizado com sucesso!")
     } catch (error) {
       console.error("Erro ao atualizar status:", error)
-      // Opcional: mostrar uma mensagem de erro
     } finally {
       setUpdatingStatus(false)
     }

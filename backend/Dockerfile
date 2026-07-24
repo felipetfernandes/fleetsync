@@ -20,10 +20,16 @@ RUN npm install
 # Copia o restante do código
 COPY . .
 
+COPY docker-entrypoint.sh .
+
+RUN chmod +x docker-entrypoint.sh
+
 # Gera o build da aplicação Prisma (se necessário)
 RUN npx prisma generate
 
 EXPOSE 3001
+
+ENTRYPOINT ["./docker-entrypoint.sh"]
 
 # Comando padrão para desenvolvimento (pode ser sobrescrito no docker-compose)
 # CMD ["npm", "run", "start:dev"]

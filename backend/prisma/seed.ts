@@ -7,7 +7,7 @@ import {
 } from "@prisma/client";
 // Import pt_BR locale
 import { en, Faker, pt_BR } from "@faker-js/faker";
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 
 // Initialize Faker with pt_BR locale
 const faker = new Faker({ locale: [pt_BR, en] });
@@ -75,7 +75,7 @@ async function main() {
   console.log("Creating company...");
   const company = await prisma.company.create({
     data: {
-      name: faker.company.name(),
+      name: "Fleet Manager Demo",
       cnpj: faker.string.numeric(14), // Simple numeric CNPJ for example
     },
   });
@@ -134,7 +134,7 @@ async function main() {
   const adminUser = await prisma.user.create({
     data: {
       name: faker.person.fullName(),
-      email: `admin@${company.name.toLowerCase().replace(/[^a-z0-9]/g, "")}.com`,
+      email: "admin@fleetmanager.com",
       phone: faker.phone.number({ style: "international" }), // Ensure format
       password: hashedPassword,
       role: UserRole.ADMIN,
@@ -150,10 +150,7 @@ async function main() {
     const branchManager = await prisma.user.create({
       data: {
         name: faker.person.fullName(),
-        email: faker.internet.email({
-          firstName: "gerente",
-          lastName: `filial${branch.id}`,
-        }),
+        email: `manager${branch.id}@fleetmanager.com`,
         phone: faker.phone.number({ style: "international" }),
         password: hashedPassword,
         role: UserRole.BRANCH_MANAGER,
@@ -164,25 +161,22 @@ async function main() {
     });
     users.push(branchManager);
     console.log(
-      `Created BRANCH_MANAGER user: ${branchManager.email} for branch ${branch.id}`
+      `Created BRANCH_MANAGER user: ${branchManager.email} for branch ${branch.id}`,
     );
   }
 
   // Workshop Managers (1 per Workshop = 25)
-  for (const workshop of workshops) {
+  for (const [index, workshop] of workshops.entries()) {
     const workshopManager = await prisma.user.create({
       data: {
         name: faker.person.fullName(),
-        email: faker.internet.email({
-          firstName: "gerente",
-          lastName: `oficina${workshop.id}`,
-        }),
+        email: `workshop${index + 1}@fleetmanager.com`,
         phone: faker.phone.number({ style: "international" }),
         password: hashedPassword,
         role: UserRole.WORKSHOP_MANAGER,
         emailVerified: true,
         companyId: company.id,
-        branchId: workshop.branchId, // Manager in the same branch as workshop
+        branchId: workshop.branchId,
         // Workshop relation (managerId) updated below
       },
     });
@@ -194,18 +188,18 @@ async function main() {
       data: { managerId: workshopManager.id },
     });
     console.log(
-      `Created WORKSHOP_MANAGER user: ${workshopManager.email} for workshop ${workshop.id}`
+      `Created WORKSHOP_MANAGER user: ${workshopManager.email} for workshop ${workshop.id}`,
     );
   }
 
   // Prepare Drivers Data (1 per Vehicle = 100)
   console.log(
-    "Generating driver data (will create users and assign to vehicles later)..."
+    "Generating driver data (will create users and assign to vehicles later)...",
   );
   for (let i = 0; i < 100; i++) {
     const driverData = {
       name: faker.person.fullName(),
-      email: faker.internet.email({ firstName: "motorista", lastName: `${i}` }),
+      email: `driver${i}@fleetmanager.com`,
       phone: faker.phone.number({ style: "international" }),
       password: hashedPassword,
       role: UserRole.DRIVER,
@@ -278,7 +272,7 @@ async function main() {
             "Leasing",
           ]),
           purchaseValue: parseFloat(
-            faker.finance.amount({ min: 30000, max: 250000, dec: 2 })
+            faker.finance.amount({ min: 30000, max: 250000, dec: 2 }),
           ),
           seller: faker.company.name(),
           mileageStart: mileageStart,
@@ -287,7 +281,7 @@ async function main() {
           insurancePolicy: faker.string.alphanumeric(15),
           insuranceExpires: faker.date.future({ years: 1 }),
           insuranceValue: parseFloat(
-            faker.finance.amount({ min: 500, max: 5000, dec: 2 })
+            faker.finance.amount({ min: 500, max: 5000, dec: 2 }),
           ),
           ipvaStatus: faker.helpers.arrayElement([
             "Pago",
@@ -295,7 +289,7 @@ async function main() {
             "Vencido",
           ]),
           ipvaValue: parseFloat(
-            faker.finance.amount({ min: 300, max: 3000, dec: 2 })
+            faker.finance.amount({ min: 300, max: 3000, dec: 2 }),
           ),
           ipvaDueDate: faker.date.future({ years: 1 }),
           licenseStatus: faker.helpers.arrayElement([
@@ -304,7 +298,7 @@ async function main() {
             "Pendente",
           ]),
           licenseValue: parseFloat(
-            faker.finance.amount({ min: 100, max: 500, dec: 2 })
+            faker.finance.amount({ min: 100, max: 500, dec: 2 }),
           ),
           licenseDueDate: faker.date.future({ years: 1 }),
           companyId: company.id,
@@ -318,7 +312,7 @@ async function main() {
     }
   }
   console.log(
-    `Created ${vehicles.length} vehicles and assigned a unique driver to each.`
+    `Created ${vehicles.length} vehicles and assigned a unique driver to each.`,
   );
 
   // --- 6. Create Mileage History ---
@@ -360,7 +354,7 @@ async function main() {
       ) {
         monthMileageIncrease = Math.max(
           0,
-          vehicle.mileageCurrent - lastMileage - 100 * monthOffset
+          vehicle.mileageCurrent - lastMileage - 100 * monthOffset,
         ); // Leave some room
       }
       // Prevent negative mileage
@@ -388,7 +382,7 @@ async function main() {
     // console.log(`Created mileage history for vehicle ${vehicle.id}`);
   }
   console.log(
-    `Created ${mileageHistoryCount} mileage history records for all vehicles.`
+    `Created ${mileageHistoryCount} mileage history records for all vehicles.`,
   );
 
   // --- 7. Create Orders ---
@@ -418,10 +412,10 @@ async function main() {
     const randomVehicle = faker.helpers.arrayElement(vehicles);
     // Ensure workshop is in the same branch as the vehicle for consistency
     const possibleWorkshops = workshops.filter(
-      (w) => w.branchId === randomVehicle.branchId
+      (w) => w.branchId === randomVehicle.branchId,
     );
     const randomWorkshop = faker.helpers.arrayElement(
-      possibleWorkshops.length > 0 ? possibleWorkshops : workshops
+      possibleWorkshops.length > 0 ? possibleWorkshops : workshops,
     ); // Fallback if no workshop in branch
 
     const order = await prisma.order.create({
@@ -451,10 +445,10 @@ async function main() {
     const itemCount = faker.number.int({ min: 1, max: 5 });
     for (let i = 0; i < itemCount; i++) {
       const cost = parseFloat(
-        faker.finance.amount({ min: 50, max: 1000, dec: 2 })
+        faker.finance.amount({ min: 50, max: 1000, dec: 2 }),
       );
       const laborCost = parseFloat(
-        faker.finance.amount({ min: 50, max: 500, dec: 2 })
+        faker.finance.amount({ min: 50, max: 500, dec: 2 }),
       );
       const totalItemCost = cost + laborCost;
       await prisma.orderItem.create({
@@ -478,7 +472,7 @@ async function main() {
     // console.log(`Updated total cost for order ${order.id}`);
   }
   console.log(
-    `Created ${orderItemCount} order items and updated costs for all orders.`
+    `Created ${orderItemCount} order items and updated costs for all orders.`,
   );
 
   console.log("Seeding finished successfully!");

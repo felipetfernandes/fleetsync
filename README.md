@@ -561,26 +561,6 @@ cd fleetsync
 
 ---
 
-## Configure Environment Variables
-
-Create the required `.env` files inside the **backend** and **frontend** directories.
-
-Example:
-
-### Backend
-
-```env
-DATABASE_URL=
-JWT_SECRET=
-```
-
-### Frontend
-
-```env
-NEXT_PUBLIC_API_URL=
-```
-
----
 
 ## Start the Application
 
@@ -602,6 +582,43 @@ The development environment will automatically:
 - Configure Nginx
 
 After the initialization process, FleetSync will be ready to use.
+
+You can access the application using the demo credentials below.
+
+### Default Password
+
+All demo users use the following password:
+
+```text
+password123
+```
+
+### Available Demo Users
+
+| Role | Email |
+| --- | --- |
+| Administrator | admin@fleetmanager.com |
+| Branch Manager | manager{branchId}@fleetmanager.com |
+| Workshop Manager | workshop{workshopId}@fleetmanager.com |
+| Driver | driver{number}@fleetmanager.com |
+
+Examples:
+
+```text
+Administrator:
+admin@fleetmanager.com
+
+Branch Manager:
+manager1@fleetmanager.com
+
+Workshop Manager:
+workshop1@fleetmanager.com
+
+Driver:
+driver1@fleetmanager.com
+```
+
+Each user is associated with a specific role and access scope, allowing the role-based authorization system and multi-tenant architecture to be explored.
 
 ---
 

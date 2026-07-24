@@ -7,7 +7,7 @@ import {
 } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 import { TENANT_PRISMA_CLIENT } from "../prisma-tenancy/prisma-tenancy.constants";
 import { ExtendedTenantClient } from "../prisma-tenancy/prisma-tenancy.provider";
 import { SafeSelectUserDto } from "./dto/safe-select-user.dto";

@@ -1,6 +1,8 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from "@prisma/client";
 
-export function getWorkshopInclude(query: any): Prisma.WorkshopInclude {
+export function getWorkshopInclude(
+  query: any,
+): Prisma.WorkshopDefaultArgs["include"] {
   const include: Prisma.WorkshopInclude = {};
 
   if (query.company) {
@@ -12,12 +14,14 @@ export function getWorkshopInclude(query: any): Prisma.WorkshopInclude {
   }
 
   if (query.manager) {
-    const managerIncludes = query.manager.split(',').map((s: string) => s.trim());
+    const managerIncludes = query.managercd 
+      .split(",")
+      .map((s: string) => s.trim());
     const nestedManagerInclude: Prisma.UserInclude = {};
-    if (managerIncludes.includes('branch')) {
+    if (managerIncludes.includes("branch")) {
       nestedManagerInclude.branch = true;
     }
-    if (managerIncludes.includes('company')) {
+    if (managerIncludes.includes("company")) {
       nestedManagerInclude.company = true;
     }
     include.manager = { include: nestedManagerInclude };
@@ -29,5 +33,3 @@ export function getWorkshopInclude(query: any): Prisma.WorkshopInclude {
 
   return include;
 }
-
-

@@ -20,6 +20,9 @@ RUN npm install
 # Copia o restante do código
 COPY . .
 
+# Gera o build da aplicação Prisma (se necessário)
+RUN npx prisma generate
+
 EXPOSE 3001
 
 # Comando padrão para desenvolvimento (pode ser sobrescrito no docker-compose)

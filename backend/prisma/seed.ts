@@ -113,7 +113,7 @@ async function main() {
             firstName: "oficina",
             lastName: `${branch.id}-${i}`,
           }), // Ensure uniqueness
-          password: hashedPassword, // Use hashed password
+          // password: hashedPassword, // Use hashed password
           companyId: company.id,
           branchId: branch.id,
         },

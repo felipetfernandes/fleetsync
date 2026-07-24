@@ -11,7 +11,7 @@ const getApiUrl = () => {
     
     // Em desenvolvimento local
     if (host.includes('localhost')) {
-      return '/api';
+      return process.env.NEXT_PUBLIC_LOCAL_API_URL || "http://localhost:3001/api";
     }
     
     // Outros ambientes (staging, etc)

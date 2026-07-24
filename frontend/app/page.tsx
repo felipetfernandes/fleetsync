@@ -1,6 +1,7 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { fetchServerSide } from "@/lib/utils/fetchServerSide"
+import { User } from "@/types/types"
 
 export default async function Home() {
   const token = cookies().get("access_token")?.value
@@ -11,7 +12,9 @@ export default async function Home() {
 
   try {
     console.log("Verificando autenticação via /auth/me...")
-    const user = await fetchServerSide("GET", "/auth/me")
+    const user: User = await fetchServerSide("GET", "/auth/me")
+
+    console.log("Usuário autenticado:", user)
 
     if (!user || !user.role) {
       console.log("Redirecionando para login - usuário inválido")

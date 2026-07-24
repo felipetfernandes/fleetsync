@@ -198,49 +198,32 @@ export class OrderService {
 
   async update(id: string, updateOrderDto: UpdateOrderDto) {
     try {
-      this.logger.log("=== UPDATE ORDER SERVICE ===")
-      this.logger.log(`Order ID: ${id}`)
-      this.logger.log(`Update DTO: ${JSON.stringify(updateOrderDto)}`)
-
-      // Verificar se a ordem existe
-      this.logger.log("Checking if order exists...")
+      
       const existingOrder = await this.prisma.order.findFirst({
         where: { id },
       })
 
       if (!existingOrder) {
-        this.logger.error(`Order ${id} not found`)
         throw new NotFoundException("Ordem de serviço não encontrada")
       }
 
-      this.logger.log(`Existing order found: ${existingOrder.id}`)
 
-      // Processar dados de atualização
       const dataToUpdate: any = { ...updateOrderDto }
 
-      this.logger.log("Processing update data...")
 
-      // Se está atualizando para COMPLETED, adicionar a data de finalização
       if (updateOrderDto.status === "COMPLETED" && !updateOrderDto.endDate) {
         dataToUpdate.endDate = new Date()
-        this.logger.log("Adding endDate for COMPLETED status")
       }
 
-      // Converter datas se necessário
       if (dataToUpdate.startDate) {
         dataToUpdate.startDate = new Date(dataToUpdate.startDate)
-        this.logger.log(`Converting startDate: ${dataToUpdate.startDate}`)
       }
 
       if (dataToUpdate.endDate) {
         dataToUpdate.endDate = new Date(dataToUpdate.endDate)
-        this.logger.log(`Converting endDate: ${dataToUpdate.endDate}`)
       }
 
-      this.logger.log(`Final data to update: ${JSON.stringify(dataToUpdate)}`)
 
-      // Executar update usando updateMany para contornar o problema de tenancy
-      this.logger.log("Executing database update...")
       const updateResult = await this.prisma.order.updateMany({
         where: { id },
         data: dataToUpdate,
@@ -250,27 +233,21 @@ export class OrderService {
         throw new NotFoundException("Ordem de serviço não encontrada ou não foi possível atualizar")
       }
 
-      this.logger.log("Update successful, fetching updated order...")
-
       if (updateOrderDto.status) {
         const vehicleId = existingOrder.vehicleId
 
         if (updateOrderDto.status === "COMPLETED" || updateOrderDto.status === "CANCELLED") {
-          // Ordem finalizada ou cancelada - veículo volta para AVAILABLE
-          this.logger.log(`Updating vehicle ${vehicleId} status to AVAILABLE (order ${updateOrderDto.status})`)
+
           await this.prisma.vehicle.updateMany({
             where: { id: vehicleId },
             data: { status: "AVAILABLE" },
           })
-          this.logger.log(`Vehicle status updated to AVAILABLE`)
         } else if (updateOrderDto.status === "IN_PROGRESS") {
           // Ordem em progresso - veículo vai para MAINTENANCE
-          this.logger.log(`Updating vehicle ${vehicleId} status to MAINTENANCE`)
           await this.prisma.vehicle.updateMany({
             where: { id: vehicleId },
             data: { status: "MAINTENANCE" },
           })
-          this.logger.log(`Vehicle status updated to MAINTENANCE`)
         }
       }
 
@@ -286,17 +263,8 @@ export class OrderService {
         },
       })
 
-      this.logger.log(`Update completed for order ${id}`)
       return updatedOrder
     } catch (error) {
-      this.logger.error(`Error in update service for order ${id}:`, error.stack)
-
-      // Log específico para erros do Prisma
-      if (error.code) {
-        this.logger.error(`Prisma error code: ${error.code}`)
-        this.logger.error(`Prisma error message: ${error.message}`)
-      }
-
       throw error
     }
   }
